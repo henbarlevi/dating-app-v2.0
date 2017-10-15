@@ -1,0 +1,40 @@
+{
+  "name": "quickstart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc --watch",
+    "start": "nodemon ./app/server.js",
+    "dev": "npm-run-all --parallel compile start"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/config": "0.0.32",
+    "@types/cors": "^2.8.1",
+    "@types/debug": "0.0.29",
+    "@types/express": "^4.0.33",
+    "@types/jsonwebtoken": "^7.2.3",
+    "@types/mongoose": "^4.7.18",
+    "@types/node": "^6.0.46",
+    "@types/request": "^2.0.3",
+    "typescript": "^2.3.4"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "colors": "^1.1.2",
+    "config": "^1.26.1",
+    "cors": "^2.8.4",
+    "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.3",
+    "mongoose": "^4.11.1",
+    "morgan": "^1.8.2",
+    "neo4j-driver": "^1.2.0",
+    "nodemon": "^1.11.0",
+    "npm-run-all": "^4.0.2",
+    "request": "^2.81.0",
+    "rxjs": "^5.4.1"
+  }
+}

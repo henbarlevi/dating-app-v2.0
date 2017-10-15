@@ -1,0 +1,11 @@
+=======improvmens
+-if we wont to add Oauth2.0 with google also - token node should contain the DB user Id NOT the facebook userId
+-using the facebook sdk lib for the OAuth and Graph api instead of doing it manually
+-use the bootstrap material design
+-use indexes in the neo4j graph > http://neo4j.com/docs/developer-manual/current/cypher/schema/index/
+-do landing page
+-use default headers in client : https://blog.alex-miller.co/angular/2017/05/13/default-headers-in-angular.html
+
+
+========ideas
+-player that lose will authomatically send friend request to winner
