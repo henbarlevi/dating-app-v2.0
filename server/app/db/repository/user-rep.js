@@ -8,48 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const neo4jDB_1 = require("../neo4jDB");
+const user_1 = require("../schemas/user");
 //=======utils
 const Logger_1 = require("../../utils/Logger");
 const TAG = 'USER-REPOSITORY';
 class UserRepository {
-    updateOrCreate(user) {
+    //create user if not exist /if exist - update his gender,name,link in case they have changed
+    updateOrCreateFacebookCreds(user) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            //create user if not exist /if exist - update his gender,name,link in case they have changed
-            try {
-                let results = yield neo4jDB_1.neo4jDB.query(`MERGE(n:USER{userId:"${user.facebook.id}"})
-                                ON CREATE
-                                SET  n.name="${user.facebook.name}" ,n.gender="${user.facebook.gender}",n.link="${user.facebook.link}"
-                                ON MATCH
-                                SET  n.name="${user.facebook.name}" ,n.gender="${user.facebook.gender}",n.link="${user.facebook.link}"
-                                return n`
-                //  `CREATE (n:USER {name:"${userInfo.name}",id:${userInfo.id},gender:"${userInfo.gender}",link:"${userInfo.link}"})` - OLD QUERY
-                );
-                /*in case user relation to facebook not exist -create it (user -AUTHENTICATED_WITH-> facebook)
-                if exist -update credentials (access token etc..)*/
-                yield neo4jDB_1.neo4jDB.query(`
-                            MATCH (u:USER { userId:"${user.facebook.id}" }),(w:WEBSITE {name:"Facebook" })
-                            MERGE (u)-[r:AUTHENTICATED_WITH ]->(w)
-                                ON CREATE
-                                SET r.access_token="${user.facebook.access_token}" , r.expires_in =${user.facebook.expires_in},r.token_type="${user.facebook.token_type}"
-                                ON MATCH
-                                SET r.access_token="${user.facebook.access_token}" , r.expires_in =${user.facebook.expires_in},r.token_type="${user.facebook.token_type}"
-                            RETURN u, type(r), w
-                            ` //
-                );
-                let userId = results.records[0]._fields[0].properties.userId; // = facebook userId NOT db user id
-                resolve(userId);
-            }
-            catch (e) {
-                Logger_1.Logger.d(TAG, 'ERR=====>' + e, 'red');
-                reject(e);
-            }
+            let options = { upsert: true, new: true, setDefaultsOnInsert: false }; //options that make create new doc record if it doesnt find one https://stackoverflow.com/questions/33305623/mongoose-create-document-if-not-exists-otherwise-update-return-document-in 
+            user_1.User.findOneAndUpdate({ "facebook.id": user.facebook.id }, { $set: { facebook: user.facebook } }, options, (err, userDoc) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    Logger_1.Logger.d(TAG, `facebook user created/updated`);
+                    console.log(userDoc);
+                    resolve(userDoc);
+                }
+            });
         }));
     }
     getUserById(userId) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let result = yield neo4jDB_1.neo4jDB.query(`
+                let result = yield neo4jDB.query(`
                     MATCH (n:USER{userId:"${userId}"})-[r]-(w:WEBSITE {name:"Facebook"}) RETURN n ,r
                     `);
                 if (result.records && result.records['length'] !== 2) {
@@ -92,7 +75,7 @@ class UserRepository {
     createFriendshipBetweenUsers(userId1, userId2) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             try {
-                yield neo4jDB_1.neo4jDB.query(`
+                yield neo4jDB.query(`
                     MATCH (a:USER{userId:"${userId1}"}),(b:USER{userId:"${userId2}"})
                     MERGE (a)-[:FRIEND]-(b)
                     `);

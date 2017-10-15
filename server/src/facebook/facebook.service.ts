@@ -20,7 +20,7 @@ import { iFacebookUserInfo } from './models/iUserinfo.model'
 export class FackbookService {
 
     static getConsentPageUrl() {
-        let permissions = ['user_likes', 'user_posts', 'user_friends','publish_actions'];
+        let permissions = ['user_likes', 'user_posts', 'user_friends','publish_actions','email'];
 
         let url = `https://www.facebook.com/v2.10/dialog/oauth?client_id=570641329993499&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Flogin`
             + '&scope=' + permissions.join();
@@ -36,7 +36,7 @@ export class FackbookService {
 
             let url = `https://graph.facebook.com/v2.10/oauth/access_token?` +
                 'client_id=' + clientId + '&redirect_uri=' + redirect_uri + '&client_secret=' + clientSecret + '&code=' + code;
-            Logger.d(TAG, `**** getting access token >${url}****`, 'gray');
+            Logger.d(TAG, `**** getting access token ****`, 'gray');
 
 
             request.get(url, {

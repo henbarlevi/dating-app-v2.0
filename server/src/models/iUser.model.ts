@@ -1,5 +1,5 @@
 export interface iUser {
-    facebook: {
+    facebook?: {
         id: string,
         name: string,
         gender: string,

@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const jwt = require("jsonwebtoken"); //jwt authentication
 //======db
-const neo4jDB_1 = require("../db/neo4jDB"); //neo4j
 const user_rep_1 = require("../db/repository/user-rep");
 //====== services
 const facebook_service_1 = require("../facebook/facebook.service"); //facebook Oauth and Api Service
@@ -46,36 +45,30 @@ router.post('/facebook/code', (req, res) => __awaiter(this, void 0, void 0, func
             .then((userCredentials) => __awaiter(this, void 0, void 0, function* () {
             let access_token = userCredentials.access_token;
             if (access_token) {
-                Logger_1.Logger.d(TAG, 'GOT ACCESS TOKEN >' + access_token, 'yellow');
-                Logger_1.Logger.d(TAG, 'credentials >' + JSON.stringify(userCredentials), 'yellow');
+                printFacebookCreds(userCredentials); //just print info
                 try {
                     //GETTING USER CREDENTIALS
                     let userInfo = yield facebook_service_1.FackbookService.getUserInfo(access_token);
                     Logger_1.Logger.d(TAG, 'got user info >' + JSON.stringify(userInfo), 'yellow');
                     //2.create/update user with his authentication credentials*/                      
                     //create user if not exist /if exist - update his gender,name,link in case they have changed
-                    let results = yield neo4jDB_1.neo4jDB.query(`MERGE(n:USER{userId:"${userInfo.id}"})
-                                ON CREATE
-                                SET  n.name="${userInfo.name}" ,n.gender="${userInfo.gender}",n.link="${userInfo.link}"
-                                ON MATCH
-                                SET  n.name="${userInfo.name}" ,n.gender="${userInfo.gender}",n.link="${userInfo.link}"
-                                return n`
-                    //  `CREATE (n:USER {name:"${userInfo.name}",id:${userInfo.id},gender:"${userInfo.gender}",link:"${userInfo.link}"})` - OLD QUERY
-                    );
+                    let user = {
+                        facebook: {
+                            id: userInfo.id,
+                            name: userInfo.name,
+                            gender: userInfo.gender,
+                            link: userInfo.link,
+                            access_token: userCredentials.access_token,
+                            token_type: userCredentials.token_type,
+                            expires_in: userCredentials.expires_in // { seconds - til - expiration }
+                        }
+                    };
+                    let userRep = new user_rep_1.UserRepository();
+                    yield userRep.updateOrCreateFacebookCreds(user);
                     //TODO - check if that user exist first -and if so - change only its relation to facebook authorization
                     /*in case user relation to facebook not exist -create it (user -AUTHENTICATED_WITH-> facebook)
                     if exist -update credentials (access token etc..)*/
-                    yield neo4jDB_1.neo4jDB.query(`
-                            MATCH (u:USER { userId:"${userInfo.id}" }),(w:WEBSITE {name:"Facebook" })
-                            MERGE (u)-[r:AUTHENTICATED_WITH ]->(w)
-                                ON CREATE
-                                SET r.access_token="${userCredentials.access_token}" , r.expires_in =${userCredentials.expires_in},r.token_type="${userCredentials.token_type}"
-                                ON MATCH
-                                SET r.access_token="${userCredentials.access_token}" , r.expires_in =${userCredentials.expires_in},r.token_type="${userCredentials.token_type}"
-                            RETURN u, type(r), w
-                            ` //
-                    );
-                    let userId = results.records[0]._fields[0].properties.userId;
+                    //let userId: string = results.records[0]._fields[0].properties.userId;
                     //create token for authenticated user:
                     let token = jwt.sign({
                         userId: userId
@@ -85,7 +78,7 @@ router.post('/facebook/code', (req, res) => __awaiter(this, void 0, void 0, func
                         token: token
                         // ,userId:userId
                     });
-                    Logger_1.Logger.d(TAG, JSON.stringify(results.records[0]), 'yellow');
+                    // Logger.d(TAG, JSON.stringify(results.records[0]), 'yellow');
                 }
                 catch (e) {
                     Logger_1.Logger.d(TAG, 'ERR========> couldnt get user info/ couldnt create user', 'red');
@@ -103,6 +96,7 @@ router.post('/facebook/code', (req, res) => __awaiter(this, void 0, void 0, func
 /*UnAutheticated Users Filter middleware - middleware that filter unlogin users*/
 router.use('/', middlewares_1.authenticationMiddleware);
 //====================================== UnAuthetication Middleware ======================================
+/*NOT CURRENTLY IN USE*/
 router.get('/analyze', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         let user = req.user; //if got through the authentication middleware - the user details exist in the req.user
@@ -120,25 +114,15 @@ router.get('/analyze', (req, res) => __awaiter(this, void 0, void 0, function* (
         Logger_1.Logger.d(TAG, 'ERR=========>' + e, 'red');
     }
 }));
+function printFacebookCreds(userCredentials) {
+    Logger_1.Logger.d(TAG, '=================== GOT FACEBOOK CREDENTIALS  ===================', 'yellow');
+    Logger_1.Logger.d(TAG, 'access_token =' + userCredentials.access_token, 'yellow');
+    Logger_1.Logger.d(TAG, 'token_type =' + userCredentials.token_type, 'yellow');
+    Logger_1.Logger.d(TAG, 'expires_in =' + userCredentials.expires_in, 'yellow');
+    Logger_1.Logger.d(TAG, '=================== GOT FACEBOOK CREDENTIALS  ===================', 'yellow');
+}
 exports.default = router;
 //-------------------------------------SNIPPETS-------------------------
-//====cypher
-/*create relation :https://stackoverflow.com/questions/34982392/neo4j-creating-relationship-on-existing-nodes
-                    https://neo4j.com/docs/developer-manual/current/cypher/clauses/create/#create-create-a-relationship-and-set-properties
-*/
-/**
- * MATCH (n) DETACH DELETE (n) - delete all nodes in db
- * MERGE (a:ACTOR {id:99}) - create this node if not exist
- * MATCH (m:MOVIE {name:"fight club"}) WITH m MATCH (m)<-[:ACTED_IN]-(a:ACTOR) return m,a  - return all actors that played in the fight club movie (and the movie node)
- * MATCH (m:MOVIE {name:"fight club"}) WITH m MATCH (m)<-[:ACTED_IN]-(a:ACTOR) return m,count(a)  - return the number of actors that played in the fight club movie (and the movie node)
- * MERGE(a:ACTOR{id:98})
-        ON CREATE
-        SET a.name="Mark Hamill", a.counter=0
-        ON MATCH
-        SET a.counter=a.counter+1
-        return a
- * MATCH (m:MOVIE) WITH m MATCH (m) <-[ACTED_IN]- (a:ACTOR) return m.title, COLLECT(a.name) as names - return movie title and a collection of the actors names that played that movie
- */
 //CONVERTING NODE FS callback to REACTIVE
 // fs.readdir('./dist/routes',(err,items)=>{
 //     if(err){

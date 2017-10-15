@@ -1,4 +1,5 @@
-import { neo4jDB } from '../neo4jDB';
+
+import { User } from '../schemas/user';
 //=======models
 import { iUser } from '../../models';
 import { iFacebookCredentials, iFacebookUserInfo } from '../../facebook/models';
@@ -6,39 +7,22 @@ import { iFacebookCredentials, iFacebookUserInfo } from '../../facebook/models';
 import { Logger } from '../../utils/Logger';
 const TAG = 'USER-REPOSITORY';
 export class UserRepository {
-    updateOrCreate(user: iUser): Promise<string> {
+    //create user if not exist /if exist - update his gender,name,link in case they have changed
+    updateOrCreateFacebookCreds(user: iUser): Promise<any> {
         return new Promise(async (resolve, reject) => {
-            //create user if not exist /if exist - update his gender,name,link in case they have changed
-            try {
-                let results: any = await neo4jDB.query(
-                    `MERGE(n:USER{userId:"${user.facebook.id}"})
-                                ON CREATE
-                                SET  n.name="${user.facebook.name}" ,n.gender="${user.facebook.gender}",n.link="${user.facebook.link}"
-                                ON MATCH
-                                SET  n.name="${user.facebook.name}" ,n.gender="${user.facebook.gender}",n.link="${user.facebook.link}"
-                                return n`
-                    //  `CREATE (n:USER {name:"${userInfo.name}",id:${userInfo.id},gender:"${userInfo.gender}",link:"${userInfo.link}"})` - OLD QUERY
-                )
+            let options = { upsert: true, new: true, setDefaultsOnInsert: false }; //options that make create new doc record if it doesnt find one https://stackoverflow.com/questions/33305623/mongoose-create-document-if-not-exists-otherwise-update-return-document-in 
+           
+            User.findOneAndUpdate({"facebook.id":user.facebook.id}, { $set: { facebook: user.facebook } },options,(err,userDoc)=>{
+                if(err){
+                    reject(err);
+                }
+                else{ //user exist - just update it
+                    Logger.d(TAG,`facebook user created/updated`);
+                    console.log(userDoc);
+                    resolve(userDoc)
+                }
+            })
 
-                /*in case user relation to facebook not exist -create it (user -AUTHENTICATED_WITH-> facebook)
-                if exist -update credentials (access token etc..)*/
-                await neo4jDB.query(
-                    `
-                            MATCH (u:USER { userId:"${user.facebook.id}" }),(w:WEBSITE {name:"Facebook" })
-                            MERGE (u)-[r:AUTHENTICATED_WITH ]->(w)
-                                ON CREATE
-                                SET r.access_token="${user.facebook.access_token}" , r.expires_in =${user.facebook.expires_in},r.token_type="${user.facebook.token_type}"
-                                ON MATCH
-                                SET r.access_token="${user.facebook.access_token}" , r.expires_in =${user.facebook.expires_in},r.token_type="${user.facebook.token_type}"
-                            RETURN u, type(r), w
-                            `//
-                );
-                let userId: string = results.records[0]._fields[0].properties.userId; // = facebook userId NOT db user id
-                resolve(userId);
-            } catch (e) {
-                Logger.d(TAG, 'ERR=====>' + e, 'red');
-                reject(e);
-            }
 
         })
 
