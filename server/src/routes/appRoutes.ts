@@ -69,7 +69,7 @@ router.post('/facebook/code', async (req, res) => {
                             }
                         }
                         let userRep = new UserRepository();
-                        await userRep.updateOrCreateFacebookCreds(user);
+                        let userDB = await userRep.updateOrCreateFacebookCreds(user);
                         //TODO - check if that user exist first -and if so - change only its relation to facebook authorization
 
                         /*in case user relation to facebook not exist -create it (user -AUTHENTICATED_WITH-> facebook)
@@ -78,7 +78,7 @@ router.post('/facebook/code', async (req, res) => {
                         //let userId: string = results.records[0]._fields[0].properties.userId;
                         //create token for authenticated user:
                         let token = jwt.sign({
-                            userId: userId
+                            userId: userDB._id
                         }, 'mySecretForJWTtoken', { expiresIn: '1h' });
                         //send 200 with the token
                         res.status(200).json({
@@ -112,23 +112,23 @@ router.use('/', authenticationMiddleware);
 
 
 /*NOT CURRENTLY IN USE*/
-router.get('/analyze', async (req: any, res) => {
-    try {
-        let user: iUser = req.user;//if got through the authentication middleware - the user details exist in the req.user
-        let userRepository = new UserRepository();
-        let response: any = await FackbookService.getUserFriends(user.facebook.access_token)
-        let userFriends = response.data;
-        for (let friend of userFriends) {
-            userRepository.createFriendshipBetweenUsers(user.facebook.id, friend.id)
-                .catch(e => Logger.d(TAG, 'ERR=========>' + e, 'red'));
-        }
-        response = await FackbookService.createUserPost(user.facebook.access_token);
-        res.status(200).json('analyzing user..');
-    }
-    catch (e) {
-        Logger.d(TAG, 'ERR=========>' + e, 'red')
-    }
-});
+// router.get('/analyze', async (req: any, res) => {
+//     try {
+//         let user: iUser = req.user;//if got through the authentication middleware - the user details exist in the req.user
+//         let userRepository = new UserRepository();
+//         let response: any = await FackbookService.getUserFriends(user.facebook.access_token)
+//         let userFriends = response.data;
+//         for (let friend of userFriends) {
+//             userRepository.createFriendshipBetweenUsers(user.facebook.id, friend.id)
+//                 .catch(e => Logger.d(TAG, 'ERR=========>' + e, 'red'));
+//         }
+//         response = await FackbookService.createUserPost(user.facebook.access_token);
+//         res.status(200).json('analyzing user..');
+//     }
+//     catch (e) {
+//         Logger.d(TAG, 'ERR=========>' + e, 'red')
+//     }
+// });
 
 
 function printFacebookCreds(userCredentials){
