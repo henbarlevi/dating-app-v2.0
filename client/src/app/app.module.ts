@@ -1,37 +1,28 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
-import { HomeComponent } from './home/home.component';
-import { HomeService} from './home/home.service';
+import { HttpClientModule } from '@angular/common/http'; 
+import { FormsModule } from '@angular/forms';
 
-//Auth
-// import {
-//   LoginComponent,
-//   LoggedInGuard
-//   , AuthService
-// } from './auth'
 import { AuthModule } from './auth'
-import { routing } from './app.routing';
-import { NavBarComponent } from './nav-bar/nav-bar.component';
+import { AppRoutingModule } from './app.routing';
+import { DashboardModule } from './dashboard/dashboard.module';
+
 @NgModule({
   declarations: [
-    AppComponent,
-    HomeComponent,
-    //LoginComponent,
-    NavBarComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule,
-    //routing order matters:
+    HttpClientModule,
     AuthModule,
-    routing
+    //routing order matters
+    DashboardModule,
+    AppRoutingModule
   ],
-  providers: [/*AuthService,LoggedInGuard*/HomeService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

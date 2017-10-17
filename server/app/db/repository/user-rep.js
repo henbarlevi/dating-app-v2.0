@@ -15,7 +15,8 @@ const TAG = 'USER-REPOSITORY';
 class UserRepository {
     //create user if not exist /if exist - update his gender,name,link in case they have changed
     updateOrCreateFacebookCreds(user) {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            Logger_1.Logger.d(TAG, '**updating/creating facebook user');
             let options = { upsert: true, new: true, setDefaultsOnInsert: false }; //options that make create new doc record if it doesnt find one https://stackoverflow.com/questions/33305623/mongoose-create-document-if-not-exists-otherwise-update-return-document-in 
             user_1.User.findOneAndUpdate({ "facebook.id": user.facebook.id }, { $set: { facebook: user.facebook } }, options, (err, userDoc) => {
                 if (err) {
@@ -27,7 +28,7 @@ class UserRepository {
                     resolve(userDoc);
                 }
             });
-        }));
+        });
     }
     getUserById(userId) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {

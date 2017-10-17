@@ -1,0 +1,15 @@
+
+nav{
+
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#cb60b3+0,c146a1+50,a80077+51,dd113d+94 */
+    background: rgb(203,96,179); /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(203,96,179,1) 0%, rgba(193,70,161,1) 50%, rgba(168,0,119,1) 51%, rgba(221,17,61,1) 94%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, rgba(203,96,179,1) 0%,rgba(193,70,161,1) 50%,rgba(168,0,119,1) 51%,rgba(221,17,61,1) 94%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, rgba(203,96,179,1) 0%,rgba(193,70,161,1) 50%,rgba(168,0,119,1) 51%,rgba(221,17,61,1) 94%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cb60b3', endColorstr='#dd113d',GradientType=0 ); /* IE6-9 */
+    padding: 0px;
+    li a{
+        padding-top:0.5em;
+        padding-bottom:0.2em; 
+    }
+}

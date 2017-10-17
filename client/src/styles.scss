@@ -1,28 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-//@import './styles/main';
-
-
-
-/*moving colorbackground */
-// background: linear-gradient(57deg, #cd0bce, #274fcc, #8a18d7, #d50f5c);
-// background-size: 800% 800%;
-
-// -webkit-animation: AnimationName 13s ease infinite;
-// -moz-animation: AnimationName 13s ease infinite;
-// animation: AnimationName 13s ease infinite;
-
-// @-webkit-keyframes AnimationName {
-//     0%{background-position:0% 79%}
-//     50%{background-position:100% 22%}
-//     100%{background-position:0% 79%}
-// }
-// @-moz-keyframes AnimationName {
-//     0%{background-position:0% 79%}
-//     50%{background-position:100% 22%}
-//     100%{background-position:0% 79%}
-// }
-// @keyframes AnimationName { 
-//     0%{background-position:0% 79%}
-//     50%{background-position:100% 22%}
-//     100%{background-position:0% 79%}
-// }
+*{
+    font-family: 'Anton', sans-serif;
+    font-family: 'Gloria Hallelujah', cursive;
+}

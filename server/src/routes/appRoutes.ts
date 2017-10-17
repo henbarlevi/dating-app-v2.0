@@ -35,7 +35,7 @@ router.get('/', (req: express.Request, res: express.Response) => {
 //redirect client to facebook consent page 
 router.get('/auth-with-facebook', (req, res) => {
    let url =FackbookService.getConsentPageUrl();
-    res.redirect(url);
+    res.send(url);
 })
 
 /*
@@ -43,6 +43,7 @@ router.get('/auth-with-facebook', (req, res) => {
 2.create/update user with his authentication credentials*/
 router.post('/facebook/code', async (req, res) => {
     let code = req.body.code;
+    console.log('the code :'+code);
     if (code) {
         Logger.d(TAG, 'got code from client >' + code, 'yellow');
         //1.get code from client and exchange it for an access_token:
@@ -80,6 +81,8 @@ router.post('/facebook/code', async (req, res) => {
                         let token = jwt.sign({
                             userId: userDB._id
                         }, 'mySecretForJWTtoken', { expiresIn: '1h' });
+                        Logger.d(TAG, 'sending back the token >'+token, 'yellow');
+                        
                         //send 200 with the token
                         res.status(200).json({
                             token: token
@@ -136,7 +139,7 @@ function printFacebookCreds(userCredentials){
     Logger.d(TAG, 'access_token =' + userCredentials.access_token, 'yellow');
     Logger.d(TAG, 'token_type =' + userCredentials.token_type, 'yellow');
     Logger.d(TAG, 'expires_in =' + userCredentials.expires_in, 'yellow');
-    Logger.d(TAG, '=================== GOT FACEBOOK CREDENTIALS  ===================' , 'yellow');
+    Logger.d(TAG, '=================== / GOT FACEBOOK CREDENTIALS  ===================' , 'yellow');
     
 }
 export default router;

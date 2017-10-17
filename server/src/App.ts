@@ -39,7 +39,9 @@ class App {
         config:{
           autoIndex:false // http://mongoosejs.com/docs/guide.html#indexes - prevent auto creation of indexes to prevent performance hit
         }});
-    // this.express.use(cors());
+
+        
+     this.express.options('*',cors());
     this.express.use(express.static(path.join(__dirname, 'public/dist')));
     this.express.use(logger('dev'));// use morgan to log requests to the console
     this.express.use(bodyParser.json());
