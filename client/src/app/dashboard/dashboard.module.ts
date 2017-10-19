@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DashboardComponent } from './dashboard.component';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { NavBarComponent } from './nav-bar/nav-bar.component';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   imports: [
@@ -11,7 +12,9 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
   ],
   declarations: [
     DashboardComponent,
-    NavBarComponent
+    NavBarComponent,
+    //pages in dashboard:
+    HomeComponent
   ],
   exports:[DashboardComponent]
 })

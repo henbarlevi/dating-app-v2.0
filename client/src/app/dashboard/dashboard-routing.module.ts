@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router'; //import router module
 import { DashboardComponent } from './dashboard.component';
+import { HomeComponent } from './home/home.component';
 
 
  const dasboardRouting = RouterModule.forChild([
@@ -8,7 +9,10 @@ import { DashboardComponent } from './dashboard.component';
 
   {
     path: 'dashboard',
-    component: DashboardComponent
+    component: DashboardComponent,
+    children:[
+      {path:'',component:HomeComponent}
+    ]
   },
 
 
