@@ -11,5 +11,8 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
   }
+  startGame(){
+    console.log('start game');
+  }
 
 }

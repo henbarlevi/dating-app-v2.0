@@ -1,8 +1,10 @@
-//Mixins functions that we can pass values into
+//Mixins  = functions that we can pass values into
 @mixin default-text-style($color,$font-family){
     color:$color;
     font-family: $font-family;
 }
+
+
 @mixin border-radius($radius) {
   -webkit-border-radius: $radius;
      -moz-border-radius: $radius;
@@ -10,3 +12,31 @@
           border-radius: $radius;
 }
 
+@mixin animate($animationName,$time){
+    -webkit-animation: $animationName $time; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: $animationName $time; /* Firefox < 16 */
+     -ms-animation: $animationName $time; /* Internet Explorer */
+      -o-animation: $animationName $time; /* Opera < 12.1 */
+         animation: $animationName $time;
+}
+
+/*https://www.w3schools.com/css/css3_animations.asp*/
+@mixin transition($prop,$time,$transitionBehaviour){
+    /*
+    prop = width /height / color/ all...
+    time = 2s
+    transitionBehaviour = linear/ ease-in/ ease-out/ease-in-out
+    */
+    @if($transitionBehaviour == ''){
+        -webkit-transition: $prop $time ease;
+        -moz-transition: $prop $time ease;
+        -o-transition: $prop $time ease;
+        transition: $prop $time ease;
+    }@else{
+        -webkit-transition: $prop $time $transitionBehaviour;
+        -moz-transition: $prop $time $transitionBehaviour;
+        -o-transition: $prop $time $transitionBehaviour;
+        transition: $prop $time $transitionBehaviour;
+    }
+
+}
