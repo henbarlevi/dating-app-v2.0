@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
     setTimeout(function () {
 
       location.reload();
-    }, 5000);
+    }, 10000);
   }
 
 }

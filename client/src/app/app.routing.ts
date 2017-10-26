@@ -10,17 +10,18 @@ import { LoginComponent , LoggedInGuard} from './auth';
   //   canActivate: [LoggedInGuard]
 
   // },
-  {
-    path: 'login',
-    component: LoginComponent
-  },
+  // {
+  //   path: 'login',
+  //   component: LoginComponent
+  // },
   {
     path: '',
     redirectTo: '/dashboard',
     pathMatch: 'full' //match to this route if the full path is '' emptystring
-  }
-
-], {preloadingStrategy: PreloadAllModules});
+  },
+  
+  
+ ]/*, {preloadingStrategy: PreloadAllModules} -uncomment this if you want preloadingStrategy*/);/**https://angular.io/guide/router#preloading-background-loading-of-feature-areas */
 
 @NgModule({
   imports: [

@@ -9,11 +9,11 @@ import { AuthService} from './auth.service';
 import {  LoggedInGuard } from './login/login.guard';
 import {  LoginComponent } from './login/login.component';
 
-import {  authRouting} from './auth.routing';
+import {  AuthRoutingModule} from './auth-routing.module';
 @NgModule({
     imports: [
         CommonModule,
-        authRouting
+        AuthRoutingModule
 
     ],
     declarations: [

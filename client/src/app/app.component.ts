@@ -8,9 +8,9 @@ import { Component ,OnInit} from '@angular/core';
 export class AppComponent implements OnInit{
   title = 'app';
   ngOnInit(){
-    console.log('will refresh in 5 sec');
-    setTimeout(function() {
-      location.reload();
-    }, 5000);
+    // console.log('will refresh in 5 sec');
+    // setTimeout(function() {
+    //   location.reload();
+    // }, 50000);
   }
 }

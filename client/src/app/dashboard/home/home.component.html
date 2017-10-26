@@ -1,4 +1,4 @@
 <div id="home-wrapper" >
   <!--adding class 'animated ' + name of animation in order to use css animations library-->
-  <button id="play-btn" class="animated bounce btn btn-lg btn-default" (click)="startGame()" >Play Game</button>
+  <a id="play-btn" [routerLink]="['./game']" class="animated bounce btn btn-lg btn-default" (click)="startGame()" >play Game</a>
 </div>
