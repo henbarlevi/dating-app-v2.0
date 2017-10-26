@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 @Injectable()
 export class GameService {
+  baseUrl = 'http://localhost:3000';
   /*
-  Raise events with services (BehaviourSubject,ReplaySubject)
+  Raise events with services (BehaviourSubject,ReplaySubject) :
   https://stackoverflow.com/questions/34376854/delegation-eventemitter-or-observable-in-angular2/35568924#35568924*/
   
   private _gameStatusChanged = new BehaviorSubject<GAME_STATUS>(GAME_STATUS.not_playing);
@@ -22,6 +23,7 @@ export class GameService {
 
 export enum GAME_STATUS{
   not_playing,
+  searching_player,
   playing,
   game_ended
 }
