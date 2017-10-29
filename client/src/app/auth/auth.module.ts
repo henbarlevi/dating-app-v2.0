@@ -5,11 +5,11 @@
 //https://angular-2-training-book.rangle.io/handout/modules/feature-modules.html
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService} from './auth.service';
-import {  LoggedInGuard } from './login/login.guard';
-import {  LoginComponent } from './login/login.component';
+import { AuthService } from './auth.service';
+import { LoggedInGuard } from './login/login.guard';
+import { LoginComponent } from './login/login.component';
 
-import {  AuthRoutingModule} from './auth-routing.module';
+import { AuthRoutingModule } from './auth-routing.module';
 @NgModule({
     imports: [
         CommonModule,
