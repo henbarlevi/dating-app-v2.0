@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthModule } from './auth'
 import { AppRoutingModule } from './app.routing';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -17,8 +18,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    AuthModule,
+    SharedModule.forRoot(),
     //routing order matters
+    AuthModule.forRoot(),
     DashboardModule,
     AppRoutingModule
   ],

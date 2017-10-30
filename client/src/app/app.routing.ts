@@ -1,19 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule,PreloadAllModules } from '@angular/router'; //import router module
 
-//import { HomeComponent } from './dashboard/home/home.component';
-import { LoginComponent , LoggedInGuard} from './auth';
+import { LoginComponent } from './auth';
  const routing = RouterModule.forRoot([
-  // {
-  //   path: 'home',
-  //   component: HomeComponent,
-  //   canActivate: [LoggedInGuard]
 
-  // },
-  // {
-  //   path: 'login',
-  //   component: LoginComponent
-  // },
   {
     path: '',
     redirectTo: '/dashboard',

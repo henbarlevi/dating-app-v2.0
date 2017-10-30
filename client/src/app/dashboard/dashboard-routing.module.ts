@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router'; //import router module
 import { DashboardComponent } from './dashboard.component';
 import { HomeComponent } from './home/home.component';
-import { LoggedInGuard } from '../auth/index';
+import { AuthModule } from '../auth/auth.module';
+import { IfLoggedInGuard } from '../auth/login/if-logged-in.guard';
 
 
  const dasboardRouting = RouterModule.forChild([
@@ -16,7 +17,7 @@ import { LoggedInGuard } from '../auth/index';
       { path: 'game', loadChildren: './../game/game.module#GameModule' }//when route is 'lazy' -loading the lazy module
       
     ]
-    //,canActivate: [LoggedInGuard]
+    ,canActivate: [IfLoggedInGuard]
   }
 
 
@@ -24,11 +25,12 @@ import { LoggedInGuard } from '../auth/index';
 
 @NgModule({
   imports: [
+    AuthModule,
     dasboardRouting
   ],
   exports: [RouterModule],
   providers: [
-    LoggedInGuard
+      //LoggedInGuard
   ]
 })
 export class DashboardRoutingModule {}
