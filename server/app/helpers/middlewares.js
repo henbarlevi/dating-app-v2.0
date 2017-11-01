@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 //=====imports
 const jwt = require("jsonwebtoken"); //jwt authentication
+//===== DB
 const user_rep_1 = require("../db/repository/user-rep");
 //=====utils
 const Logger_1 = require("../utils/Logger");
@@ -70,3 +71,34 @@ function authenticationMiddleware(req, res, next) {
     }
 }
 exports.authenticationMiddleware = authenticationMiddleware;
+/*return User if token is valid*/
+function verifyToken(token) {
+    return new Promise((resolve, reject) => {
+        Logger_1.Logger.d(TAG, `=============== Verify Token : ${token} ===============`, 'gray');
+        Logger_1.Logger.d(TAG, 'the token > ' + token, 'gray');
+        jwt.verify(token, 'mySecretForJWTtoken', (err, decoded) => __awaiter(this, void 0, void 0, function* () {
+            if (err) {
+                Logger_1.Logger.d(TAG, 'Failed to authenticate token > ' + err, 'red');
+                reject(err);
+            }
+            else {
+                let userId = decoded.userId;
+                /*
+                check that userId exist in db */
+                try {
+                    let userRep = new user_rep_1.UserRepository();
+                    let user = yield userRep.getUserById(userId);
+                    Logger_1.Logger.d(TAG, `user is authenticated, userId > ${userId} `, 'green');
+                    Logger_1.Logger.d(TAG, JSON.stringify(user), 'green');
+                    Logger_1.Logger.d(TAG, '=============== / Authentication Middleware ===============', 'gray');
+                    resolve(user);
+                }
+                catch (e) {
+                    Logger_1.Logger.d(TAG, 'ERR=========>' + e, 'red');
+                    reject(e);
+                }
+            }
+        }));
+    });
+}
+exports.verifyToken = verifyToken;

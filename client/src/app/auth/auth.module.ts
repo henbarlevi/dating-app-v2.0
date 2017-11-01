@@ -19,9 +19,9 @@ import { IfLoggedInGuard } from './login/if-logged-in.guard';
     declarations: [
         LoginComponent
     ],
-    //AuthService = accessable accross the app - NOTE - if we want to use this service in another lazyModule
+    //Services here = accessable accross the app - NOTE - if we want to use this service in another lazyModule
     // and we want it to be singelton we need to use the forRoot() pattern
-   // providers: [AuthService, LoggedInGuard],
+    providers: [],
 
     //export only that components directives and pipes
     // that need to be used outside of this module 
@@ -36,7 +36,7 @@ export class AuthModule {
   static forRoot():ModuleWithProviders{
     return{
       ngModule:AuthModule,
-      providers:[AuthService,IfLoggedInGuard]
+      providers:[AuthService] /**i've decided to include the LoggedInGuard here and instead - i imported it only in the dashboard-routing module */
     }
   }
 

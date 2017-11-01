@@ -30,7 +30,7 @@ import { IfLoggedInGuard } from '../auth/login/if-logged-in.guard';
   ],
   exports: [RouterModule],
   providers: [
-      //LoggedInGuard
+      IfLoggedInGuard /**i've decided to import this Guard Only here, but i could import it in the forRoot of the AuthModule instead */
   ]
 })
 export class DashboardRoutingModule {}

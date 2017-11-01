@@ -26,8 +26,8 @@ const TAG: string = 'GameSocketsManager |';
 /**handle game sockets */
 export class GameScoketsManager{
     //sockets groups
-    private searchingForPartner;
-    private playing
+    private waitingList:any[];
+    private playing:any[];
     /**
      *
      */
@@ -35,4 +35,27 @@ export class GameScoketsManager{
       
         
     }
+    /**accept new socket connected */
+    handle(socket:SocketIO.Socket){
+        socket.on('disconnect', function () {
+            console.log('user disconnected');
+        });
+        this.searchForPartner(socket);
+    }
+    /**search partner for socket */
+    searchForPartner(socket:SocketIO.Socket){
+        socket.emit(GAME_SOCKET_EVENTS.searchingForPlayer);
+        if(this.waitingList.length ===0){
+            this.waitingList.push(socket);
+        }
+        else{
+            //currently just get any random player available
+            let partner =this.waitingList[0];
+        }
+    }
 }
+
+export enum  GAME_SOCKET_EVENTS{
+    searchingForPlayer = 'searching_for_player'
+}
+

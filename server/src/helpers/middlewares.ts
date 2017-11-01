@@ -3,7 +3,6 @@
 //=====imports
 import * as jwt from 'jsonwebtoken'; //jwt authentication
 //===== DB
-import { neo4jDB } from '../db/neo4jdb';
 import { UserRepository } from '../db/repository/user-rep';
 //=====models
 import { iUser } from '../models'
@@ -70,4 +69,35 @@ export function authenticationMiddleware(req, res, next) {
 
     }
 
+}
+
+/*return User if token is valid*/
+export function verifyToken(token): Promise<iUser> {
+    return new Promise((resolve, reject) => {
+        Logger.d(TAG, `=============== Verify Token : ${token} ===============`, 'gray');
+        Logger.d(TAG, 'the token > ' + token, 'gray');
+        jwt.verify(token, 'mySecretForJWTtoken', async (err, decoded) => {
+            if (err) {//can happen in case token expiers
+                Logger.d(TAG, 'Failed to authenticate token > ' + err, 'red');
+                reject(err);
+            } else {
+                let userId = decoded.userId;
+                /*
+                check that userId exist in db */
+                try {
+
+                    let userRep = new UserRepository();
+                    let user: iUser = await userRep.getUserById(userId);
+                    Logger.d(TAG, `user is authenticated, userId > ${userId} `, 'green');
+                    Logger.d(TAG, JSON.stringify(user), 'green');
+                    Logger.d(TAG, '=============== / Authentication Middleware ===============', 'gray');
+                    resolve(user);
+                } catch (e) {
+                    Logger.d(TAG, 'ERR=========>' + e, 'red');
+                    reject(e);
+
+                }
+            }
+        });
+    });
 }

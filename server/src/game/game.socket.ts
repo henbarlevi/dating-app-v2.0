@@ -4,10 +4,14 @@ import * as fs from 'fs';
 import * as Rx from 'rxjs';
 import * as request from 'request';
 import * as jwt from 'jsonwebtoken'; //jwt authentication
+
 //======db
 import { UserRepository } from '../db/repository/user-rep';
 
 //====== services
+
+import { GameScoketsManager } from './gameScoketsManager';
+import { verifyToken } from '../helpers/middlewares';
 //====== models
 import { GAME_STATUS } from './GAME_STATUS_ENUM';
 import { iUser } from '../models';
@@ -22,12 +26,32 @@ import { Logger } from '../utils/Logger';
 const TAG: string = 'GameSockets |';
 
 
+// SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
+module.exports = function (io) {
+    Logger.d(TAG, 'establishing sockets.io for games..');
+    let gameSockectManager: GameScoketsManager = new GameScoketsManager();
 
-module.exports = function(io) {
-    Logger.d(TAG,'establishing sockets.io for games..');
-    io.sockets.on('connection', (socket) => {
+    /*authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
+    io.use( (socket, next)=> {
+        console.log(socket.handshake.query);
+        var token = socket.handshake.query ? socket.handshake.query.token : null;
+        if (token) {
+            verifyToken(token)
+                .then(() => next())
+                .catch(e => {
+                    next(new Error("not authenticated"));
+                    Logger.d(TAG, 'user socket not authenticated', 'red');
+
+                })
+        } else {
+            next(new Error("not authenticated"));
+            Logger.d(TAG, 'user socket not authenticated', 'red');
+        }
+    });
+
+    io.sockets.on('connection', (socket: SocketIO.Socket) => {
         console.log('user connected');
-        console.log(socket);
+
         socket.on('disconnect', function () {
             console.log('user disconnected');
         });

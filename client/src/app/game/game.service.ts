@@ -24,9 +24,18 @@ export class GameService {
   }
 
   startGame() {
+    let token :String = localStorage.getItem('token');
+    
     this.game$ = new Observable(observer => {
       console.log('creating game socket');
-      this.gameSocket = io(this.baseUrl);//connecting
+      //connecting :
+      this.gameSocket = io.connect(this.baseUrl
+        /*with token :authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
+        , {
+          query: {
+            token:token
+          }
+        });
       this.gameSocket.on('message', (data) => {
         observer.next(data);
       });
@@ -50,6 +59,6 @@ export enum GAME_TYPE {
   choose_partner_question /**a game where the partner decide what question the other player will answer */
 }
 
-export interface iGameSocketData{
-  
+export interface iGameSocketData {
+
 }

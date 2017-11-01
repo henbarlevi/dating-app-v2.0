@@ -15,7 +15,6 @@ export class IfLoggedInGuard implements CanActivate {
       return true;
     }
     console.log('user is NOT loggedIng');
-    
     return false;
   }
 }
