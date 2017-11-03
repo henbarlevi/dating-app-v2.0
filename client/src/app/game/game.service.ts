@@ -3,11 +3,14 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
 import * as io from 'socket.io-client';
+import * as plugin from 'socketio-wildcard'
+const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
+
 @Injectable()
 export class GameService {
-  baseUrl :string = 'http://localhost:3000';
+  baseUrl: string = 'http://localhost:3000';
   private gameSocket: SocketIOClient.Socket;
-  private game$:Observable<any>;
+  private game$: Observable<any>;
   //private game$ :Observable<any>
   /*
   Raise events with services (BehaviourSubject,ReplaySubject) :
@@ -24,8 +27,8 @@ export class GameService {
   }
 
   startGame() {
-    let token :String = localStorage.getItem('token');
-    
+    let token: String = localStorage.getItem('token');
+
     this.game$ = new Observable(observer => {
       console.log('creating game socket');
       //connecting :
@@ -33,10 +36,11 @@ export class GameService {
         /*with token :authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
         , {
           query: {
-            token:token
+            token: token
           }
         });
-      this.gameSocket.on('searching_for_player', (data) => {
+      socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
+      this.gameSocket.on('*', (data) => {
         observer.next(data);
       });
       //return value = function that happen when the this Observable subscription invoke .unsubscribe()

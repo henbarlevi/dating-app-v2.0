@@ -45,19 +45,31 @@ export class GameScoketsManager {
         socket.on('disconnect', function () {
             console.log('user disconnected from game');
         });
+        socket.emit(GAME_SOCKET_EVENTS.searchForPartner);
         let partner: iGameSocket = this.searchForPartner(socket);
         if (!partner) {
-            Logger.d(TAG, `inserting ${socket.user.facebook? socket.user.facebook.name :''} to waiting list`, 'yellow');
+            Logger.d(TAG, `inserting ${socket.user.facebook ? socket.user.facebook.name : ''} to waiting list`, 'yellow');
             this.waitingList.push(socket);
         } else { //if there is partner available
             //generate game room
             let gameRoom: iGameRoom = this.generateGameRoom(socket, partner);
-            this.gameRooms[3] = gameRoom;
+            //insert the 2 players into the room
+            socket.join(gameRoom.roomId);
+            partner.join(gameRoom.roomId);
+            //tell 2 players that match is found
+            this.io.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.found_partner);
+            //if one of the players disconnected, tell the other user about it
+            this.io.to(gameRoom.roomId).on('disconnect',(socket :iGameSocket)=>{
+                socket.broadcast.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.partner_disconnected);
+            });
+
+            this.gameRooms[gameRoom.roomId] = gameRoom;
+
         }
     }
     /**search partner for socket */
     searchForPartner(socket: iGameSocket): iGameSocket {
-        socket.emit(GAME_SOCKET_EVENTS.searchingForPlayer);
+        
         if (this.waitingList.length === 0) {
         }
         else {
@@ -70,24 +82,22 @@ export class GameScoketsManager {
     }
     generateGameRoom(playerOne: iGameSocket, playerTwo: iGameSocket): iGameRoom {
         let roomId: string = uuid();
-        //insert the 2 players into the room
-        playerOne.join(GAME_SOCKET_EVENTS.found_match);
-        playerTwo.join(GAME_SOCKET_EVENTS.found_match);
-        //tell 2 players that match is found
-        this.io.to(roomId).emit(GAME_SOCKET_EVENTS.found_match);
         //generate gameRoom :
         let gameRoom: iGameRoom = {
             roomId: roomId,
             playerOne: playerOne,
             playerTwo: playerTwo,
-            gamesRemaining: 3
+            miniGamesRemaining: 3
         }
         return gameRoom;
     }
 }
 
 export enum GAME_SOCKET_EVENTS {
-    searchingForPlayer = 'searching_for_player',
-    found_match = 'found_match'
+    searchForPartner = 'searching_for_partner',
+    found_partner = 'found_partner',
+    partner_played = 'partner_played', /**event with data about the other partner play actions */
+    partner_disconnected = 'partner_disconnected' ,//if one of the players disconnected/left the game
+    mini_game_ended = 'mini_game_ended'/**when a mini game end's */
 }
 
