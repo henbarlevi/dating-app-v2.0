@@ -23,21 +23,27 @@ const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
 //=======utils
 import { Logger } from '../utils/Logger';
+import { iGameSocket } from './models/iGameSocket';
 const TAG: string = 'GameSockets |';
 
 
 // SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
 module.exports = function (io) {
     Logger.d(TAG, 'establishing sockets.io for games..');
-    let gameSockectManager: GameScoketsManager = new GameScoketsManager();
+    let gameSocketsManager: GameScoketsManager = new GameScoketsManager(io);
 
     /*authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
-    io.use( (socket, next)=> {
+    io.use((socket: iGameSocket, next) => {
         console.log(socket.handshake.query);
         var token = socket.handshake.query ? socket.handshake.query.token : null;
         if (token) {
             verifyToken(token)
-                .then(() => next())
+                .then((user: iUser) => {
+                    Logger.d(TAG, 'user socket authenticated', 'green');
+                    //set user into socket socket.user
+                    socket.user = user;
+                    next()
+                })
                 .catch(e => {
                     next(new Error("not authenticated"));
                     Logger.d(TAG, 'user socket not authenticated', 'red');
@@ -48,10 +54,10 @@ module.exports = function (io) {
             Logger.d(TAG, 'user socket not authenticated', 'red');
         }
     });
-
+    /*handle connection*/
     io.sockets.on('connection', (socket: SocketIO.Socket) => {
         console.log('user connected');
-
+        gameSocketsManager.handle(socket);
         socket.on('disconnect', function () {
             console.log('user disconnected');
         });

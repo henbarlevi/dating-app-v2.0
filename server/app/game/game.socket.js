@@ -13,14 +13,19 @@ const TAG = 'GameSockets |';
 // SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
 module.exports = function (io) {
     Logger_1.Logger.d(TAG, 'establishing sockets.io for games..');
-    let gameSockectManager = new gameScoketsManager_1.GameScoketsManager();
+    let gameSocketsManager = new gameScoketsManager_1.GameScoketsManager(io);
     /*authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
     io.use((socket, next) => {
         console.log(socket.handshake.query);
         var token = socket.handshake.query ? socket.handshake.query.token : null;
         if (token) {
             middlewares_1.verifyToken(token)
-                .then(() => next())
+                .then((user) => {
+                Logger_1.Logger.d(TAG, 'user socket authenticated', 'green');
+                //set user into socket socket.user
+                socket.user = user;
+                next();
+            })
                 .catch(e => {
                 next(new Error("not authenticated"));
                 Logger_1.Logger.d(TAG, 'user socket not authenticated', 'red');
@@ -31,8 +36,10 @@ module.exports = function (io) {
             Logger_1.Logger.d(TAG, 'user socket not authenticated', 'red');
         }
     });
+    /*handle connection*/
     io.sockets.on('connection', (socket) => {
         console.log('user connected');
+        gameSocketsManager.handle(socket);
         socket.on('disconnect', function () {
             console.log('user disconnected');
         });

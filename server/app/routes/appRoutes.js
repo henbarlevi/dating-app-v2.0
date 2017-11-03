@@ -73,7 +73,7 @@ router.post('/facebook/code', (req, res) => __awaiter(this, void 0, void 0, func
                     //create token for authenticated user:
                     let token = jwt.sign({
                         userId: userDB._id
-                    }, 'mySecretForJWTtoken', { expiresIn: '1h' });
+                    }, 'mySecretForJWTtoken', { expiresIn: '3h' });
                     Logger_1.Logger.d(TAG, 'sending back the token >' + token, 'yellow');
                     //send 200 with the token
                     res.status(200).json({

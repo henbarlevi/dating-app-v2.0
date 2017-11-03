@@ -5,9 +5,9 @@ import { Observable } from 'rxjs/Observable';
 import * as io from 'socket.io-client';
 @Injectable()
 export class GameService {
-  baseUrl = 'http://localhost:3000';
+  baseUrl :string = 'http://localhost:3000';
   private gameSocket: SocketIOClient.Socket;
-  private game$
+  private game$:Observable<any>;
   //private game$ :Observable<any>
   /*
   Raise events with services (BehaviourSubject,ReplaySubject) :
@@ -36,7 +36,7 @@ export class GameService {
             token:token
           }
         });
-      this.gameSocket.on('message', (data) => {
+      this.gameSocket.on('searching_for_player', (data) => {
         observer.next(data);
       });
       //return value = function that happen when the this Observable subscription invoke .unsubscribe()

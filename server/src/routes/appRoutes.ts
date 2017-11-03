@@ -80,7 +80,7 @@ router.post('/facebook/code', async (req, res) => {
                         //create token for authenticated user:
                         let token = jwt.sign({
                             userId: userDB._id
-                        }, 'mySecretForJWTtoken', { expiresIn: '1h' });
+                        }, 'mySecretForJWTtoken', { expiresIn: '3h' });
                         Logger.d(TAG, 'sending back the token >'+token, 'yellow');
                         
                         //send 200 with the token
