@@ -1,4 +1,6 @@
-[ //array of question and anwers 
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = [
     {
         "q": "what is your name",
         "a": [
@@ -16,4 +18,4 @@
             "risks is my second name"
         ]
     }
-]
+];

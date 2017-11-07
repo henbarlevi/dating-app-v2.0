@@ -15,10 +15,9 @@ const envConfig = config.get(ENV);
 //=======utils
 const Logger_1 = require("../utils/Logger");
 const GAME_TYPE_ENUM_1 = require("./models/GAME_TYPE_ENUM");
-const GAME_SOCKET_EVENTS_1 = require("./models/GAME_SOCKET_EVENTS");
 const TAG = 'GameRoomManager |';
 // ====== Games
-const choose_partner_question_1 = require("./mini_games/choose_partner_question");
+const choose_partner_question_1 = require("./mini_games/choose_partner_question/choose_partner_question");
 let miniGames = [
     choose_partner_question_1.choose_partner_question
 ];
@@ -33,44 +32,26 @@ class GameRoomManager {
     }
     handle() {
         return __awaiter(this, void 0, void 0, function* () {
-            while (this.gameRoom.miniGamesRemaining > 0) {
+            try {
+                // while (this.gameRoom.miniGamesRemaining > 0) {
                 //generate new mini game:
                 let miniGameType = randomizeGame();
+                Logger_1.Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - minigames Remaining [${this.gameRoom.miniGamesRemaining}] `);
+                Logger_1.Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - **generating ${miniGameType}`);
                 let minigameClass = miniGames[miniGameType];
-                let miniGame = new minigameClass();
-                //TODO -transfer the minigame into the mini gameclass (waitForPlayersToBeReadyAndStartTheMiniGame) etc..
-                //and maybe create super class 
-                //declaring the mini game that should start - this is how client know to load the minigame screen:
-                this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.init_mini_game, { miniGame: miniGameType });
+                let miniGame = new minigameClass(this.io, this.gameRoom);
+                yield miniGame.startMiniGame();
+                // }
             }
-        });
-    }
-    waitForPlayersToBeReadyAndStartTheMiniGame() {
-        return new Promise((resolve, reject) => {
-            let playerOneRadyForMiniGame = false;
-            let playerTwoRadyForMiniGame = false;
-            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game, (socket) => __awaiter(this, void 0, void 0, function* () {
-                try {
-                    socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
-                        playerOneRadyForMiniGame = true : '';
-                    socket.user.facebook.id === this.gameRoom.playerTwo.user.facebook.id ?
-                        playerTwoRadyForMiniGame = true : '';
-                    //if the 2 players are ready: start the mini game
-                    playerOneRadyForMiniGame && playerTwoRadyForMiniGame ?
-                        :
-                    ;
-                    // startMiniGame
-                }
-                catch (e) {
-                    Logger_1.Logger.d(TAG, 'ERR =====>' + e, 'red');
-                }
-            }));
+            catch (e) {
+                Logger_1.Logger.d(TAG, `Err =====>${e}`, 'red');
+            }
         });
     }
 }
 exports.GameRoomManager = GameRoomManager;
 function randomizeGame() {
     let min = 0;
-    let max = Object.keys(GAME_TYPE_ENUM_1.GAME_TYPE).length / 2;
+    let max = Object.keys(GAME_TYPE_ENUM_1.GAME_TYPE).length / 2 - 1;
     return Math.floor(Math.random() * (max - min + 1) + min);
 }

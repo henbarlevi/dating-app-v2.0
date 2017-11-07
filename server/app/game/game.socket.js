@@ -49,6 +49,16 @@ module.exports = function (io) {
     });
 };
 //-------------------------------------SNIPPETS-------------------------
+/*removing listeners:
+- https://stackoverflow.com/questions/23092624/socket-io-removing-specific-listener
+ -https://stackoverflow.com/questions/9418697/how-to-unsubscribe-from-a-socket-io-subscription
+To unsubscribe all listeners of an event
+socket.off('event-name');
+to unsubscribe a certain listener
+socket.off('event-name', listener);
+If you want to create listeners that "listens" only once use socket.once('news',func). Socket.io automatically will distroy the listener after the event happened - it's called "volatile listener"
+
+*/
 //CONVERTING NODE FS callback to REACTIVE
 // fs.readdir('./dist/routes',(err,items)=>{
 //     if(err){

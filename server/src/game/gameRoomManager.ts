@@ -5,6 +5,7 @@ import * as socketIo from 'socket.io';
 //======db
 
 //====== services
+import { miniGame } from "./mini_games/abstract_minigame";
 //====== models
 import { GAME_STATUS } from './GAME_STATUS_ENUM';
 import { iUser } from '../models';
@@ -23,10 +24,10 @@ import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 const TAG: string = 'GameRoomManager |';
 
 // ====== Games
-import { choose_partner_question } from './mini_games/choose_partner_question';
+import { choose_partner_question } from './mini_games/choose_partner_question/choose_partner_question';
 let miniGames = [
     choose_partner_question
-]
+];
 
 
 
@@ -40,49 +41,55 @@ export class GameRoomManager {
 
     }
     async handle() {
-        while (this.gameRoom.miniGamesRemaining > 0) {
+        try {
+           // while (this.gameRoom.miniGamesRemaining > 0) {
+                //generate new mini game:
+                let miniGameType: GAME_TYPE = randomizeGame();
+                Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - minigames Remaining [${this.gameRoom.miniGamesRemaining}] `);
+                Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - **generating ${miniGameType}`);
 
-            //generate new mini game:
-            let miniGameType: GAME_TYPE = randomizeGame();
-            let minigameClass = miniGames[miniGameType];
-            let miniGame =  new minigameClass();
-            //TODO -transfer the minigame into the mini gameclass (waitForPlayersToBeReadyAndStartTheMiniGame) etc..
-            //and maybe create super class 
+                let minigameClass = miniGames[miniGameType];
 
-            //declaring the mini game that should start - this is how client know to load the minigame screen:
-            this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.init_mini_game, { miniGame: miniGameType });
+                let miniGame: miniGame = new minigameClass(this.io, this.gameRoom);
 
 
+                await miniGame.startMiniGame();
+
+           // }
         }
+        catch (e) {
+            Logger.d(TAG, `Err =====>${e}`, 'red')
+        }
+
     }
-    waitForPlayersToBeReadyAndStartTheMiniGame() {
-        return new Promise((resolve, reject) => {
-            let playerOneRadyForMiniGame: Boolean = false;
-            let playerTwoRadyForMiniGame: Boolean = false;
+    // waitForPlayersToBeReadyAndStartTheMiniGame() {
+    //     return new Promise((resolve, reject) => {
+    //         let playerOneRadyForMiniGame: Boolean = false;
+    //         let playerTwoRadyForMiniGame: Boolean = false;
 
-            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS.ready_for_mini_game, async (socket: iGameSocket) => {
-                try {
-                    socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
-                        playerOneRadyForMiniGame = true : ''
-                    socket.user.facebook.id === this.gameRoom.playerTwo.user.facebook.id ?
-                        playerTwoRadyForMiniGame = true : ''
+    //         this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS.ready_for_mini_game, async (socket: iGameSocket) => {
+    //             try {
+    //                 socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
+    //                     playerOneRadyForMiniGame = true : ''
+    //                 socket.user.facebook.id === this.gameRoom.playerTwo.user.facebook.id ?
+    //                     playerTwoRadyForMiniGame = true : ''
 
-                    //if the 2 players are ready: start the mini game
-                    playerOneRadyForMiniGame && playerTwoRadyForMiniGame ?
-                       // TODO -startMiniGame
-                }
-                catch (e) {
-                    Logger.d(TAG, 'ERR =====>' + e, 'red');
-                }
-            });
+    //                 //if the 2 players are ready: start the mini game
+    //                 playerOneRadyForMiniGame && playerTwoRadyForMiniGame ?
+    //                    // TODO -startMiniGame
+    //             }
+    //             catch (e) {
+    //                 Logger.d(TAG, 'ERR =====>' + e, 'red');
+    //             }
+    //         });
 
-        })
-    }
+    //     })
+    // }
 
 }
 
 function randomizeGame(): GAME_TYPE {
     let min: number = 0;
-    let max: number = Object.keys(GAME_TYPE).length / 2
+    let max: number = Object.keys(GAME_TYPE).length / 2-1;
     return Math.floor(Math.random() * (max - min + 1) + min);
 }

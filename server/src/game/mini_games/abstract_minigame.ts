@@ -19,7 +19,7 @@ export abstract class miniGame {
             let playerOneRadyForMiniGame: Boolean = false;
             let playerTwoRadyForMiniGame: Boolean = false;
 
-            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS.ready_for_mini_game, async (socket: iGameSocket) => {
+            this.io.to(this.gameRoom.roomId).once(GAME_SOCKET_EVENTS.ready_for_mini_game, async (socket: iGameSocket) => {
                 try {
                     socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
                         playerOneRadyForMiniGame = true : ''

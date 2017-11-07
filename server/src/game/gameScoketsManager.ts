@@ -9,6 +9,7 @@ import * as uuid from 'uuid/v1'; //generate guid
 import { UserRepository } from '../db/repository/user-rep';
 
 //====== services
+import { GameRoomManager } from "./gameRoomManager";
 //====== models
 import { GAME_STATUS } from './GAME_STATUS_ENUM';
 import { iUser } from '../models';
@@ -30,13 +31,14 @@ const TAG: string = 'GameSocketsManager |';
  * after user connected:
  * 1.emit for user 'searching For partner' - if not found push socket to waiting list
  * 2.after found partner - emit to 2 players 'found partner'
- * 3.join 2 socket to generated room
+ * 3.Generate game room for the 2 players and join 2 socket to generated room
  * 4.send the gameRoom to gameRoom manager to handle the game
  */
 export class GameScoketsManager {
     //sockets groups
     private waitingList: iGameSocket[] = []; //waiting for partner to play
     private gameRooms: { [roomId: string]: iGameRoom } = {};//gameRooms - Object {key:roomId,value:iGameRoom}
+    private allSockets: iGameSocket[] = [];//that helps check if the user already created socket from another tab
     /**
      *
      */
@@ -46,13 +48,19 @@ export class GameScoketsManager {
     }
     /**handle new socket connected*/
     handle(socket: iGameSocket) {
-        socket.on('disconnect', function () {
+        this.printCurrentState(socket);
+        socket.on('disconnect', () => {
             console.log('user disconnected from game');
         });
+        // if (this.userIsAlreadyConnected(socket)) {
+        //     socket.emit(GAME_SOCKET_EVENTS.already_connected);
+        //     socket.disconnect();
+        // }
         socket.emit(GAME_SOCKET_EVENTS.searchForPartner);
         let partner: iGameSocket = this.searchForPartner(socket);
+
         if (!partner) {
-            Logger.d(TAG, `inserting ${socket.user.facebook ? socket.user.facebook.name : ''} to waiting list`, 'yellow');
+            Logger.d(TAG, `**inserting ${socket.user.facebook ? socket.user.facebook.name : ''} to waiting list**`, 'yellow');
             this.waitingList.push(socket);
         } else { //if there is partner available
             //generate game room
@@ -61,9 +69,12 @@ export class GameScoketsManager {
             socket.join(gameRoom.roomId);
             partner.join(gameRoom.roomId);
             //tell 2 players that match is found
-            this.io.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.found_partner,{roomId:gameRoom.roomId});
+            this.io.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoom.roomId });
+            //send the gameroom to the GameRoom manager to handle the game:
+            let gameRoomManager = new GameRoomManager(this.io, gameRoom);
+            gameRoomManager.handle();
             //if one of the players disconnected, tell the other user about it
-            this.io.to(gameRoom.roomId).on('disconnect',(socket :iGameSocket)=>{
+            this.io.to(gameRoom.roomId).on('disconnect', (socket: iGameSocket) => {
                 socket.broadcast.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.partner_disconnected);
             });
 
@@ -71,9 +82,18 @@ export class GameScoketsManager {
 
         }
     }
+    private userIsAlreadyConnected(socket: iGameSocket) {
+        //TODO
+    }
+    private printCurrentState(socket) {
+        Logger.d(TAG, '========== Socket Details =========', 'yellow');
+        console.log('socket id =' + socket.id);
+        Logger.d(TAG, `Before handling this socket there are: \n[watingList =${this.waitingList.length} Sockets]\n[gameRooms = ${Object.keys(this.gameRooms).length}]`)
+        Logger.d(TAG, '========== Socket Details =========', 'yellow');
+    }
     /**search partner for socket */
     searchForPartner(socket: iGameSocket): iGameSocket {
-        
+
         if (this.waitingList.length === 0) {
         }
         else {
