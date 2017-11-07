@@ -15,17 +15,24 @@ import { iUser } from '../models';
 import { iFacebookCredentials } from '../facebook/models/iFacebookCredentials.model'
 import { iFacebookUserInfo } from '../facebook/models/index';
 import { iGameRoom } from './models/iGameRoom';
+import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { iGameSocket } from './models/iGameSocket';
 //====== config
 import * as config from 'config';
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
 //=======utils
 import { Logger } from '../utils/Logger';
-import { iGameSocket } from './models/iGameSocket';
 const TAG: string = 'GameSocketsManager |';
 
 
-/**handle game sockets */
+/**handle game sockets
+ * after user connected:
+ * 1.emit for user 'searching For partner' - if not found push socket to waiting list
+ * 2.after found partner - emit to 2 players 'found partner'
+ * 3.join 2 socket to generated room
+ * 4.send the gameRoom to gameRoom manager to handle the game
+ */
 export class GameScoketsManager {
     //sockets groups
     private waitingList: iGameSocket[] = []; //waiting for partner to play
@@ -37,10 +44,7 @@ export class GameScoketsManager {
 
 
     }
-    /**accept new socket connected
-     * 1.searching for the GameScoket a partner to play
-     * 2.when finding one - generate a GameRoom for them
-     */
+    /**handle new socket connected*/
     handle(socket: iGameSocket) {
         socket.on('disconnect', function () {
             console.log('user disconnected from game');
@@ -57,7 +61,7 @@ export class GameScoketsManager {
             socket.join(gameRoom.roomId);
             partner.join(gameRoom.roomId);
             //tell 2 players that match is found
-            this.io.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.found_partner);
+            this.io.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.found_partner,{roomId:gameRoom.roomId});
             //if one of the players disconnected, tell the other user about it
             this.io.to(gameRoom.roomId).on('disconnect',(socket :iGameSocket)=>{
                 socket.broadcast.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.partner_disconnected);
@@ -93,11 +97,5 @@ export class GameScoketsManager {
     }
 }
 
-export enum GAME_SOCKET_EVENTS {
-    searchForPartner = 'searching_for_partner',
-    found_partner = 'found_partner',
-    partner_played = 'partner_played', /**event with data about the other partner play actions */
-    partner_disconnected = 'partner_disconnected' ,//if one of the players disconnected/left the game
-    mini_game_ended = 'mini_game_ended'/**when a mini game end's */
-}
+
 
