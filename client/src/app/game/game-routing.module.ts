@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router'; //import router module
 import { GameComponent } from './game.component';
+import { LoadingGameComponent } from './loading-game/loading-game.component';
 
 
  const gameRouting = RouterModule.forChild([
@@ -8,7 +9,10 @@ import { GameComponent } from './game.component';
 
   {
     path: '',
-    component: GameComponent
+    component: GameComponent,
+    children:[
+      {path:'',pathMatch:"full",component:LoadingGameComponent}
+    ]
 
   },
 
@@ -34,3 +38,15 @@ export class GameRoutingModule {}
 //     { path: ':id/edit', component: RecipeEditComponent, canActivate: [AuthGuard] },
 //   ] },
 // ];
+
+// {
+//   path: 'dashboard',
+//   component: DashboardComponent,
+//   children:[
+//     {path:'',component:HomeComponent},
+//     { path: 'game', loadChildren: './../game/game.module#GameModule' }//when route is 'lazy' -loading the lazy module
+    
+//   ]
+//   ,canActivate: [IfLoggedInGuard]
+// }
+

@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 })
 export class GameComponent implements OnInit {
 
-  constructor(private GameService : GameService) { }
+  constructor(private GameService: GameService) { }
 
   ngOnInit() {
     //debug
@@ -19,8 +19,8 @@ export class GameComponent implements OnInit {
     // }, 50000);
 
     console.log('game component ngOninit');
-    let game$ :Observable<any>=this.GameService.startGame();
-    game$.subscribe(data=>{
+    let game$: Observable<any> = this.GameService.startGame();
+    let subscription = game$.subscribe(data => {
       console.log(data);
     })
 

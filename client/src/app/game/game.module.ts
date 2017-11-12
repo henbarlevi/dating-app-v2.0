@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { GameComponent } from './game.component';
 import { GameRoutingModule } from './game-routing.module';
 import { GameService } from './game.service';
+import { LoadingGameComponent } from './loading-game/loading-game.component';
 /*NOTE - there is NO need to import SharedModule for his services, (because we already using the forRoot pattern in the app module),
  we import it to use his shared components and directives etc..*/
 @NgModule({
@@ -13,11 +14,12 @@ import { GameService } from './game.service';
   ],
   //components ,directives ,pipes:
   declarations: [
-    GameComponent
+    GameComponent,
+    LoadingGameComponent
   ],
-   //LazyPrivateService = accessable only inside the module
-   providers:[GameService]
+  //LazyPrivateService = accessable only inside the module
+  providers: [GameService]
 })
-export class GameModule { 
+export class GameModule {
 
 }

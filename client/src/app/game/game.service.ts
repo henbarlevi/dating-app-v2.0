@@ -10,7 +10,7 @@ const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option :
 export class GameService {
   baseUrl: string = 'http://localhost:3000';
   private gameSocket: SocketIOClient.Socket;
-  private game$: Observable<any>;
+  public game$: Observable<any>;
   //private game$ :Observable<any>
   /*
   Raise events with services (BehaviourSubject,ReplaySubject) :
