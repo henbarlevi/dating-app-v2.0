@@ -3,7 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { GameService } from '../game.service';
 import { Observable } from 'rxjs/Observable';
 import { iSocketData } from '../models/iSocketData.model';
-
+import { GAME_SOCKET_EVENTS } from '../models/GAME_SOCKET_EVENTS';
+import { Router } from '@angular/router';
+import { GAME_TYPE } from '../models/GAME_TYPE_ENUM';
+const TAG: string = 'LoadingGame |';
 @Component({
   selector: 'app-loading-game',
   templateUrl: './loading-game.component.html',
@@ -11,14 +14,29 @@ import { iSocketData } from '../models/iSocketData.model';
 })
 export class LoadingGameComponent implements OnInit {
   private game$: Observable<any>;
-   loadingMessage: string = 'loading...';
-  constructor(private GameService: GameService) { }
+  loadingMessage: string = 'loading...';
+  constructor(private Router: Router,
+    private GameService: GameService) { }
 
   ngOnInit() {
     this.game$ = this.GameService.game$;
 
-    this.game$.subscribe((data:iSocketData) =>{
-      this.loadingMessage = data.data[0] as string;
+    this.game$.subscribe((event: iSocketData) => {
+      switch (event.data[0] as GAME_SOCKET_EVENTS) {
+        case GAME_SOCKET_EVENTS.searchForPartner:
+          this.loadingMessage = 'searching for partner';
+        case GAME_SOCKET_EVENTS.found_partner:
+          this.loadingMessage = 'Found Partner';
+        case GAME_SOCKET_EVENTS.init_mini_game:
+          this.loadingMessage = 'Initializing game';
+          //navigating to game
+          let initGameData: any = event.data[1];
+          let gameName: string = GAME_TYPE[initGameData.gameType];
+          console.log(TAG, `initing the game :` + gameName);
+          this.Router.navigate(['./' + gameName]);
+        default:
+          break;
+      }
     })
   }
 
