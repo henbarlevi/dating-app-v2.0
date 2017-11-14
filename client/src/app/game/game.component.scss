@@ -1,6 +1,7 @@
 
 @import '~styles/main';/*The tilde (~) will tell Sass to look in the src/ folder and is a quick shortcut to importing Sass files.*/
 
-div{
-    background-color: white;
+#game-wrapper{
+    background-color: $white;
+    height: 100%;
 }

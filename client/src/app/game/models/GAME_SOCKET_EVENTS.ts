@@ -1,4 +1,4 @@
-//event that occurred between server and client in a game socket
+//event names that occurred between server and client in a game socket
 export enum GAME_SOCKET_EVENTS {
     searchForPartner = 'searching_for_partner',
     found_partner = 'found_partner',
