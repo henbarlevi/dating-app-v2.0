@@ -9,7 +9,9 @@ const ENV = process.env.ENV || 'local';
 const envConfig = config.get(ENV);
 //=======utils
 const Logger_1 = require("../utils/Logger");
+const GAME_SOCKET_EVENTS_1 = require("./models/GAME_SOCKET_EVENTS");
 const TAG = 'GameSockets |';
+let alreadyConnectedUsers = {};
 // SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
 module.exports = function (io) {
     Logger_1.Logger.d(TAG, 'establishing sockets.io for games..');
@@ -22,9 +24,20 @@ module.exports = function (io) {
             middlewares_1.verifyToken(token)
                 .then((user) => {
                 Logger_1.Logger.d(TAG, 'user socket authenticated', 'green');
-                //set user into socket socket.user
-                socket.user = user;
-                next();
+                Logger_1.Logger.d(TAG, JSON.stringify(alreadyConnectedUsers));
+                //if the user alredy connected
+                if (alreadyConnectedUsers[user._id]) {
+                    socket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.already_connected);
+                    next(new Error("Already Connected"));
+                    Logger_1.Logger.d(TAG, 'user already connected from another tab/device', 'red');
+                }
+                else {
+                    Logger_1.Logger.d(TAG, 'saving ' + user._id + ' into alradyConnectedUsers');
+                    alreadyConnectedUsers[user._id] = true;
+                    //set user into socket socket.user
+                    socket.user = user;
+                    next();
+                }
             })
                 .catch(e => {
                 next(new Error("not authenticated"));
@@ -40,7 +53,9 @@ module.exports = function (io) {
     io.sockets.on('connection', (socket) => {
         console.log('user connected');
         gameSocketsManager.handle(socket);
-        socket.on('disconnect', function () {
+        socket.on('disconnect', () => {
+            let userId = socket.user._id;
+            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
             console.log('user disconnected');
         });
         socket.on('add-message', (message) => {

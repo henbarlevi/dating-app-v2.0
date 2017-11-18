@@ -12,21 +12,27 @@ const TAG: string = 'ChoosePartnerQuestionComponent |'
 })
 export class ChoosePartnerQuestionComponent implements OnInit {
   private game$: Observable<iSocketData>;
-  private questions: iQuestion[]
+  questions: iQuestion[]
+  playerTurn: boolean = false;
   constructor(private GameService: GameService) {
   }
 
   ngOnInit() {
     this.game$ = this.GameService.game$;
-    this.game$.subscribe((data: iSocketData) => {
-      console.log(TAG, 'got info from socket');
-      console.log(TAG, data);
+    let subscription = this.game$.subscribe((data: iSocketData) => {
       let gameEventName: GAME_SOCKET_EVENTS = data.data[0];
-      if (GAME_SOCKET_EVENTS.init_mini_game) {
-        this.questions = data.data[1];
+      if (gameEventName === GAME_SOCKET_EVENTS.init_mini_game) { //if the socket get an 'init)mini_game event'
+        console.log(TAG, 'got init_game event');
+        console.log(TAG, data);
+
+        this.questions = data.data[1].initData;
+        this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.ready_for_mini_game);
+
       }
 
     })
   }
 
 }
+
+

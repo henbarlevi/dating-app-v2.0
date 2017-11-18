@@ -1,3 +1,6 @@
-<div class="questions-wrapper ">
-  <a *ngFor="let question of questions" href="#" class="btn btn-block btn-lg btn-default"><span class="glyphicon glyphicon-play"></span> Default text here</a>
+<div class="questions-wrapper">
+  <div *ngFor="let question of questions" class="mb-3">
+    <a href="#" class="questionBtn">
+      <span class="glyphicon glyphicon-play"></span> {{question.q}}</a>
+  </div>
 </div>

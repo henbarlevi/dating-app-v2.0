@@ -1,0 +1,100 @@
+#minigame-wrapper{
+
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#questions-wrapper{
+    margin: auto;
+    
+}
+
+#player-details,#partner-details{
+    flex-basis: 50%;
+    height: 10%;
+}
+
+/**ARROW -http://freefrontend.com/css-arrows/*/
+$circle-size: 15px;
+$dot-color: #3FC380;
+$light-dot-color: black;
+
+$background: #333;
+
+body {
+  background-color: $background;
+}
+
+.loading-frame {
+  position: absolute;
+  top: 5%;
+  left: 47%;
+}
+
+.circle {
+  position: absolute;
+  height: $circle-size;
+  width: $circle-size;
+  border-radius: $circle-size;
+  background-color: $dot-color;
+  animation: animate linear 2s infinite;
+}
+
+.circle:nth-child(1) {
+  animation-delay: 0.9s;
+}
+
+.circle:nth-child(2) {
+  animation-delay: 1.1s;
+  transform: translate(18px,13px);
+}
+
+.circle:nth-child(3) {
+  animation-delay: 1.3s;
+  transform: translate(35px,25px);
+}
+
+.circle:nth-child(4) {
+  animation-delay: 1.1s;
+  transform: translate(18px,38px);
+}
+
+.circle:nth-child(5) {
+  animation-delay: 0.9s;
+  transform: translate(0px, 50px);
+}
+
+.circle:nth-child(6) {
+  animation-delay: 0.9s;
+  transform: translate(0,25px);
+}
+
+.circle:nth-child(7) {
+  animation-delay: 0.7s;
+  transform: translate(-20px,25px);
+}
+
+.circle:nth-child(8) {
+  animation-delay: 0.5s;
+  transform: translate(-40px,25px);
+}
+
+.circle:nth-child(9) {
+  animation-delay: 0.3s;
+  transform: translate(-60px,25px);
+}
+
+.circle:nth-child(10) {
+  animation-delay: 0.1s;
+  transform: translate(-80px,25px);
+}
+
+@keyframes animate {
+  0%, 100% {
+    background-color: $dot-color;
+  }
+  50% {
+    background-color: $light-dot-color;
+  }
+}

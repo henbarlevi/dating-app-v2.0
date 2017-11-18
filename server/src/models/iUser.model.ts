@@ -1,4 +1,6 @@
-export interface iUser {
+import { MongooseDocument } from "mongoose";
+
+export interface iUser extends MongooseDocument {
     facebook?: {
         id: string,
         name: string,

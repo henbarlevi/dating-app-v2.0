@@ -1,3 +1,29 @@
-<p>
-  choose-partner-question works!
-</p>
+<div id="arrow-wrapper">
+  <ul class='loading-frame'>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+    <div class='circle'></div>
+  </ul>
+</div>
+<div id="minigame-wrapper">
+  <!--PLAYER DETAILS-->
+  <div id="player-details">
+    YOU : REAMINING QUESTIONS
+  </div>
+  <!--PARTNER DETAILS-->
+  <div id="partner-details">
+      PARTNER : REAMINING QUESTIONS    
+  </div>
+  <!--QUESTIONS-->
+  <div id="questions-wrapper">
+    <p>MESSAGE</p>
+    <app-question-list [questions]="questions"></app-question-list>
+  </div>
+</div>

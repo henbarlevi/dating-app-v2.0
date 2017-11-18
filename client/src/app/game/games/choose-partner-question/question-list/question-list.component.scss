@@ -1,45 +1,44 @@
-.btn-sample { 
-    color: #ffffff; 
-    background-color: #611BBD; 
-    border-color: #130269; 
-  } 
-   
-  .btn-sample:hover, 
-  .btn-sample:focus, 
-  .btn-sample:active, 
-  .btn-sample.active, 
-  .open .dropdown-toggle.btn-sample { 
-    color: #ffffff; 
-    background-color: #49247A; 
-    border-color: #130269; 
-  } 
-   
-  .btn-sample:active, 
-  .btn-sample.active, 
-  .open .dropdown-toggle.btn-sample { 
-    background-image: none; 
-  } 
-   
-  .btn-sample.disabled, 
-  .btn-sample[disabled], 
-  fieldset[disabled] .btn-sample, 
-  .btn-sample.disabled:hover, 
-  .btn-sample[disabled]:hover, 
-  fieldset[disabled] .btn-sample:hover, 
-  .btn-sample.disabled:focus, 
-  .btn-sample[disabled]:focus, 
-  fieldset[disabled] .btn-sample:focus, 
-  .btn-sample.disabled:active, 
-  .btn-sample[disabled]:active, 
-  fieldset[disabled] .btn-sample:active, 
-  .btn-sample.disabled.active, 
-  .btn-sample[disabled].active, 
-  fieldset[disabled] .btn-sample.active { 
-    background-color: #611BBD; 
-    border-color: #130269; 
-  } 
-   
-  .btn-sample .badge { 
-    color: #611BBD; 
-    background-color: #ffffff; 
-  }
+
+  
+.questionBtn {
+	-moz-box-shadow: 3px 11px 14px -4px #5d2773;
+	-webkit-box-shadow: 3px 11px 14px -4px #5d2773;
+	box-shadow: 3px 11px 14px -4px #5d2773;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #d56bff), color-stop(1, #5d2773));
+	background:-moz-linear-gradient(top, #d56bff 5%, #5d2773 100%);
+	background:-webkit-linear-gradient(top, #d56bff 5%, #5d2773 100%);
+	background:-o-linear-gradient(top, #d56bff 5%, #5d2773 100%);
+	background:-ms-linear-gradient(top, #d56bff 5%, #5d2773 100%);
+	background:linear-gradient(to bottom, #d56bff 5%, #5d2773 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#d56bff', endColorstr='#5d2773',GradientType=0);
+	background-color:#d56bff;
+	-moz-border-radius:18px;
+	-webkit-border-radius:18px;
+	border-radius:18px;
+	border:1px solid #994cb8;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-size:22px;
+	font-weight:bold;
+	padding:10px 42px;
+	text-decoration:none;
+	text-shadow:1px 0px 10px #571a53;
+}
+.questionBtn:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #5d2773), color-stop(1, #d56bff));
+	background:-moz-linear-gradient(top, #5d2773 5%, #d56bff 100%);
+	background:-webkit-linear-gradient(top, #5d2773 5%, #d56bff 100%);
+	background:-o-linear-gradient(top, #5d2773 5%, #d56bff 100%);
+	background:-ms-linear-gradient(top, #5d2773 5%, #d56bff 100%);
+	background:linear-gradient(to bottom, #5d2773 5%, #d56bff 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#5d2773', endColorstr='#d56bff',GradientType=0);
+	background-color:#5d2773;
+}
+.questionBtn:active {
+	position:relative;
+	top:1px;
+}
+.mb-3{
+  margin-bottom: 0.5em;
+}
