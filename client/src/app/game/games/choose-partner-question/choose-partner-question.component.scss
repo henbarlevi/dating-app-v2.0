@@ -1,100 +1,107 @@
+img{
+  max-height: 100%;
+  max-width: 100%;
+  padding-top:5px;
+}
 #minigame-wrapper{
 
     height: 100%;
     display: flex;
+    padding: 0.2em;
     flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 #questions-wrapper{
     margin: auto;
-    
+    flex-basis: 100%;
 }
 
-#player-details,#partner-details{
-    flex-basis: 50%;
+
+#player-details,#partner-details,#arrow-wrapper{
     height: 10%;
 }
-
-/**ARROW -http://freefrontend.com/css-arrows/*/
-$circle-size: 15px;
-$dot-color: #3FC380;
-$light-dot-color: black;
-
-$background: #333;
-
-body {
-  background-color: $background;
+#player-details,#partner-details{
+  flex-basis: 40%;
+}
+#arrow-wrapper{
+  flex-basis: 20%;
+  position: relative;
 }
 
-.loading-frame {
-  position: absolute;
-  top: 5%;
-  left: 47%;
-}
+/*
+==========
+==== Arrow
+==========
+*/
+$size: 40px;
+$speed: 3s;
+$peakopacity:0.7;
+$directionAngle:0deg;
 
-.circle {
-  position: absolute;
-  height: $circle-size;
-  width: $circle-size;
-  border-radius: $circle-size;
-  background-color: $dot-color;
-  animation: animate linear 2s infinite;
-}
 
-.circle:nth-child(1) {
-  animation-delay: 0.9s;
-}
 
-.circle:nth-child(2) {
-  animation-delay: 1.1s;
-  transform: translate(18px,13px);
-}
 
-.circle:nth-child(3) {
-  animation-delay: 1.3s;
-  transform: translate(35px,25px);
-}
+  .arrows {
+    position: relative;
+    /**/
+    //position: absolute;
+    left:30%;
+    /**/
+    width:$size;
+    height:$size;
+    transform:translate(-50%,-50%);
+    &:before {
+      content: '';
+      position: absolute;
+      width:100%;
+      height:100%;
+      border-left:$size/3 solid rgba(0,0,0,$peakopacity);
+      border-bottom:$size/3 solid rgba(0,0,0,$peakopacity);
+      transform:translate($size/3,$size*4/3)rotate(-45deg);
+      animation: arrows $speed linear infinite;
+    }
+    &:after {
+      content: '';
+      position: absolute;
+      width:100%;
+      height:100%;
+      border-left:$size/3 solid rgba(0,0,0,$peakopacity);
+      border-bottom:$size/3 solid rgba(0,0,0,$peakopacity);
+      transform:translate($size*2/3,0px)rotate(-45deg) ;
+      animation: arrows $speed linear infinite $speed/-2;
+    }
+  }
 
-.circle:nth-child(4) {
-  animation-delay: 1.1s;
-  transform: translate(18px,38px);
-}
 
-.circle:nth-child(5) {
-  animation-delay: 0.9s;
-  transform: translate(0px, 50px);
-}
-
-.circle:nth-child(6) {
-  animation-delay: 0.9s;
-  transform: translate(0,25px);
-}
-
-.circle:nth-child(7) {
-  animation-delay: 0.7s;
-  transform: translate(-20px,25px);
-}
-
-.circle:nth-child(8) {
-  animation-delay: 0.5s;
-  transform: translate(-40px,25px);
-}
-
-.circle:nth-child(9) {
-  animation-delay: 0.3s;
-  transform: translate(-60px,25px);
-}
-
-.circle:nth-child(10) {
-  animation-delay: 0.1s;
-  transform: translate(-80px,25px);
-}
-
-@keyframes animate {
-  0%, 100% {
-    background-color: $dot-color;
+@keyframes arrows {
+  0% {
+      border-left:$size/3 solid rgba(0,0,0,0);
+      border-bottom:$size/3 solid rgba(0,0,0,0);
+      transform:translate($size/-6,$size*4/-6)rotate(-45deg) ;
+  }
+  10%, 90% {
+      border-left:$size/3 solid rgba(0,0,0,0);
+      border-bottom:$size/3 solid rgba(0,0,0,0);
   }
   50% {
-    background-color: $light-dot-color;
+      border-left:$size/3 solid rgba(0,0,0,$peakopacity);
+      border-bottom:$size/3 solid rgba(0,0,0,$peakopacity);
+      transform:translate($size/-6,0px)rotate(-45deg) ;
   }
+  100% {
+      border-left:$size/3 solid rgba(0,0,0,0);
+      border-bottom:$size/3 solid rgba(0,0,0,0);
+      transform:translate($size/-6,$size*4/6)rotate(-45deg) ;
+  }
+}
+//my classes
+.arrow-left{
+  transform: rotate(90deg);
+}
+.arrow-right{
+  transform: rotate(-90deg);
+}
+.arrows{
+  transform: rotate(-90deg);
 }

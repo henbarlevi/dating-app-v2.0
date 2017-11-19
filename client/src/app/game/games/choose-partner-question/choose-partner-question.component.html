@@ -1,29 +1,20 @@
-<div id="arrow-wrapper">
-  <ul class='loading-frame'>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-    <div class='circle'></div>
-  </ul>
-</div>
 <div id="minigame-wrapper">
   <!--PLAYER DETAILS-->
-  <div id="player-details">
-    YOU : REAMINING QUESTIONS
+  <div id="player-details" class="text-center">
+      <img src="http://www.auplod.com/u/aldpuoa0521.png"> <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
   </div>
+  <div id="arrow-wrapper">
+
+    <div class="arrows pagination-centered"></div>
+  </div>
+
   <!--PARTNER DETAILS-->
-  <div id="partner-details">
-      PARTNER : REAMINING QUESTIONS    
+  <div id="partner-details" class="text-center">
+      <img src="http://www.auplod.com/u/loupdaa0522.png"> <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
   </div>
   <!--QUESTIONS-->
   <div id="questions-wrapper">
     <p>MESSAGE</p>
-    <app-question-list [questions]="questions"></app-question-list>
+    <app-question-list id="questions" [questions]="questions"></app-question-list>
   </div>
 </div>

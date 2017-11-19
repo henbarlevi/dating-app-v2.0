@@ -44,7 +44,7 @@ module.exports = function (io) {
                     Logger.d(TAG, 'user socket authenticated', 'green');
                     Logger.d(TAG, JSON.stringify(alreadyConnectedUsers))
 
-                    //if the user alredy connected
+                    //if the user alredy connected - prevent duplication (user start multi game at once)
                     if (alreadyConnectedUsers[user._id]) {
                         socket.emit(GAME_SOCKET_EVENTS.already_connected);
                         next(new Error("Already Connected"));
@@ -76,6 +76,7 @@ module.exports = function (io) {
 
         gameSocketsManager.handle(socket);
         socket.on('disconnect', () => {
+            //remove player from alreadyConnectedUsers
             let userId = (socket as iGameSocket).user._id
             alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
             console.log('user disconnected');

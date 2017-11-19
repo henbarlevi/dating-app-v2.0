@@ -25,7 +25,7 @@ module.exports = function (io) {
                 .then((user) => {
                 Logger_1.Logger.d(TAG, 'user socket authenticated', 'green');
                 Logger_1.Logger.d(TAG, JSON.stringify(alreadyConnectedUsers));
-                //if the user alredy connected
+                //if the user alredy connected - prevent duplication (user start multi game at once)
                 if (alreadyConnectedUsers[user._id]) {
                     socket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.already_connected);
                     next(new Error("Already Connected"));
@@ -54,6 +54,7 @@ module.exports = function (io) {
         console.log('user connected');
         gameSocketsManager.handle(socket);
         socket.on('disconnect', () => {
+            //remove player from alreadyConnectedUsers
             let userId = socket.user._id;
             alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
             console.log('user disconnected');
