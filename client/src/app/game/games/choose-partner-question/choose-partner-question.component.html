@@ -5,7 +5,7 @@
   </div>
   <div id="arrow-wrapper">
 
-    <div class="arrows pagination-centered"></div>
+    <div class="arrows" [class.arrows-right]="playerTurn" [class.arrows-left]="!playerTurn"></div>
   </div>
 
   <!--PARTNER DETAILS-->
@@ -14,6 +14,6 @@
   </div>
   <!--QUESTIONS-->
   <div id="questions-wrapper">
-    <app-question-list id="questions" [questions]="questions"></app-question-list>
+    <app-question-list (selected)="onQuestionSelected($event)" id="questions" [questions]="questions"></app-question-list>
   </div>
 </div>

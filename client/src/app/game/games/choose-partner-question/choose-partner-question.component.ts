@@ -16,7 +16,7 @@ export class ChoosePartnerQuestionComponent implements OnInit {
   playerTurn: boolean = false;
   constructor(private GameService: GameService) {
   }
-
+ 
   ngOnInit() {
     this.game$ = this.GameService.game$;
     let subscription = this.game$.subscribe((data: iSocketData) => {
@@ -30,7 +30,16 @@ export class ChoosePartnerQuestionComponent implements OnInit {
 
       }
 
+      if (gameEventName === GAME_SOCKET_EVENTS.your_turn) {
+        this.playerTurn = true;
+      }
     })
+  }
+  onQuestionSelected(question:iQuestion){
+    console.log('question has been selected :'+question.q)
+    if(this.playerTurn){
+      
+    }
   }
 
 }
