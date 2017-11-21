@@ -69,6 +69,13 @@ the purpose of this app is to let users expirience date online in a different an
 |init_mini_game|      |     <-----> |   |
 |ready_for_mini_game|----->||<-----|
 
+# ===============================
+# TODO - list of tasks
+# ===============================
+
+* the 'contract' folder in the root is suppose to be common ground interfaces for both client and server - but the server can't seems 
+  to find ts files outside the 'server' dir - FIX possibility is to use gulp to copy paste the folder into 'server/src' folder each time there is change
+
 <div style="display:none">
 player A                            Server                             player B
 |-------------CONNECTED-------------->|-------------------------------------|

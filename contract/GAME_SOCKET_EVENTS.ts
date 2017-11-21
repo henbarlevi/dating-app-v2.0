@@ -4,6 +4,7 @@ export enum GAME_SOCKET_EVENTS {
     found_partner = 'found_partner',
     mini_game_ended = 'mini_game_ended',/**server tell sockets when a mini game end's */
     init_mini_game = 'init_mini_game',/**server tell sockets what mini-game to start */
+    /**ready */
     ready_for_mini_game = 'ready_for_mini_game',/**socket tell server that it ready for the mini game */
     ready='ready',/**server/socket tell to socket/server that he ready for something */
     /**turn - 3 options */

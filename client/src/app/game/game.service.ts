@@ -9,7 +9,8 @@ import * as plugin from 'socketio-wildcard'
 import { iSocketData } from './models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
-
+//==== utils
+const TAG:string = 'GameService |';
 @Injectable()
 export class GameService {
   baseUrl: string = 'http://localhost:3000';
@@ -46,6 +47,7 @@ export class GameService {
       });
     socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
     this.gameSocket.on('*', (data) => {
+      console.log(TAG,data);
       this._game$.next(data);
     });
 

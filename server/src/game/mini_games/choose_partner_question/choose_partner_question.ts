@@ -3,54 +3,67 @@ import { iGameRoom } from "../../models/iGameRoom";
 import { iGameSocket } from '../../models/iGameSocket';
 
 import { miniGame } from "../abstract_minigame";
-import { GAME_SOCKET_EVENTS } from '../../../../../contract/GAME_SOCKET_EVENTS';
+
 // ===== utils
 import allQuestions from './questions';
 const NumberOfQuestionsPerGame: number = 7;
 import { Logger } from "../../../utils/Logger";
 import { GAME_TYPE } from "../../models/GAME_TYPE_ENUM";
+import { GAME_SOCKET_EVENTS } from "../../../../../contract/GAME_SOCKET_EVENTS";
+import { iQUestion } from "../../../../../contract/miniGames/choose_partner_question/questions.model";
+
 const TAG: string = 'choose_partner_question';
 export class choose_partner_question extends miniGame {
 
     constructor(io: SocketIO.Namespace, gameRoom: iGameRoom) {
         super(io, gameRoom);
     }
-
+    /**tell players what minigame theyplay + initial data for the game, and wait until they say they ready */
     async initMiniGame() {
-        Logger.d(TAG, `initalizing the [choose_partner_question] game..`, 'gray');
+        Logger.d(TAG, `initalizing the [choose_partner_question] game...`, 'gray');
         //lading questions:
-        console.log(allQuestions);
         let randomQuestions = choose_partner_question.randomizeQuestions();
+        Logger.d(TAG,`this game random questions : ${randomQuestions.map((q)=>{return q.q})}`)
         //declaring the mini game that should start - this is how client know to load the minigame screen:
         this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.init_mini_game, {
             gameType: GAME_TYPE.choose_partner_question,
             initData: randomQuestions
         });
         await this.WaitForPlayersToBeReady(); //calling super class
-
+        Logger.d
     }
 
     async playMiniGame() {
         try {
-            this.initMiniGame();
-            let turn: iGameSocket;
-            let passive:iGameSocket;
+             this.initMiniGame();
+            let active: iGameSocket;
+            let passive: iGameSocket;
             //randomize first player to play:
-            Math.floor(Math.random() * 2) === 0 ?
-                turn = this.gameRoom.playerOne : turn = this.gameRoom.playerTwo
+            if (Math.floor(Math.random() * 2) === 0) {
+                active = this.gameRoom.playerOne
+                passive = this.gameRoom.playerTwo;
+            } else {
+                active = this.gameRoom.playerTwo;
+                passive = this.gameRoom.playerOne;
+            }
+            //tell player who turn it is:
+            active.emit(GAME_SOCKET_EVENTS.your_turn);
+            passive.emit(GAME_SOCKET_EVENTS.partner_turn);
 
-            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS.play, async (socket: iGameSocket) => {
-                if (turn === socket) {//if its his turn
+
+            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS.play, async (socket: iGameSocket,data) => {
+                Logger.d(TAG,JSON.stringify(socket))
+                Logger.d(TAG,JSON.stringify(data))
+                
+                if (active.user._id === socket.user._id) {//if its his turn
                     //tell the other player about his partner turn
-                    
+
                 } else {
                     Logger.d(TAG, `Warning - the player try to play when its not his turn`, 'red');
                 }
             })
-            //tell to socket that its turn to play
-            turn.emit(GAME_SOCKET_EVENTS.player_turn,true);
-            
-            //DOENT FORGET TO REMOVE LISTENERS FOR EVETNS
+
+            //DONT FORGET TO REMOVE LISTENERS FOR EVETNS
         }
         catch (e) {
             Logger.d(TAG, `Err =======>${e}`, 'red');
@@ -69,11 +82,3 @@ export class choose_partner_question extends miniGame {
 
 }
 
-interface iPlayData<T> {
-    playType: T
-    data: any
-}
-enum QuestionPlayType {
-    ask_question,
-    answer_question
-}

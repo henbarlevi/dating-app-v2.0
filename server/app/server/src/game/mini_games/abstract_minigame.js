@@ -20,8 +20,10 @@ class miniGame {
         return new Promise((resolve, reject) => {
             let playerOneRadyForMiniGame = false;
             let playerTwoRadyForMiniGame = false;
-            this.io.to(this.gameRoom.roomId).once(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game, (socket) => __awaiter(this, void 0, void 0, function* () {
+            //TODO - dont forget to dispose event listener
+            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game, (socket) => __awaiter(this, void 0, void 0, function* () {
                 try {
+                    Logger_1.Logger.d(TAG, `the user :${socket.user._id}(=_id) is ready to play`);
                     socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
                         playerOneRadyForMiniGame = true : '';
                     socket.user.facebook.id === this.gameRoom.playerTwo.user.facebook.id ?

@@ -7,9 +7,13 @@ var GAME_SOCKET_EVENTS;
     GAME_SOCKET_EVENTS["found_partner"] = "found_partner";
     GAME_SOCKET_EVENTS["mini_game_ended"] = "mini_game_ended";
     GAME_SOCKET_EVENTS["init_mini_game"] = "init_mini_game";
+    /**ready */
     GAME_SOCKET_EVENTS["ready_for_mini_game"] = "ready_for_mini_game";
     GAME_SOCKET_EVENTS["ready"] = "ready";
+    /**turn - 3 options */
     GAME_SOCKET_EVENTS["player_turn"] = "player_turn";
+    GAME_SOCKET_EVENTS["your_turn"] = "your_turn";
+    GAME_SOCKET_EVENTS["partner_turn"] = "partner_turn";
     GAME_SOCKET_EVENTS["partner_played"] = "partner_played";
     GAME_SOCKET_EVENTS["play"] = "play";
     GAME_SOCKET_EVENTS["partner_disconnected"] = "partner_disconnected";

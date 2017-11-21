@@ -1,10 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { GameService } from '../../game.service';
 import { Observable } from 'rxjs/Observable';
+// ===== models
 import { iSocketData } from '../../models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from '../../models/GAME_SOCKET_EVENTS';
+import { iPlayData } from '../../../../../../contract/iPlayData';
+import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../../../../../../contract/miniGames/choose_partner_question/PLAY_ACTIONS_ENUM';
+
 import { iQuestion } from './questions.model';
-const TAG: string = 'ChoosePartnerQuestionComponent |'
+// ===== utils
+const TAG: string = 'ChoosePartnerQuestionComponent |';
+
 @Component({
   selector: 'app-choose-partner-question',
   templateUrl: './choose-partner-question.component.html',
@@ -16,7 +22,7 @@ export class ChoosePartnerQuestionComponent implements OnInit {
   playerTurn: boolean = false;
   constructor(private GameService: GameService) {
   }
- 
+
   ngOnInit() {
     this.game$ = this.GameService.game$;
     let subscription = this.game$.subscribe((data: iSocketData) => {
@@ -35,10 +41,13 @@ export class ChoosePartnerQuestionComponent implements OnInit {
       }
     })
   }
-  onQuestionSelected(question:iQuestion){
-    console.log('question has been selected :'+question.q)
-    if(this.playerTurn){
-      
+  onQuestionSelected(question: iQuestion) {
+    if (this.playerTurn) {
+      console.log('question has been selected :' + question.q)
+      let data: iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { action: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, data: question.q };
+      this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, data);
+    } else {
+      console.log(TAG, 'its not your turn');
     }
   }
 
