@@ -20,7 +20,7 @@ const envConfig: any = config.get(ENV);
 import { Logger } from '../utils/Logger';
 import { iGameSocket } from './models/iGameSocket';
 import { GAME_TYPE } from './models/GAME_TYPE_ENUM';
-import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import {  } from './models/GAME_SOCKET_EVENTS';
 const TAG: string = 'GameRoomManager |';
 
 // ====== Games
@@ -53,7 +53,7 @@ export class GameRoomManager {
                 let miniGame: miniGame = new minigameClass(this.io, this.gameRoom);
 
 
-                await miniGame.startMiniGame();
+                await miniGame.playMiniGame();
 
            // }
         }

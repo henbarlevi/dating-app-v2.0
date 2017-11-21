@@ -3,7 +3,7 @@ import { iGameRoom } from "../../models/iGameRoom";
 import { iGameSocket } from '../../models/iGameSocket';
 
 import { miniGame } from "../abstract_minigame";
-import { GAME_SOCKET_EVENTS } from "../../models/GAME_SOCKET_EVENTS";
+import { GAME_SOCKET_EVENTS } from '../../../../../contract/GAME_SOCKET_EVENTS';
 // ===== utils
 import allQuestions from './questions';
 const NumberOfQuestionsPerGame: number = 7;
@@ -30,17 +30,27 @@ export class choose_partner_question extends miniGame {
 
     }
 
-    async startMiniGame() {
+    async playMiniGame() {
         try {
             this.initMiniGame();
             let turn: iGameSocket;
-            //randomize first player:
+            let passive:iGameSocket;
+            //randomize first player to play:
             Math.floor(Math.random() * 2) === 0 ?
                 turn = this.gameRoom.playerOne : turn = this.gameRoom.playerTwo
 
-            // if (turn === gameRoom.playerOne) {
-
-            // }
+            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS.play, async (socket: iGameSocket) => {
+                if (turn === socket) {//if its his turn
+                    //tell the other player about his partner turn
+                    
+                } else {
+                    Logger.d(TAG, `Warning - the player try to play when its not his turn`, 'red');
+                }
+            })
+            //tell to socket that its turn to play
+            turn.emit(GAME_SOCKET_EVENTS.player_turn,true);
+            
+            //DOENT FORGET TO REMOVE LISTENERS FOR EVETNS
         }
         catch (e) {
             Logger.d(TAG, `Err =======>${e}`, 'red');
@@ -53,8 +63,17 @@ export class choose_partner_question extends miniGame {
         let min: number = 0;
         let max: number = allQuestions.length - NumberOfQuestionsPerGame;
         let startIndex = Math.floor(Math.random() * (max - min + 1) + min);
-        let randomQuestions = allQuestions.slice(startIndex, startIndex+NumberOfQuestionsPerGame);
+        let randomQuestions = allQuestions.slice(startIndex, startIndex + NumberOfQuestionsPerGame);
         return randomQuestions
     }
 
+}
+
+interface iPlayData<T> {
+    playType: T
+    data: any
+}
+enum QuestionPlayType {
+    ask_question,
+    answer_question
 }
