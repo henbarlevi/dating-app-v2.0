@@ -38,7 +38,7 @@ export class AuthService {
     localStorage.clear();
   }
 
-  isLoggedIn() {
+  isLoggedIn() :boolean {
     return localStorage.getItem('token') !== null;
   }
 }

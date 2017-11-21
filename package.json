@@ -1,0 +1,9 @@
+{
+
+  "scripts": {
+    "dev": "npm run client & npm run server ",
+    "server":"start cmd /k \"cd server &&  npm run dev\" ",
+    "client": "start cmd /k \"cd client &&  npm run build\" "
+  }
+ 
+}

@@ -6,6 +6,7 @@ import * as mongoose from 'mongoose';
 import * as config from 'config';
 import * as cors from 'cors';
 import appRoutes from './routes/appRoutes';
+
 // ====== utils
 import { Logger } from './utils/Logger'
 const TAG = 'App';
@@ -13,9 +14,9 @@ const TAG = 'App';
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(`${ENV}`);
 const connectionString: string = envConfig.connectionString || 'mongodb://localhost/mydb';
-Logger.d(TAG,'===================== App ENV Configuration =====================','yellow');
+Logger.d(TAG, '===================== App ENV Configuration =====================', 'yellow');
 console.log(envConfig);
-Logger.d(TAG,'===================== / App ENV Configuration =====================','yellow');
+Logger.d(TAG, '===================== / App ENV Configuration =====================', 'yellow');
 
 
 // Creates and configures an ExpressJS web server.
@@ -35,13 +36,15 @@ class App {
   // Configure Express middleware.
   private middleware(): void {
     mongoose.connect(connectionString,
-      { useMongoClient: true,
-        config:{
-          autoIndex:false // http://mongoosejs.com/docs/guide.html#indexes - prevent auto creation of indexes to prevent performance hit
-        }});
+      {
+        useMongoClient: true,
+        config: {
+          autoIndex: false // http://mongoosejs.com/docs/guide.html#indexes - prevent auto creation of indexes to prevent performance hit
+        }
+      });
 
-        
-     this.express.options('*',cors());
+ 
+    this.express.options('*', cors());
     this.express.use(express.static(path.join(__dirname, 'public/dist')));
     this.express.use(logger('dev'));// use morgan to log requests to the console
     this.express.use(bodyParser.json());

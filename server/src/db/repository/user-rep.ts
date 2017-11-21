@@ -20,7 +20,7 @@ export class UserRepository {
                 else{ //user exist - just update it
                     Logger.d(TAG,`facebook user created/updated`);
                     console.log(userDoc);
-                    resolve(userDoc)
+                    resolve(userDoc);
                 }
             })
 

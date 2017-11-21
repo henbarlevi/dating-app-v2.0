@@ -3,13 +3,13 @@
 // if the same dependencies were imported in the root module or in any other feature module.
 // In short, even when having multiple feature modules, each one of them needs to import the CommonModule
 //https://angular-2-training-book.rangle.io/handout/modules/feature-modules.html
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService} from './auth.service';
-import {  LoggedInGuard } from './login/login.guard';
-import {  LoginComponent } from './login/login.component';
+import { AuthService } from './auth.service';
+import { LoginComponent } from './login/login.component';
 
-import {  AuthRoutingModule} from './auth-routing.module';
+import { AuthRoutingModule } from './auth-routing.module';
+import { IfLoggedInGuard } from './login/if-logged-in.guard';
 @NgModule({
     imports: [
         CommonModule,
@@ -19,12 +19,25 @@ import {  AuthRoutingModule} from './auth-routing.module';
     declarations: [
         LoginComponent
     ],
-    //AuthService = accessable accross the app - NOTE - if we want to use this service in another lazyModule
+    //Services here = accessable accross the app - NOTE - if we want to use this service in another lazyModule
     // and we want it to be singelton we need to use the forRoot() pattern
-    providers: [AuthService, LoggedInGuard],
+    providers: [],
+
     //export only that components directives and pipes
     // that need to be used outside of this module 
     //services are not need to be exported, the acceable accross the app
     exports: [LoginComponent]
 })
-export class AuthModule { }
+
+export class AuthModule {
+  /*
+  using forRoot pattern to prevent 2 instances of service
+  https://angular-2-training-book.rangle.io/handout/modules/shared-di-tree.html*/  
+  static forRoot():ModuleWithProviders{
+    return{
+      ngModule:AuthModule,
+      providers:[AuthService] /**i've decided to include the LoggedInGuard here and instead - i imported it only in the dashboard-routing module */
+    }
+  }
+
+}
