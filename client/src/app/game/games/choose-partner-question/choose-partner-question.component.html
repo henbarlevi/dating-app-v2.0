@@ -1,3 +1,19 @@
-<p>
-  choose-partner-question works!
-</p>
+<div id="minigame-wrapper">
+  <!--PLAYER DETAILS-->
+  <div id="player-details" class="text-center">
+      <img src="http://www.auplod.com/u/aldpuoa0521.png"> <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
+  </div>
+  <div id="arrow-wrapper">
+
+    <div class="arrows" [class.arrows-right]="playerTurn" [class.arrows-left]="!playerTurn"></div>
+  </div>
+
+  <!--PARTNER DETAILS-->
+  <div id="partner-details" class="text-center">
+      <img src="http://www.auplod.com/u/loupdaa0522.png"> <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
+  </div>
+  <!--QUESTIONS-->
+  <div id="questions-wrapper">
+    <app-question-list (selected)="onQuestionSelected($event)" id="questions" [questions]="questions"></app-question-list>
+  </div>
+</div>

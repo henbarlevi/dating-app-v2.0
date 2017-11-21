@@ -24,8 +24,10 @@ const envConfig: any = config.get(ENV);
 //=======utils
 import { Logger } from '../utils/Logger';
 import { iGameSocket } from './models/iGameSocket';
+import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 const TAG: string = 'GameSockets |';
 
+let alreadyConnectedUsers: { [user_id: string]: boolean } = {};
 
 // SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
 module.exports = function (io) {
@@ -40,9 +42,22 @@ module.exports = function (io) {
             verifyToken(token)
                 .then((user: iUser) => {
                     Logger.d(TAG, 'user socket authenticated', 'green');
-                    //set user into socket socket.user
-                    socket.user = user;
-                    next()
+                    Logger.d(TAG, JSON.stringify(alreadyConnectedUsers))
+
+                    //if the user alredy connected - prevent duplication (user start multi game at once)
+                    if (alreadyConnectedUsers[user._id]) {
+                        socket.emit(GAME_SOCKET_EVENTS.already_connected);
+                        next(new Error("Already Connected"));
+                        Logger.d(TAG, 'user already connected from another tab/device', 'red');
+
+                    } else { //User is Ok
+                        Logger.d(TAG, 'saving ' + user._id + ' into alradyConnectedUsers');
+                        alreadyConnectedUsers[user._id] = true;
+                        //set user into socket socket.user
+                        socket.user = user;
+                        next();
+                    }
+
                 })
                 .catch(e => {
                     next(new Error("not authenticated"));
@@ -58,9 +73,12 @@ module.exports = function (io) {
     io.sockets.on('connection', (socket: SocketIO.Socket) => {
         console.log('user connected');
 
-        
+
         gameSocketsManager.handle(socket);
-        socket.on('disconnect', function () {
+        socket.on('disconnect', () => {
+            //remove player from alreadyConnectedUsers
+            let userId = (socket as iGameSocket).user._id
+            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
             console.log('user disconnected');
         });
 

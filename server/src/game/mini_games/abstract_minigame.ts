@@ -1,8 +1,8 @@
 import { iGameRoom } from "../models/iGameRoom";
-import { GAME_SOCKET_EVENTS } from "../models/GAME_SOCKET_EVENTS";
 import { iGameSocket } from "../models/iGameSocket";
 import { Logger } from "../../utils/Logger";
 import { GAME_TYPE } from "../models/GAME_TYPE_ENUM";
+import { GAME_SOCKET_EVENTS } from "../../../../contract/GAME_SOCKET_EVENTS";
 const TAG: string = 'miniGame Abstract |';
 export abstract class miniGame {
 
@@ -11,7 +11,7 @@ export abstract class miniGame {
     }
     abstract async initMiniGame();  //declaring the mini game that should start and waiting for players to be ready
 
-    abstract async startMiniGame();
+    abstract async playMiniGame(); //run the mini game
 
     WaitForPlayersToBeReady() {
         return new Promise((resolve, reject) => {

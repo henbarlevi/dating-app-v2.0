@@ -1,9 +1,9 @@
 
 @import '~styles/main';/*The tilde (~) will tell Sass to look in the src/ folder and is a quick shortcut to importing Sass files.*/
 
-.page-wrapper{
+#page-wrapper{
     height: 100vh;
-    padding-top:4em;
+    padding-top:3.5em;//prevent nav-bar from covering the page
 	background: $strong-pink;
 	background: linear-gradient(276deg, #16c1e0, #193d4c, #cb0e66, #cb0e48, #1f2022);
 	background-size: 1000% 1000%;
@@ -64,7 +64,7 @@ animation: AnimationName 8s ease infinite;
 	background-color: #292c2f;
 	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
 	box-sizing: border-box;
-	width: 100%;
+	width: 100vw; //fix issue that footer not in 100% width
 	font: bold 16px sans-serif;
 	text-align: left;
 

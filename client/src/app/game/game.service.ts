@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import * as io from 'socket.io-client';
 import * as plugin from 'socketio-wildcard'
 import { iSocketData } from './models/iSocketData.model';
+import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
 
 @Injectable()
@@ -50,6 +51,10 @@ export class GameService {
 
 
     return this.game$;
+  }
+  //send to server  game event
+  emitGameEvent(eventName:GAME_SOCKET_EVENTS,data?:any){
+    this.gameSocket.emit(eventName,data);
   }
 }
 

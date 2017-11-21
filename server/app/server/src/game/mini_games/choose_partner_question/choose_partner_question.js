@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_minigame_1 = require("../abstract_minigame");
+const GAME_SOCKET_EVENTS_1 = require("../../../../../contract/GAME_SOCKET_EVENTS");
 // ===== utils
 const questions_1 = require("./questions");
 const NumberOfQuestionsPerGame = 7;
@@ -26,7 +27,7 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             console.log(questions_1.default);
             let randomQuestions = choose_partner_question.randomizeQuestions();
             //declaring the mini game that should start - this is how client know to load the minigame screen:
-            this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.init_mini_game, {
+            this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.init_mini_game, {
                 gameType: GAME_TYPE_ENUM_1.GAME_TYPE.choose_partner_question,
                 initData: randomQuestions
             });
@@ -38,12 +39,20 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             try {
                 this.initMiniGame();
                 let turn;
+                let passive;
                 //randomize first player to play:
                 Math.floor(Math.random() * 2) === 0 ?
                     turn = this.gameRoom.playerOne : turn = this.gameRoom.playerTwo;
-                this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS);
+                this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.play, (socket) => __awaiter(this, void 0, void 0, function* () {
+                    if (turn === socket) {
+                        //tell the other player about his partner turn
+                    }
+                    else {
+                        Logger_1.Logger.d(TAG, `Warning - the player try to play when its not his turn`, 'red');
+                    }
+                }));
                 //tell to socket that its turn to play
-                turn.emit(GAME_SOCKET_EVENTS.your_turn);
+                turn.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.player_turn, true);
                 //DOENT FORGET TO REMOVE LISTENERS FOR EVETNS
             }
             catch (e) {
@@ -60,3 +69,8 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
     }
 }
 exports.choose_partner_question = choose_partner_question;
+var QuestionPlayType;
+(function (QuestionPlayType) {
+    QuestionPlayType[QuestionPlayType["ask_question"] = 0] = "ask_question";
+    QuestionPlayType[QuestionPlayType["answer_question"] = 1] = "answer_question";
+})(QuestionPlayType || (QuestionPlayType = {}));
