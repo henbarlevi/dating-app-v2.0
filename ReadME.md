@@ -31,7 +31,7 @@ var a:string = 'namw'
 - wrting RoutingModule for each Module
 > ### SCSS
 - how to devide SCSS files (Veriables, Mixing etc...)
-- how to import SCSS files into components scss files <span class="well"> @import '~styles/main';</span>/*The tilde (~) will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.*/
+- how to import SCSS files into components scss files <span class="well"> @import '~styles/main';</span> The tilde <b>~</b> will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.
 - to create new angular project with scss:<b> ng new My_New_Project --style=scss</b>
 > ### Server
 - using SOCKET.IO
