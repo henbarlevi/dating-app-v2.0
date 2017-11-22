@@ -14,7 +14,7 @@ const questions_1 = require("./questions");
 const NumberOfQuestionsPerGame = 7;
 const Logger_1 = require("../../../utils/Logger");
 const GAME_TYPE_ENUM_1 = require("../../models/GAME_TYPE_ENUM");
-const GAME_SOCKET_EVENTS_1 = require("../../../../../contract/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_1 = require("../../models/GAME_SOCKET_EVENTS");
 const TAG = 'choose_partner_question';
 class choose_partner_question extends abstract_minigame_1.miniGame {
     constructor(io, gameRoom) {

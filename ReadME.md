@@ -31,7 +31,7 @@ var a:string = 'namw'
 - wrting RoutingModule for each Module
 > ### SCSS
 - how to devide SCSS files (Veriables, Mixing etc...)
-- how to import SCSS files into components scss files <span class="well"> @import '~styles/main';</span> The tilde <b>~</b> will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.
+- how to import SCSS files into components scss files <span class="well"> @import '~styles/main';</span> The tilde <b>~</b> will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.  
 - to create new angular project with scss:<b> ng new My_New_Project --style=scss</b>
 > ### Server
 - using SOCKET.IO
@@ -68,13 +68,6 @@ the purpose of this app is to let users expirience date online in a different an
 |found_partner||<---->||
 |init_mini_game|      |     <-----> |   |
 |ready_for_mini_game|----->||<-----|
-
-# ===============================
-# TODO - list of tasks
-# ===============================
-
-* the 'contract' folder in the root is suppose to be common ground interfaces for both client and server - but the server can't seems 
-  to find ts files outside the 'server' dir - FIX possibility is to use gulp to copy paste the folder into 'server/src' folder each time there is change
 
 <div style="display:none">
 player A                            Server                             player B

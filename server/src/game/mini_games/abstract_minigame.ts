@@ -3,7 +3,7 @@ import { iGameSocket } from "../models/iGameSocket";
 import { Logger } from "../../utils/Logger";
 import { GAME_TYPE } from "../models/GAME_TYPE_ENUM";
 import {  } from "./choose_partner_question/choose_partner_question";
-import { GAME_SOCKET_EVENTS } from "../../../../contract/GAME_SOCKET_EVENTS";
+import { GAME_SOCKET_EVENTS } from "../models/GAME_SOCKET_EVENTS";
 const TAG: string = 'miniGame Abstract |';
 export abstract class miniGame {
 

@@ -25,7 +25,6 @@ const TAG: string = 'GameRoomManager |';
 
 // ====== Games
 import { choose_partner_question } from './mini_games/choose_partner_question/choose_partner_question';
-import { GAME_SOCKET_EVENTS } from '../../../contract/GAME_SOCKET_EVENTS';
 let miniGames = [
     choose_partner_question
 ];

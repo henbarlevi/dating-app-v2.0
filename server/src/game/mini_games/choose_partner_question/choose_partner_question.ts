@@ -9,8 +9,7 @@ import allQuestions from './questions';
 const NumberOfQuestionsPerGame: number = 7;
 import { Logger } from "../../../utils/Logger";
 import { GAME_TYPE } from "../../models/GAME_TYPE_ENUM";
-import { GAME_SOCKET_EVENTS } from "../../../../../contract/GAME_SOCKET_EVENTS";
-import { iQUestion } from "../../../../../contract/miniGames/choose_partner_question/questions.model";
+import { GAME_SOCKET_EVENTS } from "../../models/GAME_SOCKET_EVENTS";
 
 const TAG: string = 'choose_partner_question';
 export class choose_partner_question extends miniGame {

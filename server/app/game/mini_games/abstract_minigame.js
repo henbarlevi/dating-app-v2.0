@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Logger_1 = require("../../utils/Logger");
-const GAME_SOCKET_EVENTS_1 = require("../../../../contract/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_1 = require("../models/GAME_SOCKET_EVENTS");
 const TAG = 'miniGame Abstract |';
 class miniGame {
     constructor(io, gameRoom) {
