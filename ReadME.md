@@ -75,6 +75,7 @@ the purpose of this app is to let users expirience date online in a different an
 # ====================================
 * use token injection for env configutation (endpoint etc..) : https://stackoverflow.com/questions/43193049/app-settings-the-angular-4-way/43316544
 * check why server doestn receive socket.io emits from client
+* replace all hardcoded urls with environment variables
 <div style="display:none">
 player A                            Server                             player B
 |-------------CONNECTED-------------->|-------------------------------------|
