@@ -69,6 +69,11 @@ the purpose of this app is to let users expirience date online in a different an
 |init_mini_game|      |     <-----> |   |
 |ready_for_mini_game|----->||<-----|
 
+# ====================================
+# TODO 
+# ====================================
+* use token injection for env configutation (endpoint etc..) : https://stackoverflow.com/questions/43193049/app-settings-the-angular-4-way/43316544
+* check why server doestn receive socket.io emits from client
 <div style="display:none">
 player A                            Server                             player B
 |-------------CONNECTED-------------->|-------------------------------------|
