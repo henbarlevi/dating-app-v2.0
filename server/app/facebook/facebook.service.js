@@ -14,7 +14,7 @@ const clientSecret = envConfig.facebook.client_secret;
 class FackbookService {
     static getConsentPageUrl() {
         let permissions = ['user_likes', 'user_posts', 'user_friends', 'publish_actions', 'email'];
-        let url = `https://www.facebook.com/v2.10/dialog/oauth?client_id=570641329993499&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Flogin`
+        let url = `https://www.facebook.com/v2.10/dialog/oauth?client_id=${clientId}&redirect_uri=${redirect_uri}`
             + '&scope=' + permissions.join();
         return url;
     }

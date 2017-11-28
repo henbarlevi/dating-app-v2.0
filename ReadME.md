@@ -35,6 +35,7 @@ var a:string = 'namw'
 - to create new angular project with scss:<b> ng new My_New_Project --style=scss</b>
 > ### Server
 - using SOCKET.IO
+- CORS middleware
 - implement Oauth2.0 with facebook
 - using mongoose 
   *the new [not deprecated] middleware
