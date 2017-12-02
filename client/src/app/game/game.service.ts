@@ -45,6 +45,7 @@ export class GameService {
           token: token
         }
       });
+    this.gameSocket.emit('AAAAAAA');
     socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
     this.gameSocket.on('*', (data) => {
       console.log(TAG,data);
@@ -56,6 +57,7 @@ export class GameService {
   }
   //send to server  game event
   emitGameEvent(eventName:GAME_SOCKET_EVENTS,data?:any){
+    console.log(`%c ** Emiting Socket Event : ${eventName}**`,'color: blue');
     this.gameSocket.emit(eventName,data);
   }
 }

@@ -28,7 +28,6 @@ import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 const TAG: string = 'GameSockets |';
 
 let alreadyConnectedUsers: { [user_id: string]: boolean } = {};
-
 // SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
 module.exports = function (io) {
     Logger.d(TAG, 'establishing sockets.io for games..');
@@ -69,6 +68,10 @@ module.exports = function (io) {
             Logger.d(TAG, 'user socket not authenticated', 'red');
         }
     });
+
+    const middleware = require('socketio-wildcard')();//add the * (any socket event) option
+    io.use(middleware);
+  
     /*handle connection*/
     io.sockets.on('connection', (socket: SocketIO.Socket) => {
         console.log('user connected');
@@ -81,11 +84,24 @@ module.exports = function (io) {
             alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
             console.log('user disconnected');
         });
-
-        socket.on('add-message', (message) => {
-            io.emit('message', { type: 'new-message', text: message });
+        socket.on('*',  (packet) =>{   
+            Logger.d(TAG,`Event From Client : ${JSON.stringify(packet)}`,'cyan');
         });
+        
+        socket.on('ready_for_mini_game', (socket) => {
+            Logger.d(TAG,`Got Ready for miniGame`,'cyan');
+            
+        });//
+
+        // socket.on('add-message', (message) => {
+        //     io.emit('message', { type: 'new-message', text: message });
+        // });
     });
+
+    io.sockets.on('ready_for_mini_game',(socket)=>{
+        Logger.d(TAG,`Godddddt Ready for miniGame`,'cyan');
+        
+    })
 
 
 

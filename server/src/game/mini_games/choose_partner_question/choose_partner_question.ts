@@ -30,6 +30,7 @@ export class choose_partner_question extends miniGame {
             initData: randomQuestions
         });
         await this.WaitForPlayersToBeReady(); //calling super class
+        Logger.d(TAG,'players are ready!');
     }
 
     async playMiniGame() {

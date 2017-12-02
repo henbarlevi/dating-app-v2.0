@@ -38,6 +38,7 @@
     "request": "^2.81.0",
     "rxjs": "^5.4.1",
     "socket.io": "^2.0.4",
+    "socketio-wildcard": "^2.0.0",
     "uuid": "^3.1.0"
   }
 }

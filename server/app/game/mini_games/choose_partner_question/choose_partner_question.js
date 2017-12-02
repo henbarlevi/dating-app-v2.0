@@ -33,6 +33,7 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
                 initData: randomQuestions
             });
             yield this.WaitForPlayersToBeReady(); //calling super class
+            Logger_1.Logger.d(TAG, 'players are ready!');
         });
     }
     playMiniGame() {

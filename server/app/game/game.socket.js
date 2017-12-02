@@ -49,6 +49,8 @@ module.exports = function (io) {
             Logger_1.Logger.d(TAG, 'user socket not authenticated', 'red');
         }
     });
+    const middleware = require('socketio-wildcard')(); //add the * (any socket event) option
+    io.use(middleware);
     /*handle connection*/
     io.sockets.on('connection', (socket) => {
         console.log('user connected');
@@ -59,9 +61,18 @@ module.exports = function (io) {
             alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
             console.log('user disconnected');
         });
-        socket.on('add-message', (message) => {
-            io.emit('message', { type: 'new-message', text: message });
+        socket.on('*', (packet) => {
+            Logger_1.Logger.d(TAG, `Event From Client : ${JSON.stringify(packet)}`, 'cyan');
         });
+        socket.on('ready_for_mini_game', (socket) => {
+            Logger_1.Logger.d(TAG, `Got Ready for miniGame`, 'cyan');
+        }); //
+        // socket.on('add-message', (message) => {
+        //     io.emit('message', { type: 'new-message', text: message });
+        // });
+    });
+    io.sockets.on('ready_for_mini_game', (socket) => {
+        Logger_1.Logger.d(TAG, `Godddddt Ready for miniGame`, 'cyan');
     });
 };
 //-------------------------------------SNIPPETS-------------------------

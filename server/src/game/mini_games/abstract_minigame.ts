@@ -16,11 +16,11 @@ export abstract class miniGame {
 
     WaitForPlayersToBeReady() {
         return new Promise((resolve, reject) => {
-
+            Logger.d(TAG,'** waiting for 2 players to be ready... **','gray');
             let playerOneRadyForMiniGame: Boolean = false;
             let playerTwoRadyForMiniGame: Boolean = false;
             //TODO - dont forget to dispose event listener
-            this.io.on(GAME_SOCKET_EVENTS.ready_for_mini_game, async (socket: iGameSocket) => {
+            this.io.on('ready_for_mini_game'/*GAME_SOCKET_EVENTS.ready_for_mini_game*/, async (socket: iGameSocket) => {
                 try {
                     console.log(TAG,socket.rooms);
                     Logger.d(TAG,`the user :${socket.user._id}(=_id) is ready to play`);

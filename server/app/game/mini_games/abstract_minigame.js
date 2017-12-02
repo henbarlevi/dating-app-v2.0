@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Logger_1 = require("../../utils/Logger");
-const GAME_SOCKET_EVENTS_1 = require("../models/GAME_SOCKET_EVENTS");
 const TAG = 'miniGame Abstract |';
 class miniGame {
     constructor(io, gameRoom) {
@@ -18,11 +17,13 @@ class miniGame {
     }
     WaitForPlayersToBeReady() {
         return new Promise((resolve, reject) => {
+            Logger_1.Logger.d(TAG, '** waiting for 2 players to be ready... **', 'gray');
             let playerOneRadyForMiniGame = false;
             let playerTwoRadyForMiniGame = false;
             //TODO - dont forget to dispose event listener
-            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game, (socket) => __awaiter(this, void 0, void 0, function* () {
+            this.io.on('ready_for_mini_game' /*GAME_SOCKET_EVENTS.ready_for_mini_game*/, (socket) => __awaiter(this, void 0, void 0, function* () {
                 try {
+                    console.log(TAG, socket.rooms);
                     Logger_1.Logger.d(TAG, `the user :${socket.user._id}(=_id) is ready to play`);
                     socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
                         playerOneRadyForMiniGame = true : '';
