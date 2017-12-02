@@ -11,9 +11,10 @@ i've created package.json in root folder in order to crate npm script commands.
 the "dev" command open 2 cmd windows and run the server in one and the client in another
 
 * ### option 2 :
-to run server - *open cmd *enter the 'server' folder *execute "npm run dev" 
-to run client - *open cmd *enter the 'client' folder *execute "npm run build" 
+#### to run server - *open cmd *enter the 'server' folder *execute **"npm run dev"** 
+#### to run client - *open cmd *enter the 'client' folder *execute **"npm run build"** - if you want to build for production and **"npm start"** for dev 
 
+* ### Don't Forget To Run Mongo!
 <div class="well">NOTE - to see readme styled with mark-down format inside VScode - download the extention "Markdown preview github styling</div>
 
 # ===================================
@@ -76,6 +77,7 @@ the purpose of this app is to let users expirience date online in a different an
 * use token injection for env configutation (endpoint etc..) : https://stackoverflow.com/questions/43193049/app-settings-the-angular-4-way/43316544
 * check why server doestn receive socket.io emits from client
 * replace all hardcoded urls with environment variables
+* do research on how to make the site be in top in google search - maybe this is the key : [Search Conosole](https://www.google.com/webmasters/tools/home?hl=en)
 <div style="display:none">
 player A                            Server                             player B
 |-------------CONNECTED-------------->|-------------------------------------|

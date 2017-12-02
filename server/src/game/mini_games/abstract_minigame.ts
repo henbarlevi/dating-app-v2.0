@@ -20,8 +20,9 @@ export abstract class miniGame {
             let playerOneRadyForMiniGame: Boolean = false;
             let playerTwoRadyForMiniGame: Boolean = false;
             //TODO - dont forget to dispose event listener
-            this.io.to(this.gameRoom.roomId).on(GAME_SOCKET_EVENTS.ready_for_mini_game, async (socket: iGameSocket) => {
+            this.io.on(GAME_SOCKET_EVENTS.ready_for_mini_game, async (socket: iGameSocket) => {
                 try {
+                    console.log(TAG,socket.rooms);
                     Logger.d(TAG,`the user :${socket.user._id}(=_id) is ready to play`);
                     socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
                         playerOneRadyForMiniGame = true : ''

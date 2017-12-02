@@ -22,19 +22,19 @@ export class choose_partner_question extends miniGame {
         Logger.d(TAG, `initalizing the [choose_partner_question] game...`, 'gray');
         //lading questions:
         let randomQuestions = choose_partner_question.randomizeQuestions();
-        Logger.d(TAG,`this game random questions : ${randomQuestions.map((q)=>{return q.q})}`)
+        //Logger.d(TAG,`this game random questions : ${randomQuestions.map((q)=>{return q.q})}`) //DEBUG
+
         //declaring the mini game that should start - this is how client know to load the minigame screen:
         this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.init_mini_game, {
             gameType: GAME_TYPE.choose_partner_question,
             initData: randomQuestions
         });
         await this.WaitForPlayersToBeReady(); //calling super class
-        Logger.d
     }
 
     async playMiniGame() {
         try {
-             this.initMiniGame();
+           await  this.initMiniGame();
             let active: iGameSocket;
             let passive: iGameSocket;
             //randomize first player to play:

@@ -26,20 +26,19 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             Logger_1.Logger.d(TAG, `initalizing the [choose_partner_question] game...`, 'gray');
             //lading questions:
             let randomQuestions = choose_partner_question.randomizeQuestions();
-            Logger_1.Logger.d(TAG, `this game random questions : ${randomQuestions.map((q) => { return q.q; })}`);
+            //Logger.d(TAG,`this game random questions : ${randomQuestions.map((q)=>{return q.q})}`) //DEBUG
             //declaring the mini game that should start - this is how client know to load the minigame screen:
             this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.init_mini_game, {
                 gameType: GAME_TYPE_ENUM_1.GAME_TYPE.choose_partner_question,
                 initData: randomQuestions
             });
             yield this.WaitForPlayersToBeReady(); //calling super class
-            Logger_1.Logger.d;
         });
     }
     playMiniGame() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                this.initMiniGame();
+                yield this.initMiniGame();
                 let active;
                 let passive;
                 //randomize first player to play:

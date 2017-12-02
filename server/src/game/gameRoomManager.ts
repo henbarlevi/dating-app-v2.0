@@ -33,7 +33,7 @@ let miniGames = [
 
 // ====== / Games
 
-/**handle an individual game room that contains 2 sockets of players
+/**handle an individual game room that contains 2 sockets of players (or more -in future version)
  * 
 */
 export class GameRoomManager {
@@ -47,7 +47,7 @@ export class GameRoomManager {
 
                 let miniGameType: GAME_TYPE = randomizeGame();
                 Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - minigames Remaining [${this.gameRoom.miniGamesRemaining}] `);
-                Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - **generating ${miniGameType}`);
+                Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - ** generating the miniGame ${GAME_TYPE[miniGameType]}`);
 
                 let minigameClass = miniGames[miniGameType];
 

@@ -22,7 +22,7 @@ let miniGames = [
     choose_partner_question_1.choose_partner_question
 ];
 // ====== / Games
-/**handle an individual game room that contains 2 sockets of players
+/**handle an individual game room that contains 2 sockets of players (or more -in future version)
  *
 */
 class GameRoomManager {
@@ -37,7 +37,7 @@ class GameRoomManager {
                 //generate new mini game:
                 let miniGameType = randomizeGame();
                 Logger_1.Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - minigames Remaining [${this.gameRoom.miniGamesRemaining}] `);
-                Logger_1.Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - **generating ${miniGameType}`);
+                Logger_1.Logger.d(TAG, `gameRoom [${this.gameRoom.roomId}] - ** generating the miniGame ${GAME_TYPE_ENUM_1.GAME_TYPE[miniGameType]}`);
                 let minigameClass = miniGames[miniGameType];
                 let miniGame = new minigameClass(this.io, this.gameRoom);
                 yield miniGame.playMiniGame();
