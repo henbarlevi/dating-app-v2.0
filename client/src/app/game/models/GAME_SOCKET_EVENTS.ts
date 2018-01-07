@@ -1,5 +1,8 @@
 //event names that occurred between server and client in a game socket
 export enum GAME_SOCKET_EVENTS {
+    disconnect= 'disconnect',// client disconnected
+    connection = 'connection', // client connected
+    
     searchForPartner = 'searching_for_partner',
     found_partner = 'found_partner',
     mini_game_ended = 'mini_game_ended',/**server tell sockets when a mini game end's */

@@ -3,8 +3,9 @@ import { GAME_TYPE } from "./GAME_TYPE_ENUM";
 
 export interface iGameRoom {
     roomId: any,
-    playerOne: iGameSocket,
-    playerTwo: iGameSocket,
+    // playerOne: iGameSocket, //OLD
+    // playerTwo: iGameSocket, //OLD
     miniGamesRemaining: Number,
-    currentGameType?:GAME_TYPE
+    currentGameType?:GAME_TYPE,
+    players:iGameSocket[]//new
 }

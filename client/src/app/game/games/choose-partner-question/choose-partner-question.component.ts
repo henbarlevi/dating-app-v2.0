@@ -8,6 +8,7 @@ import { iPlayData } from '../../../../../../contract/iPlayData';
 import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../../../../../../contract/miniGames/choose_partner_question/PLAY_ACTIONS_ENUM';
 
 import { iQuestion } from './questions.model';
+import { game$Event } from '../../models/game$Event.model';
 // ===== utils
 const TAG: string = 'ChoosePartnerQuestionComponent |';
 
@@ -17,7 +18,7 @@ const TAG: string = 'ChoosePartnerQuestionComponent |';
   styleUrls: ['./choose-partner-question.component.scss']
 })
 export class ChoosePartnerQuestionComponent implements OnInit {
-  private game$: Observable<iSocketData>;
+  private game$: Observable<game$Event>;
   questions: iQuestion[]
   playerTurn: boolean = false;
   constructor(private GameService: GameService) {
@@ -25,13 +26,11 @@ export class ChoosePartnerQuestionComponent implements OnInit {
 
   ngOnInit() {
     this.game$ = this.GameService.game$;
-    let subscription = this.game$.subscribe((data: iSocketData) => {
-      let gameEventName: GAME_SOCKET_EVENTS = data.data[0];
+    let subscription = this.game$.subscribe((gameEvent: game$Event) => {
+      let gameEventName: GAME_SOCKET_EVENTS = gameEvent.eventName;
       if (gameEventName === GAME_SOCKET_EVENTS.init_mini_game) { //if the socket get an 'init)mini_game event'
-        console.log(TAG, 'got init_game event');
-        console.log(TAG, data);
 
-        this.questions = data.data[1].initData;
+        this.questions = gameEvent.eventData.initData;
         this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.ready_for_mini_game);
 
       }

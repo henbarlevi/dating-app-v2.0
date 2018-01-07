@@ -25,14 +25,15 @@ const envConfig: any = config.get(ENV);
 import { Logger } from '../utils/Logger';
 import { iGameSocket } from './models/iGameSocket';
 import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { Game$ } from './game$.service';
 const TAG: string = 'GameSockets |';
 
-let alreadyConnectedUsers: { [user_id: string]: boolean } = {};
+let alreadyConnectedUsers: { [user_id: string]: iGameSocket } = {};
 // SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
 module.exports = function (io) {
     Logger.d(TAG, 'establishing sockets.io for games..');
     let gameSocketsManager: GameScoketsManager = new GameScoketsManager(io);
-
+    gameSocketsManager.run();
     /*authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
     io.use((socket: iGameSocket, next) => {
         console.log(socket.handshake.query);
@@ -40,27 +41,38 @@ module.exports = function (io) {
         if (token) {
             verifyToken(token)
                 .then((user: iUser) => {
-                    Logger.d(TAG, 'user socket authenticated', 'green');
-                    Logger.d(TAG, JSON.stringify(alreadyConnectedUsers))
+                    Logger.d(TAG, `Already Connected Users : ${Object.keys(alreadyConnectedUsers).join()}`)
 
-                    //if the user alredy connected - prevent duplication (user start multi game at once)
+                    //if the user alredy connected - prevent duplication (disconnect the first tab)
                     if (alreadyConnectedUsers[user._id]) {
-                        socket.emit(GAME_SOCKET_EVENTS.already_connected);
-                        next(new Error("Already Connected"));
-                        Logger.d(TAG, 'user already connected from another tab/device', 'red');
+                        Logger.d(TAG, 'user already connected from another tab/device', 'yellow');
+                        alreadyConnectedUsers[user._id] === socket ? console.log('its the same socket'):console.log('its NOT the same socket');
+                        alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS.already_connected);
 
-                    } else { //User is Ok
-                        Logger.d(TAG, 'saving ' + user._id + ' into alradyConnectedUsers');
-                        alreadyConnectedUsers[user._id] = true;
+                        alreadyConnectedUsers[user._id].disconnect();
                         //set user into socket socket.user
                         socket.user = user;
+                        //saving into alreadyConnectedUsers
+                        alreadyConnectedUsers[user._id] = socket;
+                        next();
+
+
+                    } else {
+
+                        Logger.d(TAG, 'user socket authenticated', 'green');
+                        Logger.d(TAG, 'saving ' + user._id + ' into alradyConnectedUsers');
+                        //set user into socket socket.user
+                        socket.user = user;
+                        //saving into alreadyConnectedUsers
+                        alreadyConnectedUsers[user._id] = socket;
                         next();
                     }
+
 
                 })
                 .catch(e => {
                     next(new Error("not authenticated"));
-                    Logger.d(TAG, 'user socket not authenticated', 'red');
+                    Logger.d(TAG, `user socket not authenticated ${e}`, 'red');
 
                 })
         } else {
@@ -69,39 +81,35 @@ module.exports = function (io) {
         }
     });
 
-    const middleware = require('socketio-wildcard')();//add the * (any socket event) option
-    io.use(middleware);
-  
+    //service that export Observable that raise event every time client send emit evetm through socket.io
+    Game$.init(io);
     /*handle connection*/
-    io.sockets.on('connection', (socket: SocketIO.Socket) => {
-        console.log('user connected');
-
-
-        gameSocketsManager.handle(socket);
+    io.sockets.on('connection', (socket: iGameSocket) => {
+        let connectionQueryParams =socket.handshake.query;
+        
         socket.on('disconnect', () => {
             //remove player from alreadyConnectedUsers
             let userId = (socket as iGameSocket).user._id
-            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
-            console.log('user disconnected');
+            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : '';
         });
-        socket.on('*',  (packet) =>{   
-            Logger.d(TAG,`Event From Client : ${JSON.stringify(packet)}`,'cyan');
-        });
-        
-        socket.on('ready_for_mini_game', (socket) => {
-            Logger.d(TAG,`Got Ready for miniGame`,'cyan');
-            
-        });//
+        //handle reconnection - TODO
+        if (socket.handshake.query.roomId) {
+            socket.gameRoomId = socket.handshake.query.roomId;
+            Logger.d(TAG, `user is trying to reconnect to room ${socket.handshake.query.roomId}..`, 'gray')
+            //TODO
+            let userId = (socket as iGameSocket).user._id
+            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : ''
+            socket.disconnect();
+            //if user trying to reconnnect to game roome
+            //gameSocketsManager.handleReconnection(socket);
+        }
+//
 
         // socket.on('add-message', (message) => {
         //     io.emit('message', { type: 'new-message', text: message });
         // });
     });
 
-    io.sockets.on('ready_for_mini_game',(socket)=>{
-        Logger.d(TAG,`Godddddt Ready for miniGame`,'cyan');
-        
-    })
 
 
 

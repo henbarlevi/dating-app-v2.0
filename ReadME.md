@@ -30,6 +30,7 @@ var a:string = 'namw'
 > ### Angular
 - how to devide an angular project to multi modules + lazy loading
 - wrting RoutingModule for each Module
+- handle configurations for each environment using environment.ts/environment.prod.ts etc... (you can also use [tokenInjection](https://stackoverflow.com/questions/43193049/app-settings-the-angular-4-way/43316544) instead)
 > ### SCSS
 - how to devide SCSS files (Veriables, Mixing etc...)
 - how to import SCSS files into components scss files <span class="well"> @import '~styles/main';</span> The tilde <b>~</b> will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.  
@@ -40,8 +41,9 @@ var a:string = 'namw'
 - implement Oauth2.0 with facebook
 - using mongoose 
   *the new [not deprecated] middleware
+  *use indexing (if u change indexing on schema in production read [this](:https://stackoverflow.com/questions/14342708/mongoose-indexing-in-production-code) to prevent performence issue)
 > ### utils
-- write good README.md book mark
+- write good README.md with markdown format
 # ====================================
 # PROJECT IMPLEMENTATION 
 # ====================================
@@ -74,8 +76,8 @@ the purpose of this app is to let users expirience date online in a different an
 # ====================================
 # TODO 
 # ====================================
-* use token injection for env configutation (endpoint etc..) : https://stackoverflow.com/questions/43193049/app-settings-the-angular-4-way/43316544
-* check why server doestn receive socket.io emits from client
+* handle reconnection of user
+* handle sockets emits from client with RXJS
 * replace all hardcoded urls with environment variables
 * do research on how to make the site be in top in google search - maybe this is the key : [Search Conosole](https://www.google.com/webmasters/tools/home?hl=en)
 <div style="display:none">
