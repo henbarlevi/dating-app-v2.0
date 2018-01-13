@@ -40,10 +40,10 @@ export class ChoosePartnerQuestionComponent implements OnInit {
       }
     })
   }
-  onQuestionSelected(question: iQuestion) {
+  onQuestionSelected(questionIndex: number) {
+    console.log('question has been selected :' + questionIndex)
     if (this.playerTurn) {
-      console.log('question has been selected :' + question.q)
-      let data: iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { actionType: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, data: question.q };
+      let data: iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { actionType: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, data: questionIndex };
       this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, data);
     } else {
       console.log(TAG, 'its not your turn');

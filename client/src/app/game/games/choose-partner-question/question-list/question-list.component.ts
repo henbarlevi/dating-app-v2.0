@@ -8,14 +8,14 @@ const TAG:string ='QuestionList |'
 })
 export class QuestionListComponent implements OnInit {
   @Input() questions: iQuestion[] = [];
-  @Output() selected =new EventEmitter<iQuestion>();
+  @Output() selected =new EventEmitter<number>();
   constructor() { }
 
   ngOnInit() {
     
   }
-  onSelected(question:iQuestion){
-   this.selected.emit(question);
+  onSelected(questionIndex:number){
+   this.selected.emit(questionIndex);
   }
 
 }

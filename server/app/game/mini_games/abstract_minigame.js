@@ -49,25 +49,6 @@ class miniGame {
                     reject(e);
                 }
             }));
-            // this.io.on('ready_for_mini_game'/*GAME_SOCKET_EVENTS.ready_for_mini_game*/, async (socket: iGameSocket) => {
-            //     try {
-            //         console.log(TAG, socket.rooms);
-            //         Logger.d(TAG, `the user :${socket.user._id}(=_id) is ready to play`);
-            //         socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
-            //             playerOneRadyForMiniGame = true : ''
-            //         socket.user.facebook.id === this.gameRoom.playerTwo.user.facebook.id ?
-            //             playerTwoRadyForMiniGame = true : ''
-            //         //if the 2 players are ready: start the mini game
-            //         if (playerOneRadyForMiniGame && playerTwoRadyForMiniGame) {
-            //             Logger.d(TAG, '2 players are ready to play', 'green');
-            //             resolve();
-            //         }
-            //     }
-            //     catch (e) {
-            //         Logger.d(TAG, 'ERR =====>' + e, 'red');
-            //         reject(e);
-            //     }
-            // });
         });
     }
 }

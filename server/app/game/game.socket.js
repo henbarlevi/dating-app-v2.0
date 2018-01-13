@@ -9,7 +9,6 @@ const ENV = process.env.ENV || 'local';
 const envConfig = config.get(ENV);
 //=======utils
 const Logger_1 = require("../utils/Logger");
-const GAME_SOCKET_EVENTS_1 = require("./models/GAME_SOCKET_EVENTS");
 const game__service_1 = require("./game$.service");
 const TAG = 'GameSockets |';
 let alreadyConnectedUsers = {};
@@ -29,8 +28,7 @@ module.exports = function (io) {
                 //if the user alredy connected - prevent duplication (disconnect the first tab)
                 if (alreadyConnectedUsers[user._id]) {
                     Logger_1.Logger.d(TAG, 'user already connected from another tab/device', 'yellow');
-                    alreadyConnectedUsers[user._id] === socket ? console.log('its the same socket') : console.log('its NOT the same socket');
-                    alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.already_connected);
+                    //alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS.already_connected);
                     alreadyConnectedUsers[user._id].disconnect();
                     //set user into socket socket.user
                     socket.user = user;
@@ -55,7 +53,7 @@ module.exports = function (io) {
         }
         else {
             next(new Error("not authenticated"));
-            Logger_1.Logger.d(TAG, 'user socket not authenticated', 'red');
+            Logger_1.Logger.d(TAG, 'user socket not authenticated - client didnt sent token', 'red');
         }
     });
     //service that export Observable that raise event every time client send emit evetm through socket.io
@@ -75,9 +73,7 @@ module.exports = function (io) {
             //TODO
             let userId = socket.user._id;
             alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : '';
-            socket.disconnect();
-            //if user trying to reconnnect to game roome
-            //gameSocketsManager.handleReconnection(socket);
+            //socket.disconnect();
         }
         //
         // socket.on('add-message', (message) => {

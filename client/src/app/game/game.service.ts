@@ -45,19 +45,20 @@ export class GameService {
         query: query
       });
     socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
-    this.gameSocket.on('*', (data:iSocketData) => {
-      console.log(TAG, data);
+    this.gameSocket.on('*', (data: iSocketData) => {
+      console.log(TAG, `%c ** GameSocket Recieved [${data.data[0]}] event with the data [${data.data[1]}]**`, 'color: blue');
+
 
       this._game$.next({
-        eventName:data.data[0],
-        eventData:data.data[1]
+        eventName: data.data[0],
+        eventData: data.data[1]
       });
     });
     this.gameSocket.once('disconnect', () => {
       console.log(TAG, 'You have disconnected');
       //emit disconnection to game$
       this._game$.next({
-        eventName:GAME_SOCKET_EVENTS.disconnect,
+        eventName: GAME_SOCKET_EVENTS.disconnect,
       });
       //delete roomId
       this.gameroomId = null;
@@ -70,7 +71,7 @@ export class GameService {
   }
   /*send to server game event*/
   emitGameEvent(eventName: GAME_SOCKET_EVENTS, data?: any) {
-    console.log(`%c ** Emiting Socket Event : ${eventName}**`, 'color: blue');
+    console.log(`%c ** GameSocket Emiting [${eventName}] event**`, 'color: blue');
     let roomId = this.gameroomId;
     if (roomId) {
       data ? data.roomId = roomId : data = { roomId: roomId };

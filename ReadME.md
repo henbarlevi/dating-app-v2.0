@@ -1,15 +1,23 @@
 
-
+# Dating App V2.0
+web application that let people expirience online dating in a different way
+## Table of Contents
+### 1.  [OverView](#OverView)
+> - [motivation](#motivation)
+> - Common Language
+> - [how to run project](#howtorun)
+### 2. [Best Practice Examples](#bestpractice)
 # ===============================
-# How to run project 
+# OverView 
 # ===============================
-
+> ## motivation
+the purpose of this app is to let users expirience date online in a different and special way
+> ## How to run project <a name="howtorun"></a>
 * ### option 1: 
 for development i created shortcut - write *<span class="well">"npm run dev" </span>* in the <b> root folder</b>
  instead of opening 2 command lines sepertly and run the client in one and the server in another.
 i've created package.json in root folder in order to crate npm script commands.
 the "dev" command open 2 cmd windows and run the server in one and the client in another
-
 * ### option 2 :
 #### to run server - *open cmd *enter the 'server' folder *execute **"npm run dev"** 
 #### to run client - *open cmd *enter the 'client' folder *execute **"npm run build"** - if you want to build for production and **"npm start"** for dev 
@@ -18,7 +26,7 @@ the "dev" command open 2 cmd windows and run the server in one and the client in
 <div class="well">NOTE - to see readme styled with mark-down format inside VScode - download the extention "Markdown preview github styling</div>
 
 # ===================================
-# what best practice/good examples can you find here 
+# what best practice/good examples can you find here <a name="bestpractice"></a>
 # ===================================
 
 ```scss
@@ -47,8 +55,6 @@ var a:string = 'namw'
 # ====================================
 # PROJECT IMPLEMENTATION 
 # ====================================
-
-the purpose of this app is to let users expirience date online in a different and special way
 
 ### GENERAL Scenario 
 1. user connect to website using Facebook/Instegram/ Oauth2.0 Or Enter as Guest.

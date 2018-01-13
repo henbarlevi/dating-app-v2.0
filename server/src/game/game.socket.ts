@@ -46,8 +46,7 @@ module.exports = function (io) {
                     //if the user alredy connected - prevent duplication (disconnect the first tab)
                     if (alreadyConnectedUsers[user._id]) {
                         Logger.d(TAG, 'user already connected from another tab/device', 'yellow');
-                        alreadyConnectedUsers[user._id] === socket ? console.log('its the same socket'):console.log('its NOT the same socket');
-                        alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS.already_connected);
+                        //alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS.already_connected);
 
                         alreadyConnectedUsers[user._id].disconnect();
                         //set user into socket socket.user
@@ -77,7 +76,7 @@ module.exports = function (io) {
                 })
         } else {
             next(new Error("not authenticated"));
-            Logger.d(TAG, 'user socket not authenticated', 'red');
+            Logger.d(TAG, 'user socket not authenticated - client didnt sent token', 'red');
         }
     });
 
@@ -99,9 +98,8 @@ module.exports = function (io) {
             //TODO
             let userId = (socket as iGameSocket).user._id
             alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : ''
-            socket.disconnect();
-            //if user trying to reconnnect to game roome
-            //gameSocketsManager.handleReconnection(socket);
+            //socket.disconnect();
+
         }
 //
 

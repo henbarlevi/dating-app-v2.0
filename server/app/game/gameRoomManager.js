@@ -8,10 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-//====== config
-const config = require("config");
-const ENV = process.env.ENV || 'local';
-const envConfig = config.get(ENV);
 //=======utils
 const Logger_1 = require("../utils/Logger");
 const GAME_TYPE_ENUM_1 = require("./models/GAME_TYPE_ENUM");
@@ -24,6 +20,13 @@ const Observable_1 = require("rxjs/Observable");
 let miniGames = [
     choose_partner_question_1.choose_partner_question
 ];
+// =========================
+// ====== ENV Configutations
+// =========================
+const config = require("config");
+const ENV = process.env.ENV || 'local';
+const envConfig = config.get(ENV);
+const reconnection_timeout = envConfig.game.reconnection_timeout; //time to reconnect if a player is inside a game
 // ====== / Games
 /**handle an individual game room that contains 2 sockets of players (or more -in future version)
  *

@@ -5,11 +5,13 @@ import * as request from 'request';
 import * as jwt from 'jsonwebtoken'; //jwt authentication
 import * as socketIo from 'socket.io';
 import * as uuid from 'uuid/v1'; //generate guid
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/timer';
 //======db
 import { UserRepository } from '../db/repository/user-rep';
-
 //====== services
 import { GameRoomManager } from "./gameRoomManager";
+import { game$, game$Event } from './game$.service';
 //====== models
 import { GAME_STATUS } from './GAME_STATUS_ENUM';
 import { iUser } from '../models';
@@ -18,15 +20,16 @@ import { iFacebookUserInfo } from '../facebook/models/index';
 import { iGameRoom } from './models/iGameRoom';
 import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 import { iGameSocket } from './models/iGameSocket';
-//====== config
+//=======utils
+import { Logger } from '../utils/Logger';
+const TAG: string = 'GameSocketsManager |';
+// =========================
+// ====== ENV Configutations
+// =========================
 import * as config from 'config';
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
-//=======utils
-import { Logger } from '../utils/Logger';
-import { game$, game$Event } from './game$.service';
-import { Observable } from 'rxjs/Observable';
-const TAG: string = 'GameSocketsManager |';
+const reconnection_timeout: number = envConfig.game.reconnection_timeout //time to reconnect if a player is inside a game
 
 /**handle game sockets
  * after user connected:
@@ -113,47 +116,9 @@ export class GameScoketsManager {
         //handle disconnections //TODO - check how dispose correctly
         game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.disconnect)
             .subscribe((gameEvent: game$Event) => {
-                let disconnectingUserID = gameEvent.socket.user._id;
-                let disconnectUserSocket = gameEvent.socket;
-                let disconnectedFromRoomId: string = gameEvent.socket.gameRoomId;
-                //remove socket from waiting list if its there
-                this.waitingList[disconnectingUserID] ? Logger.d(TAG, `** removing ${this.getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'grau') : '';
-                this.waitingList[disconnectingUserID] = null;
-                //if disconnected player is inside a game
-                if (this.playersPlaying[disconnectingUserID]) {
-                    //insert him to temporary disconnected list (give him change to recoonnect)
-                    Logger.d(TAG, `** give ${this.getUserNameBySocket(disconnectUserSocket)} 20 sec cahnce   to reconnect.. **`, 'gray')
-                    const time_to_reconnect: number = 1000 * 20;
-                    //check if player reconnect on time:
-                    let reconnected$ = game$.filter((gameEv: game$Event) =>
-                        //check a socket connected and its the disconnected player from this room
-                        gameEv.eventName === GAME_SOCKET_EVENTS.connection &&
-                        (disconnectedFromRoomId=== gameEv.socket.gameRoomId ||disconnectedFromRoomId === gameEv.socket.handshake.query.roomId) &&
-                        gameEv.socket.user._id === disconnectingUserID)
-                    Observable.timer(time_to_reconnect).merge(reconnected$).first().subscribe(
-                        (gameEventOrTimeout: any) => {
-                            //reconnected on time:
-                            if (gameEventOrTimeout.eventName) {
-                                let gameEvent :game$Event = gameEventOrTimeout; 
-                                //check if game is still going
-                                if (this.gameRooms[disconnectedFromRoomId]){
-                                    //
-                                }else{
-                                    //TODO tell the reconnected user that game ended
-                                    //disconnect user
-                                    gameEvent.socket.disconnect();
-                                }
+                Logger.d(TAG, `** Handle Disconnection For ${this.getUserNameBySocket(gameEvent.socket)}`, 'gray');
 
-                            } else {//timeout //TODOTODOTOD - think how to handle the reconnection issue + who will handle the list of players that can reconnect
-                                Logger.d(TAG, `reconnection chance for ${this.getUserNameBySocket(disconnectUserSocket)} passed **  removing him from [playersPlaying] list **`, 'gray')
-                                delete this.playersPlaying[disconnectingUserID];
-                            }
-                        }
-                    )
-
-
-                }
-
+                this.handleDisconnectionEvent(gameEvent);
             })
     }
     handlePlayersLeavingGame() {
@@ -167,18 +132,7 @@ export class GameScoketsManager {
                 }
             })
     }
-    private userIsAlreadyConnected(socket: iGameSocket) {
-        //TODO
-    }
-    private getUserNameBySocket(socket: iGameSocket) { //return userName or userId
-        return socket.user.facebook ? socket.user.facebook.name : socket.user._id
-    }
-    private printCurrentState(socket) {
-        Logger.d(TAG, '========== Socket Details =========', 'yellow');
-        console.log('socket id =' + socket.id);
-        Logger.d(TAG, `Before handling this socket there are: \n[watingList =${Object.keys(this.waitingList).length} Sockets]\n[gameRooms = ${Object.keys(this.gameRooms).length}]`)
-        Logger.d(TAG, '========== Socket Details =========', 'yellow');
-    }
+
     /**search partner for socket */
     searchForPartner(socket: iGameSocket): iGameSocket {
         let usersId: string[] = Object.keys(this.waitingList);
@@ -203,6 +157,75 @@ export class GameScoketsManager {
             players: players
         }
         return gameRoom;
+    }
+    // =========================
+    // ====== Private Methods
+    // =========================
+
+    /**[handle indevidual disconnection event]
+     * 
+     * General Flow
+     * 1. remove user from  waitingList (if he's there)
+     * 2. if user was inside a game (= inside playersPlaying List) - will let user 20 sec to reconnect
+     *  a.if reconnected on time - check if game is still going
+     *       - if so - let the gameRoom handle the reconnection 
+     *       - if not - tell the user the game ended +( disconnect him /treat him like a new connection hadnling (didnt decided yet))
+     *  b.if not - remove him from playersPlaying List
+     */
+    private handleDisconnectionEvent(gameEvent: game$Event) {
+        let disconnectingUserID = gameEvent.socket.user._id;
+        let disconnectUserSocket = gameEvent.socket;
+        let disconnectedFromRoomId: string = gameEvent.socket.gameRoomId;
+        //remove socket from waiting list if its there
+        this.waitingList[disconnectingUserID] ? Logger.d(TAG, `** removing ${this.getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'gray') : '';
+        this.waitingList[disconnectingUserID] = null;
+        //if disconnected player is inside a game
+        if (this.playersPlaying[disconnectingUserID]) {
+            //insert him to temporary disconnected list (give him change to recoonnect)
+            Logger.d(TAG, `** give ${this.getUserNameBySocket(disconnectUserSocket)} 20 sec cahnce   to reconnect.. **`, 'gray')
+            //check if player reconnect on time:
+            let reconnected$ = game$.filter((gameEv: game$Event) =>
+                //check a socket connected and its the disconnected player from this room
+                gameEv.eventName === GAME_SOCKET_EVENTS.connection &&
+                (disconnectedFromRoomId === gameEv.socket.gameRoomId || disconnectedFromRoomId === gameEv.socket.handshake.query.roomId) &&
+                gameEv.socket.user._id === disconnectingUserID)
+            Observable.timer(reconnection_timeout).merge(reconnected$).first().subscribe(
+                (gameEventOrTimeout: any) => {
+                    //reconnected on time:
+                    if (gameEventOrTimeout.eventName) {
+                        Logger.d(TAG, `User [${this.getUserNameBySocket(disconnectUserSocket)}] returned to Game (gameroom ${disconnectedFromRoomId})  **`, 'gray')
+
+                        let gameEvent: game$Event = gameEventOrTimeout;
+                        //check if game is still going
+                        if (this.gameRooms[disconnectedFromRoomId]) {
+                            //
+                        } else {
+                            //TODO tell the reconnected user that game ended
+                            //disconnect user
+                            gameEvent.socket.disconnect();
+                        }
+                        //reconnection timeout
+                    } else {//timeout //TODOTODOTOD - think how to handle the reconnection issue + who will handle the list of players that can reconnect
+                        Logger.d(TAG, `reconnection chance for ${this.getUserNameBySocket(disconnectUserSocket)} passed **  removing him from [playersPlaying] list **`, 'gray')
+                        delete this.playersPlaying[disconnectingUserID];
+                    }
+                }
+            )
+
+
+        }
+    }
+    private userIsAlreadyConnected(socket: iGameSocket) {
+        //TODO
+    }
+    private getUserNameBySocket(socket: iGameSocket) { //return userName or userId
+        return socket.user.facebook ? socket.user.facebook.name : socket.user._id
+    }
+    private printCurrentState(socket) {
+        Logger.d(TAG, '========== Socket Details =========', 'yellow');
+        console.log('socket id =' + socket.id);
+        Logger.d(TAG, `Before handling this socket there are: \n[watingList =${Object.keys(this.waitingList).length} Sockets]\n[gameRooms = ${Object.keys(this.gameRooms).length}]`)
+        Logger.d(TAG, '========== Socket Details =========', 'yellow');
     }
 
 }
