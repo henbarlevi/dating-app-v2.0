@@ -97,19 +97,10 @@ var a:string = 'namw'
 * handle sockets emits from client with RXJS
 * replace all hardcoded urls with environment variables
 * do research on how to make the site be in top in google search - maybe this is the key : [Search Conosole](https://www.google.com/webmasters/tools/home?hl=en)
-<div style="display:none">
-player A                            Server                             player B
-|-------------CONNECTED-------------->|-------------------------------------|
-|<--------serch_for_partner-----------|-------------------------------------|
-|-------------------------------------|<------------CONNECTED---------------|
-|-------------------------------------|--------serch_for_partner----------->|
-|<----------------------FOUND_PARTNER-|FOUND_PARTNER----------------------->|
-|-------------------------------------|-------------------------------------|
-|-------------------------------------|-------------------------------------|
-|-------------------------------------|-------------------------------------|
-|-------------------------------------|-------------------------------------|
-|-------------------------------------|-------------------------------------|
-</div>
+
+
+
+
 
 <style>
 .well{
