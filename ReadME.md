@@ -1,12 +1,15 @@
 
 # Dating App V2.0
-web application that let people expirience online dating in a different way
+web application that let people expirience online dating in a different way, by letting them play with each other in a co-op\vs manner in a variety of mini games
 ## Table of Contents
 ### 1.  [OverView](#OverView)
 > - [motivation](#motivation)
 > - Common Language
 > - [how to run project](#howtorun)
+> - tech details
 ### 2. [Best Practice Examples](#bestpractice)
+### 3. [Project Explanation](#projectexplenation)
+
 # ===============================
 # OverView 
 # ===============================
@@ -24,7 +27,15 @@ the "dev" command open 2 cmd windows and run the server in one and the client in
 
 * ### Don't Forget To Run Mongo!
 <div class="well">NOTE - to see readme styled with mark-down format inside VScode - download the extention "Markdown preview github styling</div>
+<br />
 
+> ## Common Language <a name="commonlanguage"></a>
+- game - a dating game where 2 or more players play together in a variety of mini games
+- minigame - in every dating session the 2 (or more) players will play several mini games
+> ### Tech Details
+- server side tech - nodejs, socket.io
+- db - mongodb + mongoose
+- client side tech - angualr 4.3 
 # ===================================
 # what best practice/good examples can you find here <a name="bestpractice"></a>
 # ===================================
@@ -53,7 +64,7 @@ var a:string = 'namw'
 > ### utils
 - write good README.md with markdown format
 # ====================================
-# PROJECT IMPLEMENTATION 
+# Project Explanation <a name="projectexplenation"></a>
 # ====================================
 
 ### GENERAL Scenario 
