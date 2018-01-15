@@ -4,10 +4,8 @@ import { iGameSocket } from '../../models/iGameSocket';
 
 import { miniGame } from "../abstract_minigame";
 
-// ===== utils
 import allQuestions from './questions';
 const NumberOfQuestionsPerGame: number = 7;
-import { Logger } from "../../../utils/Logger";
 import { GAME_TYPE } from "../../models/GAME_TYPE_ENUM";
 import { GAME_SOCKET_EVENTS } from "../../models/GAME_SOCKET_EVENTS";
 import { utilsService } from "../../../utils/utils.service";
@@ -16,11 +14,17 @@ import { Subscription } from "rxjs/Subscription";
 import { iQuestion } from "./questions.model";
 import { iPlayData } from "../../models/iPlayData";
 import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from "./PLAY_ACTIONS_ENUM";
-import { iMiniGameState, iGenericMiniGameState } from "../iminiGameState.model";
+import { iGenericMiniGameState } from "../iminiGameState.model";
+// ===== redux
+import { createStore } from 'redux';
+import { MiniGameStateReducer } from "./redux/minigame_state.reducers";
 
+// ===== utils
+import { Logger } from "../../../utils/Logger";
 const TAG: string = 'choose_partner_question';
 export class choose_partner_question extends miniGame {
     private randomQuestions: iQuestion[];
+    private miniGameState: Store = createStore(MiniGameStateReducer);
     constructor(io: SocketIO.Namespace, gameRoom: iGameRoom) {
         super(io, gameRoom);
     }
@@ -67,8 +71,8 @@ export class choose_partner_question extends miniGame {
                     if (turn.user._id === gameEvent.socket.user._id) {//if its his turn
                         const playActionData: iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS> = gameEvent.eventData as iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS>;
                         const playActionIsValid: boolean = this.ValidatePlayAction(miniGameState, playActionData);
-                        if(playActionIsValid){
-                            miniGameState =updateMiniGameState(miniGameState,playActionData);
+                        if (playActionIsValid) {
+                            miniGameState = updateMiniGameState(miniGameState, playActionData);
                             this.gameRoom.players.forEach(p => p.user._id !== turn.user._id ? p.emit(GAME_SOCKET_EVENTS.partner_played, { turn }) : '')
                         }
                     } else {
@@ -97,11 +101,11 @@ export class choose_partner_question extends miniGame {
 
     }
     //TODOTODOTODO transfer this to be handled by redux structure 
-    private updateMiniGameState(miniGameState:iMiniGameState,playActionData:iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS>):iMiniGameState{
-        if(playActionData.actionType === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question){
-         return{
-             currentAnswerIndex:miniGameState
-         }   
+    private updateMiniGameState(miniGameState: iMiniGameState, playActionData: iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS>): iMiniGameState {
+        if (playActionData.actionType === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
+            return {
+                currentAnswerIndex: miniGameState
+            }
         }
         return {
             currentAnswerIndex
@@ -148,7 +152,7 @@ export class choose_partner_question extends miniGame {
 
 
 interface iMiniGameState extends iGenericMiniGameState {
-    currentQuestionIndex: number ,
-    currentAnswerIndex: number ,
+    currentQuestionIndex: number,
+    currentAnswerIndex: number,
     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS;
 }

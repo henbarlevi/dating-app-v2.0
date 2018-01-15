@@ -9,19 +9,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_minigame_1 = require("../abstract_minigame");
-// ===== utils
 const questions_1 = require("./questions");
 const NumberOfQuestionsPerGame = 7;
-const Logger_1 = require("../../../utils/Logger");
 const GAME_TYPE_ENUM_1 = require("../../models/GAME_TYPE_ENUM");
 const GAME_SOCKET_EVENTS_1 = require("../../models/GAME_SOCKET_EVENTS");
 const utils_service_1 = require("../../../utils/utils.service");
 const game__service_1 = require("../../game$.service");
 const PLAY_ACTIONS_ENUM_1 = require("./PLAY_ACTIONS_ENUM");
+// ===== redux
+const redux_1 = require("redux");
+const minigame_state_reducers_1 = require("./redux/minigame_state.reducers");
+// ===== utils
+const Logger_1 = require("../../../utils/Logger");
 const TAG = 'choose_partner_question';
 class choose_partner_question extends abstract_minigame_1.miniGame {
     constructor(io, gameRoom) {
         super(io, gameRoom);
+        this.miniGameState = redux_1.createStore(minigame_state_reducers_1.MiniGameStateReducer);
     }
     /**tell players what minigame theyplay + initial data for the game, and wait until they say they ready */
     initMiniGame() {
