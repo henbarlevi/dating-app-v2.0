@@ -42,7 +42,7 @@ class Game$ {
             //also catch disconnection and emit to observable
             //TODO - remove all listeners when diconnected
             socket.on('disconnect', () => {
-                Logger_1.Logger.d(TAG, 'disconnect socket ' + socket.id, 'cyan');
+                // Logger.d(TAG,'disconnect socket '+socket.id,'cyan');
                 _game$.next({
                     socket: socket,
                     eventName: GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.disconnect

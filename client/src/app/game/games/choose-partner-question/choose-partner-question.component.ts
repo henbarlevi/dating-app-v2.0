@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 // ===== models
 import { iSocketData } from '../../models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from '../../models/GAME_SOCKET_EVENTS';
-import { iPlayData } from '../../../../../../contract/iPlayData';
+import { iPlayAction } from '../../../../../../contract/iPlayData';
 import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../../../../../../contract/miniGames/choose_partner_question/PLAY_ACTIONS_ENUM';
 
 import { iQuestion } from './questions.model';
@@ -43,7 +43,7 @@ export class ChoosePartnerQuestionComponent implements OnInit {
   onQuestionSelected(questionIndex: number) {
     console.log('question has been selected :' + questionIndex)
     if (this.playerTurn) {
-      let data: iPlayData<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { actionType: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, data: questionIndex };
+      let data: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex };
       this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, data);
     } else {
       console.log(TAG, 'its not your turn');

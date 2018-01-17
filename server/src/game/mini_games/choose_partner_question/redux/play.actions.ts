@@ -1,19 +1,20 @@
 import { Action } from 'redux';
+import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../PLAY_ACTIONS_ENUM';
 
 
 /* ==== ACTIONS ====*/
 
-// ------- add movie ------
-export const ASK_QUESTION = 'ASK_QUESTION';
+// ------- ASK Q ------
+export const ASK_QUESTION = CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question;
 export class askQuestion implements Action {
     constructor(public payload: number) { }
-    readonly type = ASK_QUESTION;
+    readonly type:CHOOSE_QUESTIONS_PLAY_ACTIONS = ASK_QUESTION;
 }
-// ------- start edit movie ------
-export const ANSWER_QUESTION = 'ANSWER_QUESTION';
+// ------- ANSWER Q ------
+export const ANSWER_QUESTION = CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question;
 export class answerQuestion implements Action {
     constructor(public payload: number) { }
-    readonly type = ANSWER_QUESTION;
+    readonly type:CHOOSE_QUESTIONS_PLAY_ACTIONS = ANSWER_QUESTION;
 }
 
 

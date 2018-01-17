@@ -7,6 +7,8 @@ import * as socketIo from 'socket.io';
 import * as uuid from 'uuid/v1'; //generate guid
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
+import 'rxjs/add/observable/merge';
+import 'rxjs/add/operator/first';
 //======db
 import { UserRepository } from '../db/repository/user-rep';
 //====== services
@@ -30,6 +32,8 @@ import * as config from 'config';
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
 const reconnection_timeout: number = envConfig.game.reconnection_timeout //time to reconnect if a player is inside a game
+
+
 
 /**handle game sockets
  * after user connected:
@@ -178,18 +182,19 @@ export class GameScoketsManager {
         let disconnectedFromRoomId: string = gameEvent.socket.gameRoomId;
         //remove socket from waiting list if its there
         this.waitingList[disconnectingUserID] ? Logger.d(TAG, `** removing ${this.getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'gray') : '';
-        this.waitingList[disconnectingUserID] = null;
+        delete this.waitingList[disconnectingUserID];
         //if disconnected player is inside a game
         if (this.playersPlaying[disconnectingUserID]) {
             //insert him to temporary disconnected list (give him change to recoonnect)
             Logger.d(TAG, `** give ${this.getUserNameBySocket(disconnectUserSocket)} 20 sec cahnce   to reconnect.. **`, 'gray')
             //check if player reconnect on time:
-            let reconnected$ = game$.filter((gameEv: game$Event) =>
+            const reconnected$ = game$.filter((gameEv: game$Event) =>
                 //check a socket connected and its the disconnected player from this room
                 gameEv.eventName === GAME_SOCKET_EVENTS.connection &&
                 (disconnectedFromRoomId === gameEv.socket.gameRoomId || disconnectedFromRoomId === gameEv.socket.handshake.query.roomId) &&
-                gameEv.socket.user._id === disconnectingUserID)
-            Observable.timer(reconnection_timeout).merge(reconnected$).first().subscribe(
+                gameEv.socket.user._id === disconnectingUserID);
+            const timeOut$ = Observable.timer(reconnection_timeout);
+            Observable.merge(reconnected$, timeOut$).first().subscribe(
                 (gameEventOrTimeout: any) => {
                     //reconnected on time:
                     if (gameEventOrTimeout.eventName) {

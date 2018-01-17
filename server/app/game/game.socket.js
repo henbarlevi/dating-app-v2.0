@@ -1,5 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("rxjs/add/observable/merge");
+require("rxjs/add/observable/timer");
 //====== services
 const gameScoketsManager_1 = require("./gameScoketsManager");
 const middlewares_1 = require("../helpers/middlewares");
@@ -64,7 +66,7 @@ module.exports = function (io) {
         socket.on('disconnect', () => {
             //remove player from alreadyConnectedUsers
             let userId = socket.user._id;
-            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : '';
+            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : Logger_1.Logger.d(TAG, `Warning! -Diconnected User ${userId} not exist in the alreadyConnectedUsers`, 'red');
         });
         //handle reconnection - TODO
         if (socket.handshake.query.roomId) {

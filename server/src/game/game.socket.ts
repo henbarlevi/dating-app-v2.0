@@ -5,6 +5,9 @@ import * as Rx from 'rxjs';
 import * as request from 'request';
 import * as jwt from 'jsonwebtoken'; //jwt authentication
 
+import 'rxjs/add/observable/merge'; 
+import 'rxjs/add/observable/timer';
+
 //======db
 import { UserRepository } from '../db/repository/user-rep';
 
@@ -89,7 +92,7 @@ module.exports = function (io) {
         socket.on('disconnect', () => {
             //remove player from alreadyConnectedUsers
             let userId = (socket as iGameSocket).user._id
-            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : '';
+            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : Logger.d(TAG,`Warning! -Diconnected User ${userId} not exist in the alreadyConnectedUsers`,'red');
         });
         //handle reconnection - TODO
         if (socket.handshake.query.roomId) {

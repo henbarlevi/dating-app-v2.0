@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const PLAY_ACTIONS_ENUM_1 = require("../PLAY_ACTIONS_ENUM");
 /* ==== ACTIONS ====*/
-// ------- add movie ------
-exports.ASK_QUESTION = 'ASK_QUESTION';
+// ------- ASK Q ------
+exports.ASK_QUESTION = PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question;
 class askQuestion {
     constructor(payload) {
         this.payload = payload;
@@ -10,8 +11,8 @@ class askQuestion {
     }
 }
 exports.askQuestion = askQuestion;
-// ------- start edit movie ------
-exports.ANSWER_QUESTION = 'ANSWER_QUESTION';
+// ------- ANSWER Q ------
+exports.ANSWER_QUESTION = PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question;
 class answerQuestion {
     constructor(payload) {
         this.payload = payload;

@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const uuid = require("uuid/v1"); //generate guid
 const Observable_1 = require("rxjs/Observable");
 require("rxjs/add/observable/timer");
+require("rxjs/add/observable/merge");
+require("rxjs/add/operator/first");
 //====== services
 const gameRoomManager_1 = require("./gameRoomManager");
 const game__service_1 = require("./game$.service");
@@ -155,18 +157,19 @@ class GameScoketsManager {
         let disconnectedFromRoomId = gameEvent.socket.gameRoomId;
         //remove socket from waiting list if its there
         this.waitingList[disconnectingUserID] ? Logger_1.Logger.d(TAG, `** removing ${this.getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'gray') : '';
-        this.waitingList[disconnectingUserID] = null;
+        delete this.waitingList[disconnectingUserID];
         //if disconnected player is inside a game
         if (this.playersPlaying[disconnectingUserID]) {
             //insert him to temporary disconnected list (give him change to recoonnect)
             Logger_1.Logger.d(TAG, `** give ${this.getUserNameBySocket(disconnectUserSocket)} 20 sec cahnce   to reconnect.. **`, 'gray');
             //check if player reconnect on time:
-            let reconnected$ = game__service_1.game$.filter((gameEv) => 
+            const reconnected$ = game__service_1.game$.filter((gameEv) => 
             //check a socket connected and its the disconnected player from this room
             gameEv.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection &&
                 (disconnectedFromRoomId === gameEv.socket.gameRoomId || disconnectedFromRoomId === gameEv.socket.handshake.query.roomId) &&
                 gameEv.socket.user._id === disconnectingUserID);
-            Observable_1.Observable.timer(reconnection_timeout).merge(reconnected$).first().subscribe((gameEventOrTimeout) => {
+            const timeOut$ = Observable_1.Observable.timer(reconnection_timeout);
+            Observable_1.Observable.merge(reconnected$, timeOut$).first().subscribe((gameEventOrTimeout) => {
                 //reconnected on time:
                 if (gameEventOrTimeout.eventName) {
                     Logger_1.Logger.d(TAG, `User [${this.getUserNameBySocket(disconnectUserSocket)}] returned to Game (gameroom ${disconnectedFromRoomId})  **`, 'gray');
