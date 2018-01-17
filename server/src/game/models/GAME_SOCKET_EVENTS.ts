@@ -19,12 +19,13 @@ export enum GAME_SOCKET_EVENTS {
     ready_for_mini_game = 'ready_for_mini_game',/**socket tell server that it ready for the mini game */
     ready='ready',/**server/socket tell to socket/server that he ready for something */
     /**turn - 3 options */
-    player_turn ='player_turn', /*server tell sockets who turn it is*/
+    player_turn ='player_turn', /*[GENERIC] server tell sockets who turn it is*/
     your_turn="your_turn",/**server tell socket that its his turn */
     partner_turn="partner_turn",/**server tell socket that its his PARTNER turn */
     
     partner_played = 'partner_played', /**server tell the other socket data about the other partner play actions */
     play= 'play',/*client tell server about is play move*/
     //edge cases
-    already_connected = 'already_connected' //(Currently not in use in client - maybe useless )for example if the user create another tab and connecting in parallel ,telling the first tab to close the session
+    already_connected = 'already_connected' ,//(Currently not in use in client - maybe useless )for example if the user create another tab and connecting in parallel ,telling the first tab to close the session
+    reconnection_data = 'reconnection_data'//server tell user that he has reconnted to game along with the current gamestate details
 }

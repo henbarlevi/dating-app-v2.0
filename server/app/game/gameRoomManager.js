@@ -69,7 +69,8 @@ class GameRoomManager {
      * 1.subscribe to events of disconnected users from this room
      * 2.if disconnection  occur tell other players about disconnected user
      * 3.give a player a certien time to reconnect:
-     *  a.if reconnected on time - give the user reconnection succeded and tell the other players about reconnected user
+     *  a.if reconnected on time - check if the game still on , if so give the user reconnection succeded and tell the other players about reconnected user
+     *                                                          if not, //TODO
      *  b.if didn't reconnected on time - tell the other players that the player left permenantly, if user will try to reconnect it will
      * receive session expierd
     */
@@ -84,23 +85,19 @@ class GameRoomManager {
     /**handle indevidual player disconnection */
     handleDisconnection(gameEvent) {
         Logger_1.Logger.d(TAG, `** handling disconnection of player ${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id} **`, 'gray');
-        //tell other players about disconnected partner
+        //2.tell other players about disconnected partner
         let disconnectedSocket = gameEvent.socket;
         let disconnctedSocketId = disconnectedSocket.id;
-        let disconnectedUserId = disconnectedSocket.user._id; //TODOTODOTODO - Bug here - filter -filters the reconneciton process (same UserId false) 
+        let disconnectedUserId = disconnectedSocket.user._id.toString(); //TODOTODOTODO - Bug here - filter -filters the reconneciton process (same UserId false) 
         this.gameRoom.players.filter(socket => socket.id !== disconnctedSocketId).forEach(s => {
             s.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_disconnected, { player: disconnectedSocket.user });
         });
-        const time_to_reconnect = reconnection_timeout; //in milisec
         //3.give a player a certien time to reconnect:
-        let reconnected$ = game__service_1.game$.filter((gameEvent) => {
-            //check a socket connected and its the disconnected player from this room
-            Logger_1.Logger.d('Recoonect$ FIlter', `Connection Event = ${gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection}\n, same gameroomId query connection ${(this.gameRoom.roomId === gameEvent.socket.gameRoomId || this.gameRoom.roomId === gameEvent.socket.handshake.query.roomId)} \nits the same disconnected userId ${gameEvent.socket.user._id === disconnectedUserId}`);
-            console.log(gameEvent.eventName + '!!');
-            return gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection &&
-                (this.gameRoom.roomId === gameEvent.socket.gameRoomId || this.gameRoom.roomId === gameEvent.socket.handshake.query.roomId) &&
-                gameEvent.socket.user._id === disconnectedUserId;
-        });
+        const time_to_reconnect = reconnection_timeout; //in milisec
+        let reconnected$ = game__service_1.game$.filter((gameEvent) => 
+        //check a socket connected and its the disconnected player from this room
+        gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection &&
+            gameEvent.socket.user._id.toString() === disconnectedUserId.toString());
         let timeOut$ = Observable_1.Observable.timer(time_to_reconnect);
         Observable_1.Observable.merge(reconnected$, timeOut$).first().subscribe((gameEventOrTimeout) => {
             //reconnected on time:

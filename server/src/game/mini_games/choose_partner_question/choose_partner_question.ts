@@ -90,11 +90,11 @@ export class choose_partner_question extends miniGame {
                         Logger.d(TAG, `Warning - the player try to play when its not his turn`, 'red');
                     }
                 })
-            this.miniGameState.subscribe(() => {
-                Logger.d(TAG, `miniGame (gameRoomId=${this.gameRoom.roomId.slice(0, 5)}..) State Changed :`, 'magenta');
-                Logger.d(TAG, this.miniGameState.getState(), 'magenta');
+            // this.miniGameState.subscribe(() => {
+            //     Logger.d(TAG, `miniGame (gameRoomId=${this.gameRoom.roomId.slice(0, 5)}..) State Changed :`, 'magenta');
+            //     Logger.d(TAG, this.miniGameState.getState(), 'magenta');
 
-            }) //TODOTODO continue implement the migration to redux .getState()
+            // }) //TODOTODO continue implement the migration to redux .getState()
             //TODO
             //DONT FORGET TO UNSBSRIBE When FOR EVETNS
             //TODO - Handle disconnection in a middle of a game
@@ -106,16 +106,16 @@ export class choose_partner_question extends miniGame {
 
     }
     //TODOTODOTODO transfer this to be handled by redux structure 
-    private updateMiniGameState(miniGameState: iMiniGameState, playActionData: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>): iMiniGameState {
-        if (playActionData.type === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
-            return {
-                currentAnswerIndex: miniGameState
-            }
-        }
-        return {
-            currentAnswerIndex
-        }
-    }
+    // private updateMiniGameState(miniGameState: iMiniGameState, playActionData: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>): iMiniGameState {
+    //     if (playActionData.type === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
+    //         return {
+    //             currentAnswerIndex: miniGameState
+    //         }
+    //     }
+    //     return {
+    //         currentAnswerIndex
+    //     }
+    // }
     private randomizeFirstTurn(): number {
         return utilsService.randomizeInt(0, this.gameRoomPlayersAmount - 1);
 

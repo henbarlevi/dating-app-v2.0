@@ -26,5 +26,6 @@ var GAME_SOCKET_EVENTS;
     GAME_SOCKET_EVENTS["partner_played"] = "partner_played";
     GAME_SOCKET_EVENTS["play"] = "play";
     //edge cases
-    GAME_SOCKET_EVENTS["already_connected"] = "already_connected"; //(Currently not in use in client - maybe useless )for example if the user create another tab and connecting in parallel ,telling the first tab to close the session
+    GAME_SOCKET_EVENTS["already_connected"] = "already_connected";
+    GAME_SOCKET_EVENTS["reconnection_data"] = "reconnection_data"; //server tell user that he has reconnted to game along with the current gamestate details
 })(GAME_SOCKET_EVENTS = exports.GAME_SOCKET_EVENTS || (exports.GAME_SOCKET_EVENTS = {}));
