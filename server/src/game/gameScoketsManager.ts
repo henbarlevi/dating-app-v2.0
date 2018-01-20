@@ -59,7 +59,7 @@ export class GameScoketsManager {
         this.handleNewConnections();/**handle socket's connections */
         this.handlePlayersLeavingGame();
     }
-    /**handle socket's connections */
+    /**handle socket's new connections */
     handleNewConnections() {
         //handle connections //TODO - check how dispose correctly
         game$
@@ -177,7 +177,7 @@ export class GameScoketsManager {
      *  b.if not - remove him from playersPlaying List
      */
     private handleDisconnectionEvent(gameEvent: game$Event) {
-        let disconnectingUserID = gameEvent.socket.user._id;
+        let disconnectingUserID = gameEvent.socket.user._id.toString();
         let disconnectUserSocket = gameEvent.socket;
         let disconnectedFromRoomId: string = gameEvent.socket.gameRoomId;
         //remove socket from waiting list if its there
@@ -192,7 +192,7 @@ export class GameScoketsManager {
                 //check a socket connected and its the disconnected player from this room
                 gameEv.eventName === GAME_SOCKET_EVENTS.connection &&
                 (disconnectedFromRoomId === gameEv.socket.gameRoomId || disconnectedFromRoomId === gameEv.socket.handshake.query.roomId) &&
-                gameEv.socket.user._id === disconnectingUserID);
+                gameEv.socket.user._id.toString() === disconnectingUserID);
             const timeOut$ = Observable.timer(reconnection_timeout);
             Observable.merge(reconnected$, timeOut$).first().subscribe(
                 (gameEventOrTimeout: any) => {

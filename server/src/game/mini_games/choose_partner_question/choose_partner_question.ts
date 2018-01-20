@@ -25,6 +25,7 @@ const TAG: string = 'choose_partner_question';
 export class choose_partner_question extends miniGame {
     private randomQuestions: iQuestion[];
     private miniGameState: Store<iMiniGameState>;
+    private turn: iGameSocket;//who socket turn is
     /**Ctor */
     constructor(io: SocketIO.Namespace, gameRoom: iGameRoom) {
         super(io, gameRoom);
@@ -57,44 +58,44 @@ export class choose_partner_question extends miniGame {
     async playMiniGame() {
         try {
             await this.initMiniGame();
-            let turn: iGameSocket;//who socket turn is
+
             //randomize first player to play:
             let firstTurnPlayerIndex: number = this.randomizeFirstTurn();
             //tell players who's turn is
-            turn = this.gameRoom.players[firstTurnPlayerIndex];
+            this.turn = this.gameRoom.players[firstTurnPlayerIndex];
             this.gameRoom.players.forEach(player => {
-                player === turn ?
+                player === this.turn ?
                     player.emit(GAME_SOCKET_EVENTS.your_turn) : player.emit(GAME_SOCKET_EVENTS.partner_turn);
             })
-            //mini game initial state
-            // let miniGameState: iMiniGameState = {
-            //     currentAnswerIndex: -1,//answer not yet chosen
-            //     currentQuestionIndex: -1,//question not yet chosen
-            //     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question //game waiting for player to choose a -question
-            // }
+
             //listen to minigame players actions
 
-            let play$Subscription: Subscription = game$.filter((gameEvent: game$Event) =>
-                gameEvent.eventName === GAME_SOCKET_EVENTS.play &&
-                gameEvent.socket.gameRoomId === this.gameRoom.roomId)
-                .subscribe((gameEvent: game$Event) => {
-                    if (turn.user._id === gameEvent.socket.user._id) {//if its his turn
-                        const playActionData: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = gameEvent.eventData as iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>;
-                        this.miniGameState.dispatch(playActionData);
-                        //const playActionIsValid: boolean = this.ValidatePlayAction(miniGameState, playActionData);
-                        // if (playActionIsValid) {
-                        //miniGameState = updateMiniGameState(miniGameState, playActionData);
-                        this.gameRoom.players.forEach(p => p.user._id !== turn.user._id ? p.emit(GAME_SOCKET_EVENTS.partner_played, { turn }) : '')
-                        // }
-                    } else {
-                        Logger.d(TAG, `Warning - the player try to play when its not his turn`, 'red');
-                    }
+            let play$Subscription: Subscription = game$
+                //pass only "play" game events that related to this gameroomId
+                .filter((gameEvent: game$Event) =>
+                    gameEvent.eventName === GAME_SOCKET_EVENTS.play &&
+                    gameEvent.socket.gameRoomId === this.gameRoom.roomId)
+                //pass only validated play actions
+                .filter((gameEvent: game$Event) => {
+                    return this.ValidatePlayAction(this.miniGameState.getState(), gameEvent)
                 })
-            // this.miniGameState.subscribe(() => {
-            //     Logger.d(TAG, `miniGame (gameRoomId=${this.gameRoom.roomId.slice(0, 5)}..) State Changed :`, 'magenta');
-            //     Logger.d(TAG, this.miniGameState.getState(), 'magenta');
+                .subscribe((gameEvent: game$Event) => {
+                    Logger.d(TAG, `Client User [${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id}] - Emited Event: [${gameEvent.eventName ? gameEvent.eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
+                    const playActionData: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = gameEvent.eventData as iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>;
+                    this.miniGameState.dispatch(playActionData);
 
-            // }) //TODOTODO continue implement the migration to redux .getState()
+                    const playerId: string = gameEvent.socket.user._id.toString();
+                    this.tellPlayersAboutPlayAction(playerId, playActionData);
+                })
+
+            this.miniGameState.subscribe(() => {
+                Logger.d(TAG, `miniGame (gameRoomId=${this.gameRoom.roomId.slice(0, 5)}..) State Changed :`, 'magenta');
+                let newCurrentState: iMiniGameState = this.miniGameState.getState()
+                for (let key of Object.keys(newCurrentState)) {
+                    Logger.d(TAG, `${key} = ${newCurrentState[key]}`, 'magenta');
+                }
+
+            })
             //TODO
             //DONT FORGET TO UNSBSRIBE When FOR EVETNS
             //TODO - Handle disconnection in a middle of a game
@@ -105,31 +106,40 @@ export class choose_partner_question extends miniGame {
 
 
     }
-    //TODOTODOTODO transfer this to be handled by redux structure 
-    // private updateMiniGameState(miniGameState: iMiniGameState, playActionData: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>): iMiniGameState {
-    //     if (playActionData.type === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
-    //         return {
-    //             currentAnswerIndex: miniGameState
-    //         }
-    //     }
-    //     return {
-    //         currentAnswerIndex
-    //     }
-    // }
+
     private randomizeFirstTurn(): number {
         return utilsService.randomizeInt(0, this.gameRoomPlayersAmount - 1);
 
     }
     /**receive 'play' event that accure on the gameroom and return if its valid or not
-     * by considering the state of the game
+     * by considering the state of the game.
+     * 1.validate if its the player turn
+     * 2. if player choose a question - check its a valid question index value:
+          if player choose an answer - """"""""  
      */
-    private ValidatePlayAction(miniGameState: iMiniGameState, playActionData: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>): boolean {
-        if (!playActionData || !playActionData.payload) { return false }///TODOTODOTODO decide how client will send the play action data -currently client send the full question string but index its enough
-        if (playActionData.type !== miniGameState.currentGameAction) { return false }
+    private ValidatePlayAction(miniGameState: iMiniGameState, gameEvent: game$Event): boolean {
+        const playActionData: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = gameEvent.eventData as iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>;
+        if (this.turn.user._id.toString() !== gameEvent.socket.user._id.toString()) {
+            //if its NOT his turn
+            Logger.d(TAG, `Warning - the player try to play when its not his turn`, 'red');
+            console.log(gameEvent);
+            return false
+        }
+        if (!playActionData || (!playActionData.payload && playActionData.payload !== 0)) {
+            Logger.d(TAG, `Warning - PlayAction is null/not contain payload`, 'red');
+
+            return false
+        }
+        if (playActionData.type !== miniGameState.currentGameAction) {
+            Logger.d(TAG, `Warning - PlayAction type not valid for current state - playActionData.type :[${CHOOSE_QUESTIONS_PLAY_ACTIONS[playActionData.type]}] != currentState[${miniGameState.currentGameAction}]`, 'red');
+
+            return false
+        }
         //if player choose a question
         let emitedValue = playActionData.payload;
-        if (typeof emitedValue === 'number') {
+        if (typeof emitedValue !== 'number') {
             Logger.d(TAG, `the emittedvalue is not a number, its a ${typeof emitedValue}`, 'red');
+            return false;
         }
         if (miniGameState.currentGameAction === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
             //check its a valid question index value:
@@ -139,9 +149,9 @@ export class choose_partner_question extends miniGame {
 
         } else {//if player choose an answer
             //check its a valid answer index value:
-            let currentQuestionIndex = miniGameState.currentQuestionIndex;
-            let chosenAnswerIndex = playActionData.payload as number;
-            let AnswersMaxIndex: number = this.randomQuestions[currentQuestionIndex].a.length - 1;//max valid index
+            const currentQuestionIndex = miniGameState.currentQuestionIndex;
+            const chosenAnswerIndex = playActionData.payload as number;
+            const AnswersMaxIndex: number = this.randomQuestions[currentQuestionIndex].a.length - 1;//max valid index
             return !(chosenAnswerIndex < 0 || chosenAnswerIndex > AnswersMaxIndex);
         }
     }

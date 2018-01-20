@@ -4,11 +4,12 @@ import { Observable } from 'rxjs/Observable';
 // ===== models
 import { iSocketData } from '../../models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from '../../models/GAME_SOCKET_EVENTS';
-import { iPlayAction } from '../../../../../../contract/iPlayData';
+
 import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../../../../../../contract/miniGames/choose_partner_question/PLAY_ACTIONS_ENUM';
 
 import { iQuestion } from './questions.model';
 import { game$Event } from '../../models/game$Event.model';
+import { iPlayAction } from '../../models/iPlayData';
 // ===== utils
 const TAG: string = 'ChoosePartnerQuestionComponent |';
 

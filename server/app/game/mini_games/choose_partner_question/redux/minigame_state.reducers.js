@@ -4,9 +4,11 @@ const PLAY_ACTIONS_ENUM_1 = require("../PLAY_ACTIONS_ENUM");
 const PLAY_ACTIONS = require("./play.actions");
 const NumberOfQuestionsPerGame = 7;
 const Logger_1 = require("../../../../utils/Logger");
+const GAME_TYPE_ENUM_1 = require("../../../models/GAME_TYPE_ENUM");
 const TAG = 'MiniGameStateReducer |';
 //mini game initial state
 const initialState = {
+    miniGameType: GAME_TYPE_ENUM_1.GAME_TYPE.choose_partner_question,
     currentAnswerIndex: -1,
     currentQuestionIndex: -1,
     currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
@@ -15,19 +17,13 @@ const initialState = {
     numberOfPlayersLeftToAnswer: 2
 };
 function MiniGameStateReducer(state = initialState, action) {
-    Logger_1.Logger.d(TAG, `Changing Game State [CHOOSE_QUESTIONS] game`, 'gray');
     switch (action.type) {
         case PLAY_ACTIONS.ASK_QUESTION:
             return Object.assign({}, state, { currentQuestionIndex: action.payload, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question });
-        // case PLAY_ACTIONS.ANSWER_QUESTION:
-        //     const numberOfPlayersLeftToAnswer: number = state.numberOfPlayersLeftToAnswer - 1;
-        //     if (state.numberOfPlayersLeftToAnswer)
-        //         return {
-        //             ...state,
-        //             currentAnswerIndex: action.payload,
-        //             numberOfPlayersLeftToAnswer: numberOfPlayersLeftToAnswer,
-        //             currentGameAction: numberOfPlayersLeftToAnswer === 0 ? CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question : state.currentGameAction
-        //         }
+        case PLAY_ACTIONS.ANSWER_QUESTION:
+            const numberOfPlayersLeftToAnswer = state.numberOfPlayersLeftToAnswer - 1;
+            if (state.numberOfPlayersLeftToAnswer)
+                return Object.assign({}, state, { currentAnswerIndex: action.payload, numberOfPlayersLeftToAnswer: numberOfPlayersLeftToAnswer, currentGameAction: numberOfPlayersLeftToAnswer === 0 ? PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question : state.currentGameAction });
         default:
             return state;
     }

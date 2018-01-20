@@ -6,6 +6,7 @@ import { iPlayAction } from '../../../models/iPlayData';
 const NumberOfQuestionsPerGame: number = 7;
 
 import { Logger } from '../../../../utils/Logger';
+import { GAME_TYPE } from '../../../models/GAME_TYPE_ENUM';
 const TAG: string = 'MiniGameStateReducer |';
 /**
 * This is a reducer, a pure function with (state, action) => state signature.
@@ -19,7 +20,7 @@ const TAG: string = 'MiniGameStateReducer |';
 * follows a different convention (such as function maps) if it makes sense for your
 * project.
 */
-export interface iMiniGameState /*TODO uncomment thisextends iGenericMiniGameState*/ {
+export interface iMiniGameState extends iGenericMiniGameState<GAME_TYPE.choose_partner_question> {
     currentQuestionIndex: number,
     currentAnswerIndex: number,
     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS,
@@ -29,6 +30,7 @@ export interface iMiniGameState /*TODO uncomment thisextends iGenericMiniGameSta
 }
 //mini game initial state
 const initialState: iMiniGameState = {
+    miniGameType:GAME_TYPE.choose_partner_question,
     currentAnswerIndex: -1,//answer not yet chosen
     currentQuestionIndex: -1,//question not yet chosen
     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, //game waiting for player to choose a -question
@@ -38,7 +40,6 @@ const initialState: iMiniGameState = {
 }
 
 export function MiniGameStateReducer(state = initialState, action: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>) {
-    Logger.d(TAG,`Changing Game State [CHOOSE_QUESTIONS] game`,'gray');
     switch (action.type) {
         case PLAY_ACTIONS.ASK_QUESTION:
             return {
@@ -46,15 +47,15 @@ export function MiniGameStateReducer(state = initialState, action: iPlayAction<C
                 currentQuestionIndex: action.payload,
                 currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question
             }
-        // case PLAY_ACTIONS.ANSWER_QUESTION:
-        //     const numberOfPlayersLeftToAnswer: number = state.numberOfPlayersLeftToAnswer - 1;
-        //     if (state.numberOfPlayersLeftToAnswer)
-        //         return {
-        //             ...state,
-        //             currentAnswerIndex: action.payload,
-        //             numberOfPlayersLeftToAnswer: numberOfPlayersLeftToAnswer,
-        //             currentGameAction: numberOfPlayersLeftToAnswer === 0 ? CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question : state.currentGameAction
-        //         }
+        case PLAY_ACTIONS.ANSWER_QUESTION:
+            const numberOfPlayersLeftToAnswer: number = state.numberOfPlayersLeftToAnswer - 1;
+            if (state.numberOfPlayersLeftToAnswer)
+                return {
+                    ...state,
+                    currentAnswerIndex: action.payload,
+                    numberOfPlayersLeftToAnswer: numberOfPlayersLeftToAnswer,
+                    currentGameAction: numberOfPlayersLeftToAnswer === 0 ? CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question : state.currentGameAction
+                }
 
         default:
             return state;

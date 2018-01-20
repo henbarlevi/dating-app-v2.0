@@ -54,7 +54,7 @@ export class Game$ {
     private static printAllEvents() {
         game$.subscribe(async(socketEvent: game$Event) => {
             try{
-
+                
                 Logger.d(TAG, `Client User [${socketEvent.socket.user.facebook ? socketEvent.socket.user.facebook.name : socketEvent.socket.user._id}] - Emited Event: [${socketEvent.eventName ?  socketEvent.eventName : 'Unknwon'}] With the Data [${socketEvent.eventData ? JSON.stringify(socketEvent.eventData) : 'None'}]`, 'cyan');
             }
             catch(e){

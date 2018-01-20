@@ -29,7 +29,6 @@ class miniGame {
                 if (event.eventData) {
                     let gameroomId = event.eventData.roomId;
                     let eventName = event.eventName;
-                    Logger_1.Logger.d(TAG, `Game room ${this.gameRoom.roomId} received event : ${eventName} related to ${gameroomId} to game room ${gameroomId}`, 'gray');
                     return eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameroomId === this.gameRoom.roomId;
                 }
                 return false;
@@ -38,7 +37,7 @@ class miniGame {
                 try {
                     let playerReady = data.socket;
                     let playerRelatedToGameroom = this.gameRoom.players.find(p => p.id === playerReady.id);
-                    playerRelatedToGameroom ? playersReady.push(playerReady) : 'Warning! Socket That is not related to game room emited event of ready_for_minigame';
+                    playerRelatedToGameroom ? playersReady.push(playerReady) : Logger_1.Logger.d(TAG, 'Warning! Socket That is not related to game room emited event of ready_for_minigame', 'red');
                     Logger_1.Logger.d(TAG, `game room [${this.gameRoom.roomId}] | Player - ${playerReady.user.facebook ? playerReady.user.facebook.name : playerReady.user._id} is ready`);
                     if (playersReady.length === this.gameRoomPlayersAmount) {
                         resolve();
@@ -50,6 +49,22 @@ class miniGame {
                 }
             }));
         });
+    }
+    /**when some players do an action in the game - this method will inform the other players about the game action occurred
+     * @param playerId - the player that did the action
+     */
+    tellPlayersAboutPlayAction(playerId, playActionData) {
+        const playAction = Object.assign({}, playActionData, { playerId: playerId });
+        this.gameRoom.players.forEach(p => {
+            if (p.user._id.toString() !== playerId) {
+                Logger_1.Logger.d(TAG, `telling the player [${this.getUserNameBySocket(p)}] about the playaction`, 'gray');
+                p.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_played, playAction);
+            }
+        });
+    }
+    /**for logs - return a user Name Or Id string */
+    getUserNameBySocket(socket) {
+        return socket.user.facebook ? socket.user.facebook.name : socket.user._id.toString();
     }
 }
 exports.miniGame = miniGame;

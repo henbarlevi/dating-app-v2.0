@@ -1,5 +1,8 @@
 //this is the event args along with the 'play' (when the client/server emit event of 'play')
+// (when the player do some action in a minigame)
+//T = PLAY_ACTIONS_ENUM ( each mini game has PLAY_ACTIONS_ENUM)
 export interface iPlayAction<T> {
-    actionType: T
-    data?: any
+    type: T //type of the action , for example-if its a poker minigame the enumartor will contain actions like :(Fold,Raise,pickedCard etc.))
+    payload?: any //more data about the action
 }
+//

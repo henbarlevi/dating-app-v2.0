@@ -9,6 +9,7 @@ import { game$, game$Event } from '../game$.service';
 import 'rxjs/add/operator/filter';
 import { iSocketData } from "../models/iSocketData.model";
 import { retry } from "rxjs/operator/retry";
+import { iPlayAction } from "../models/iPlayData";
 export abstract class miniGame {
     protected gameRoomPlayersAmount: number;
     constructor(protected io: SocketIO.Namespace, protected gameRoom: iGameRoom) {
@@ -23,12 +24,11 @@ export abstract class miniGame {
             Logger.d(TAG, '** waiting for players to be ready... **', 'gray');
             let playersReady: iGameSocket[] = [];
             //TODO - dont forget to dispose event listener
-           let subscription = game$
+            let subscription = game$
                 .filter((event: game$Event) => {
                     if (event.eventData) {
                         let gameroomId: string = event.eventData.roomId;
                         let eventName: string = event.eventName as GAME_SOCKET_EVENTS
-                        Logger.d(TAG, `Game room ${this.gameRoom.roomId} received event : ${eventName} related to ${gameroomId} to game room ${gameroomId}`, 'gray');
                         return eventName === GAME_SOCKET_EVENTS.ready_for_mini_game && gameroomId === this.gameRoom.roomId;
                     }
                     return false;
@@ -38,7 +38,7 @@ export abstract class miniGame {
 
                         let playerReady: iGameSocket = data.socket;
                         let playerRelatedToGameroom = this.gameRoom.players.find(p => p.id === playerReady.id);
-                        playerRelatedToGameroom ? playersReady.push(playerReady) : 'Warning! Socket That is not related to game room emited event of ready_for_minigame';
+                        playerRelatedToGameroom ? playersReady.push(playerReady) : Logger.d(TAG, 'Warning! Socket That is not related to game room emited event of ready_for_minigame', 'red');
                         Logger.d(TAG, `game room [${this.gameRoom.roomId}] | Player - ${playerReady.user.facebook ? playerReady.user.facebook.name : playerReady.user._id} is ready`)
 
                         if (playersReady.length === this.gameRoomPlayersAmount) { //all players ready_for_mini_game
@@ -53,5 +53,22 @@ export abstract class miniGame {
 
 
         })
+    }
+    /**when some players do an action in the game - this method will inform the other players about the game action occurred
+     * @param playerId - the player that did the action 
+     */
+    protected tellPlayersAboutPlayAction(playerId: string, playActionData: iPlayAction<any>) {
+        const playAction: iPlayAction<any> = { ...playActionData, playerId: playerId };
+        this.gameRoom.players.forEach(p => {
+            if (p.user._id.toString() !== playerId) {//if its not the player that did the action
+                Logger.d(TAG, `telling the player [${this.getUserNameBySocket(p)}] about the playaction`, 'gray');
+                p.emit(GAME_SOCKET_EVENTS.partner_played, playAction)
+            }
+        })
+    }
+
+    /**for logs - return a user Name Or Id string */
+    protected getUserNameBySocket(socket: iGameSocket) { //return userName or userId
+        return socket.user.facebook ? socket.user.facebook.name : socket.user._id.toString()
     }
 }

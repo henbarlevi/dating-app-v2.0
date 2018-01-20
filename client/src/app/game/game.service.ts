@@ -16,21 +16,27 @@ const TAG: string = 'GameService |';
 export class GameService {
   baseUrl: string = 'http://localhost:3000';
   private gameSocket: SocketIOClient.Socket;
-  private _game$: ReplaySubject<game$Event> = new ReplaySubject<game$Event>(1);
-  public game$: Observable<game$Event> = this._game$.asObservable();
   /*
   Raise events with services (BehaviourSubject,ReplaySubject) :
   https://stackoverflow.com/questions/34376854/delegation-eventemitter-or-observable-in-angular2/35568924#35568924*/
-  private _gameStatusChanged = new BehaviorSubject<GAME_STATUS>(GAME_STATUS.not_playing);
-  public gameStatusChanged$ = this._gameStatusChanged.asObservable();
-
-  raiseGameStatusChange(gameStatus: GAME_STATUS) {
-    this._gameStatusChanged.next(gameStatus);
-  }
-
+  private _game$: ReplaySubject<game$Event> = new ReplaySubject<game$Event>(1);
+  public game$: Observable<game$Event> = this._game$.asObservable();
 
   constructor() {
+    this.printAllEvents();
+  }
 
+  private printAllEvents() {
+    this.game$.subscribe(async (socketEvent: game$Event) => {
+      try {
+
+        console.log('%c'+ `[RECEIVED] EVENT [${socketEvent.eventName}] - Occured with data:  With the Data [${socketEvent.eventData ? JSON.stringify(socketEvent.eventData) : 'None'}]`, 'color: blue');
+      }
+      catch (e) {
+        console.log('%c'+ `Err =====> while printing event ` + e, 'color: red');
+      }
+
+    })
   }
   /**estabslish web socket and return observable that emits the websocket events coming from server */
   startGame() {
@@ -46,16 +52,12 @@ export class GameService {
       });
     socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
     this.gameSocket.on('*', (data: iSocketData) => {
-      console.log(TAG, `%c ** GameSocket Recieved [${data.data[0]}] event with the data [${data.data[1]}]**`, 'color: blue');
-
-
       this._game$.next({
         eventName: data.data[0],
         eventData: data.data[1]
       });
     });
     this.gameSocket.once('disconnect', () => {
-      console.log(TAG, 'You have disconnected');
       //emit disconnection to game$
       this._game$.next({
         eventName: GAME_SOCKET_EVENTS.disconnect,
@@ -71,7 +73,7 @@ export class GameService {
   }
   /*send to server game event*/
   emitGameEvent(eventName: GAME_SOCKET_EVENTS, data?: any) {
-    console.log(`%c ** GameSocket Emiting [${eventName}] event**`, 'color: blue');
+    console.log(`%c ** [Emited] Event :[${eventName}] **`, 'color: blue');
     let roomId = this.gameroomId;
     if (roomId) {
       data ? data.roomId = roomId : data = { roomId: roomId };
@@ -90,7 +92,10 @@ export class GameService {
       localStorage.setItem('roomId', roomId);
     }
   }
+
+
 }
+
 
 export enum GAME_STATUS {
   not_playing,
