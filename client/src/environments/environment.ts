@@ -5,6 +5,7 @@
 
 export const environment = {
   production: false,
-  envName:'DEV',
-  apiUrl:"http://localhost:3000"
+  envName: 'DEV',
+  apiUrl: "http://localhost:3000",
+  miniGamesPerGame: 3
 };

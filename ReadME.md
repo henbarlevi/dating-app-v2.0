@@ -98,8 +98,8 @@ var a:string = 'namw'
 * replace all hardcoded urls with environment variables
 * do research on how to make the site be in top in google search - maybe this is the key : [Search Conosole](https://www.google.com/webmasters/tools/home?hl=en)
 * when doing JSON.stringify(gameEventOrtimeout) in the gameroomManager on the mreged observable subscribed object - recevied "Converting circular structure to JSON" Fix this to avoid memory leak
-
-
+* change the css arrow to gif
+* maybe discard saving roomId in client - it already handled by server, so maybe there is no need to save it in client storage
 
 
 <style>

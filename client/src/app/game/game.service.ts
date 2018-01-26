@@ -10,6 +10,10 @@ import { iSocketData } from './models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 import { game$Event } from './models/game$Event.model';
 const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
+//ngrx (redux)
+import { iState } from './_ngrx/game.reducers';
+import { Store } from '@ngrx/store';
+import * as GameActions from './_ngrx/game.actions';
 //==== utils
 const TAG: string = 'GameService |';
 @Injectable()
@@ -22,18 +26,18 @@ export class GameService {
   private _game$: ReplaySubject<game$Event> = new ReplaySubject<game$Event>(1);
   public game$: Observable<game$Event> = this._game$.asObservable();
 
-  constructor() {
-    this.printAllEvents();
+  constructor(private store: Store<iState>) {
+    this.printAllEvents();//log $game events
   }
 
   private printAllEvents() {
     this.game$.subscribe(async (socketEvent: game$Event) => {
       try {
 
-        console.log('%c'+ `[RECEIVED] EVENT [${socketEvent.eventName}] - Occured with data:  With the Data [${socketEvent.eventData ? JSON.stringify(socketEvent.eventData) : 'None'}]`, 'color: blue');
+        console.log('%c' + `[RECEIVED] EVENT [${socketEvent.eventName}] - Occured with data:  With the Data [${socketEvent.eventData ? JSON.stringify(socketEvent.eventData) : 'None'}]`, 'color: blue');
       }
       catch (e) {
-        console.log('%c'+ `Err =====> while printing event ` + e, 'color: red');
+        console.log('%c' + `Err =====> while printing event ` + e, 'color: red');
       }
 
     })
@@ -62,13 +66,17 @@ export class GameService {
       this._game$.next({
         eventName: GAME_SOCKET_EVENTS.disconnect,
       });
-      //delete roomId
+      //delete roomId from localstorage
       this.gameroomId = null;
       //clean listener and observable emits
       this.gameSocket.removeAllListeners();
       this._game$ = new ReplaySubject<game$Event>(1);
       this.game$ = this._game$.asObservable();
+      //change gamestate:
+      this.store.dispatch(new GameActions.socketDisconnection())
     })
+    //change gamestate:
+    this.store.dispatch(new GameActions.StartNewGame());
     return this.game$;
   }
   /*send to server game event*/
@@ -97,12 +105,7 @@ export class GameService {
 }
 
 
-export enum GAME_STATUS {
-  not_playing,
-  searching_player,
-  playing,
-  game_ended
-}
+
 
 export enum GAME_TYPE {
   choose_partner_question /**a game where the partner decide what question the other player will answer */

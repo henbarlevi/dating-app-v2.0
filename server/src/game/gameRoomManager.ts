@@ -27,7 +27,7 @@ const TAG: string = 'GameRoomManager |';
 
 // ====== Games
 import { choose_partner_question } from './mini_games/choose_partner_question/choose_partner_question';
-import { game$, game$Event, game$Event } from './game$.service';
+import { game$, game$Event } from './game$.service';
 let miniGames = [
     choose_partner_question
 ];
@@ -57,8 +57,14 @@ export class GameRoomManager {
             this.gameRoom.players.forEach(playerSocket => {
                 playerSocket.join(gameRoomId);
             })
-            //tell players that match is found
-            this.io.to(gameRoomId).emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId });
+            //tell players that match is found and their partner/s id
+            //OLD -this.io.to(gameRoomId).emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId });
+            const playersId: string[] = this.gameRoom.players.map(p => p.user._id.toString())
+            this.gameRoom.players.forEach((playersocket: iGameSocket) => {
+                Logger.d(TAG, `emit to player [${this.getUserNameBySocket(playersocket)}] found partners`, 'gray')
+                const partnersId = playersId.filter(pId => pId !== playersocket.user._id);
+                playersocket.emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId, partnersId: partnersId })
+            })
             // while (this.gameRoom.miniGamesRemaining > 0) {
             //generate new mini game:
 
@@ -122,11 +128,11 @@ export class GameRoomManager {
                 //reconnected on time:
                 if (gameEventOrTimeout.eventName) {
                     const gameEvent = gameEventOrTimeout as game$Event;
-                    Logger.d(TAG,`User [${this.getUserNameBySocket(disconnectedSocket)}] reconnected back to gameRoomId: [${this.gameRoom.roomId}]`,'gray');
+                    Logger.d(TAG, `User [${this.getUserNameBySocket(disconnectedSocket)}] reconnected back to gameRoomId: [${this.gameRoom.roomId}]`, 'gray');
 
                 } else {//timeout //TODOTODOTOD - think how to handle the reconnection issue + who will handle the list of players that can reconnect
-                    Logger.d(TAG,`User [${this.getUserNameBySocket(disconnectedSocket)}] chance to reconnection passed, goomRoomId: [${this.gameRoom.roomId}]`,'gray');
-                    
+                    Logger.d(TAG, `User [${this.getUserNameBySocket(disconnectedSocket)}] chance to reconnection passed, goomRoomId: [${this.gameRoom.roomId}]`, 'gray');
+
                 }
             }
         )

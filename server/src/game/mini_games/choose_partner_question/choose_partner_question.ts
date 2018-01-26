@@ -48,7 +48,7 @@ export class choose_partner_question extends miniGame {
 
         //declaring the mini game that should start - this is how client know to load the minigame screen:
         this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.init_mini_game, {
-            gameType: GAME_TYPE.choose_partner_question,
+            miniGameType: GAME_TYPE.choose_partner_question,
             initData: this.randomQuestions
         });
         await this.WaitForPlayersToBeReady(); //calling super class
@@ -69,12 +69,12 @@ export class choose_partner_question extends miniGame {
             })
 
             //listen to minigame players actions
-
             let play$Subscription: Subscription = game$
                 //pass only "play" game events that related to this gameroomId
-                .filter((gameEvent: game$Event) =>
-                    gameEvent.eventName === GAME_SOCKET_EVENTS.play &&
-                    gameEvent.socket.gameRoomId === this.gameRoom.roomId)
+                .filter((gameEvent: game$Event) => {
+                    return gameEvent.eventName === GAME_SOCKET_EVENTS.play &&
+                        gameEvent.socket.gameRoomId === this.gameRoom.roomId
+                })
                 //pass only validated play actions
                 .filter((gameEvent: game$Event) => {
                     return this.ValidatePlayAction(this.miniGameState.getState(), gameEvent)

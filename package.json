@@ -1,9 +1,13 @@
 {
-
   "scripts": {
     "dev": "npm run client & npm run server ",
-    "server":"start cmd /k \"cd server &&  npm run dev\" ",
+    "server": "start cmd /k \"cd server &&  npm run dev\" ",
     "client": "start cmd /k \"cd client &&  npm start\" "
+  },
+  "devDependencies": {
+    "ngrx-store-freeze": "^0.2.0"
+  },
+  "dependencies": {
+    "ngrx-store-logger": "^0.2.0"
   }
- 
 }

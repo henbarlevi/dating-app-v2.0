@@ -53,8 +53,8 @@ class GameScoketsManager {
         )
             .subscribe((gameEvent) => {
             let socket = gameEvent.socket;
-            Logger_1.Logger.d(TAG, `** Handle New Connection **`, 'gray');
             this.printCurrentState(socket);
+            Logger_1.Logger.d(TAG, `** Handle New Connection **`, 'gray');
             socket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.searchForPartner);
             let partner = this.searchForPartner(socket);
             if (!partner) {
@@ -71,14 +71,6 @@ class GameScoketsManager {
                 gameRoom.players.forEach(socket => {
                     socket.gameRoomId = gameRoom.roomId;
                 });
-                // ==== MOVED TO gameroomManager
-                // //insert the 2 players into the room
-                // socket.join(gameRoom.roomId);
-                // partner.join(gameRoom.roomId);
-                // //tell 2 players that match is found
-                // this.io.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoom.roomId });
-                //send the gameroom to the GameRoom manager to handle the game:
-                // ==== MOVED TO gameroomManager
                 //generate new Handler to handle the room
                 let gameRoomManager = new gameRoomManager_1.GameRoomManager(this.io, gameRoom);
                 gameRoomManager.handle();

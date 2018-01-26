@@ -26,16 +26,19 @@ module.exports = function (io) {
         if (token) {
             middlewares_1.verifyToken(token)
                 .then((user) => {
-                Logger_1.Logger.d(TAG, `Already Connected Users : ${Object.keys(alreadyConnectedUsers).join()}`);
+                Logger_1.Logger.d(TAG, `Already Connected Users _id = ${Object.keys(alreadyConnectedUsers).join()}`);
+                const userId = user._id.toString();
+                Logger_1.Logger.d(TAG, `This User _id =  ${userId}`);
+                Logger_1.Logger.d(TAG, `${alreadyConnectedUsers[userId]}`);
                 //if the user alredy connected - prevent duplication (disconnect the first tab)
-                if (alreadyConnectedUsers[user._id]) {
-                    Logger_1.Logger.d(TAG, 'user already connected from another tab/device', 'yellow');
+                if (alreadyConnectedUsers[userId]) {
+                    Logger_1.Logger.d(TAG, 'user already connected from another tab/device, **disconnect previous connection and saving the new socket into [alreadyConnectedUsers] **', 'yellow');
                     //alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS.already_connected);
-                    alreadyConnectedUsers[user._id].disconnect();
+                    alreadyConnectedUsers[userId].disconnect();
                     //set user into socket socket.user
                     socket.user = user;
                     //saving into alreadyConnectedUsers
-                    alreadyConnectedUsers[user._id] = socket;
+                    alreadyConnectedUsers[userId] = socket;
                     next();
                 }
                 else {
@@ -44,7 +47,7 @@ module.exports = function (io) {
                     //set user into socket socket.user
                     socket.user = user;
                     //saving into alreadyConnectedUsers
-                    alreadyConnectedUsers[user._id] = socket;
+                    alreadyConnectedUsers[userId] = socket;
                     next();
                 }
             })
@@ -65,8 +68,16 @@ module.exports = function (io) {
         let connectionQueryParams = socket.handshake.query;
         socket.on('disconnect', () => {
             //remove player from alreadyConnectedUsers
-            let userId = socket.user._id;
-            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : Logger_1.Logger.d(TAG, `Warning! -Diconnected User ${userId} not exist in the alreadyConnectedUsers`, 'red');
+            const userId = socket.user._id.toString();
+            if (alreadyConnectedUsers[userId]) {
+                Logger_1.Logger.d(TAG, `** removing ${userId} from [alreadyConnectedUsers] **`, 'gray');
+                delete alreadyConnectedUsers[userId];
+                console.log(alreadyConnectedUsers);
+            }
+            else {
+                Logger_1.Logger.d(TAG, `Warning! -Diconnected User ${userId} not exist in the [alreadyConnectedUsers]`, 'red');
+            }
+            ;
         });
         //handle reconnection - TODO
         if (socket.handshake.query.roomId) {

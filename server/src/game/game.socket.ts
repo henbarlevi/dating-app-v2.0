@@ -5,7 +5,7 @@ import * as Rx from 'rxjs';
 import * as request from 'request';
 import * as jwt from 'jsonwebtoken'; //jwt authentication
 
-import 'rxjs/add/observable/merge'; 
+import 'rxjs/add/observable/merge';
 import 'rxjs/add/observable/timer';
 
 //======db
@@ -44,18 +44,21 @@ module.exports = function (io) {
         if (token) {
             verifyToken(token)
                 .then((user: iUser) => {
-                    Logger.d(TAG, `Already Connected Users : ${Object.keys(alreadyConnectedUsers).join()}`)
+                    Logger.d(TAG, `Already Connected Users _id = ${Object.keys(alreadyConnectedUsers).join()}`)
+                    const userId: string = user._id.toString();
+                    Logger.d(TAG, `This User _id =  ${userId}`)
+                    Logger.d(TAG, `${alreadyConnectedUsers[userId]}`)
 
                     //if the user alredy connected - prevent duplication (disconnect the first tab)
-                    if (alreadyConnectedUsers[user._id]) {
-                        Logger.d(TAG, 'user already connected from another tab/device', 'yellow');
+                    if (alreadyConnectedUsers[userId]) {
+                        Logger.d(TAG, 'user already connected from another tab/device, **disconnect previous connection and saving the new socket into [alreadyConnectedUsers] **', 'yellow');
                         //alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS.already_connected);
 
-                        alreadyConnectedUsers[user._id].disconnect();
+                        alreadyConnectedUsers[userId].disconnect();
                         //set user into socket socket.user
                         socket.user = user;
                         //saving into alreadyConnectedUsers
-                        alreadyConnectedUsers[user._id] = socket;
+                        alreadyConnectedUsers[userId] = socket;
                         next();
 
 
@@ -66,7 +69,7 @@ module.exports = function (io) {
                         //set user into socket socket.user
                         socket.user = user;
                         //saving into alreadyConnectedUsers
-                        alreadyConnectedUsers[user._id] = socket;
+                        alreadyConnectedUsers[userId] = socket;
                         next();
                     }
 
@@ -87,12 +90,17 @@ module.exports = function (io) {
     Game$.init(io);
     /*handle connection*/
     io.sockets.on('connection', (socket: iGameSocket) => {
-        let connectionQueryParams =socket.handshake.query;
-        
+        let connectionQueryParams = socket.handshake.query;
+
         socket.on('disconnect', () => {
             //remove player from alreadyConnectedUsers
-            let userId = (socket as iGameSocket).user._id
-            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : Logger.d(TAG,`Warning! -Diconnected User ${userId} not exist in the alreadyConnectedUsers`,'red');
+
+            const userId: string = (socket as iGameSocket).user._id.toString()
+            if (alreadyConnectedUsers[userId]) {
+                Logger.d(TAG, `** removing ${userId} from [alreadyConnectedUsers] **`, 'gray')
+                delete alreadyConnectedUsers[userId];
+                console.log(alreadyConnectedUsers);
+            } else { Logger.d(TAG, `Warning! -Diconnected User ${userId} not exist in the [alreadyConnectedUsers]`, 'red') };
         });
         //handle reconnection - TODO
         if (socket.handshake.query.roomId) {
@@ -104,7 +112,7 @@ module.exports = function (io) {
             //socket.disconnect();
 
         }
-//
+        //
 
         // socket.on('add-message', (message) => {
         //     io.emit('message', { type: 'new-message', text: message });

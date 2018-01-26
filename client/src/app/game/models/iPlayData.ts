@@ -4,5 +4,6 @@
 export interface iPlayAction<T> {
     type: T //type of the action , for example-if its a poker minigame the enumartor will contain actions like :(Fold,Raise,pickedCard etc.))
     payload?: any //more data about the action
+    playerId?: string//if the server tell the other players about the action, it will also mention who did the action
 }
 //

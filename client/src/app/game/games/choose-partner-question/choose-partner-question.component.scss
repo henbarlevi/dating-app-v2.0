@@ -1,8 +1,4 @@
-img{
-  max-height: 100%;
-  max-width: 100%;
-  padding-top:5px;
-}
+
 #minigame-wrapper{
 
     height: 100%;
@@ -12,13 +8,52 @@ img{
     flex-wrap: wrap;
     justify-content: space-between;
 }
+#player-details,#partner-details,#arrow-wrapper{
+  height: 15%;
+}
+#player-details,#partner-details{
+flex-basis: 40%;
 
-#questions-wrapper{
+}
+/*
+==========
+==== 'YOU','Partner' and arrow imgs
+==========
+*/
+img{
+  max-height: 100%;
+  max-width: 100%;
+ 
+  padding-top:5px;
+}
+/*
+==========
+==== Arrow
+==========
+*/
+#arrow-wrapper{
+  flex-basis: 20%;
+  //to center arrow img inside the div
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+//my classes
+.arrows-left{
+  transform: rotate(180deg);
+}
+.arrows-right{
+  //keep original direction of img
+}
+
+#questions-wrapper,#answers-wrapper{
     flex-basis: 100%;
     display: flex;
     height: 80%;
 }
-#questions{
+#questions,#answers{
   flex-basis: 45%;
   @media screen and (max-width:620px) {
     flex-basis: 100%;
@@ -27,146 +62,5 @@ img{
   margin:auto;
 }
 
-#player-details,#partner-details,#arrow-wrapper{
-    height: 15%;
-}
-#player-details,#partner-details{
-  flex-basis: 40%;
- 
-}
-#arrow-wrapper{
-  flex-basis: 20%;
-  position: relative;
-}
-
-/*
-==========
-==== Arrow
-==========
-*/
-//writen with "mobile first" principle
-$size: 40px;
-$sizePhone:20px;
-
-$speed: 3s;
-$peakopacity:0.7;
-$directionAngle:0deg;
 
 
-.arrows {
-  position: relative;
-  /**/
-  //position: absolute;
-  left:30%;
-  /**/
-  width:$sizePhone;
-  height:$sizePhone;
-  transform:translate(-50%,-50%);
-  &:before {
-    content: '';
-    position: absolute;
-    width:100%;
-    height:100%;
-    border-left:$sizePhone/3 solid rgba(0,0,0,$peakopacity);
-    border-bottom:$sizePhone/3 solid rgba(0,0,0,$peakopacity);
-    transform:translate($sizePhone/3,$sizePhone*4/3)rotate(-45deg);
-    animation: arrowsPhone $speed linear infinite;
-  }
-  &:after {
-    content: '';
-    position: absolute;
-    width:100%;
-    height:100%;
-    border-left:$sizePhone/3 solid rgba(0,0,0,$peakopacity);
-    border-bottom:$sizePhone/3 solid rgba(0,0,0,$peakopacity);
-    transform:translate($sizePhone*2/3,0px)rotate(-45deg) ;
-    animation: arrowsPhone $speed linear infinite $speed/-2;
-  }
-}
-//same for phone
-@media screen and(min-width:620px){
-  .arrows {
-    position: relative;
-    /**/
-    //position: absolute;
-    left:30%;
-    /**/
-    width:$size;
-    height:$size;
-    transform:translate(-50%,-50%);
-    &:before {
-      content: '';
-      position: absolute;
-      width:100%;
-      height:100%;
-      border-left:$size/3 solid rgba(0,0,0,$peakopacity);
-      border-bottom:$size/3 solid rgba(0,0,0,$peakopacity);
-      transform:translate($size/3,$size*4/3)rotate(-45deg);
-      animation: arrows $speed linear infinite;
-    }
-    &:after {
-      content: '';
-      position: absolute;
-      width:100%;
-      height:100%;
-      border-left:$size/3 solid rgba(0,0,0,$peakopacity);
-      border-bottom:$size/3 solid rgba(0,0,0,$peakopacity);
-      transform:translate($size*2/3,0px)rotate(-45deg) ;
-      animation: arrows $speed linear infinite $speed/-2;
-    }
-  }
-  
-}
-
-
-//arrow animation
-@keyframes arrows {
-  0% {
-      border-left:$size/3 solid rgba(0,0,0,0);
-      border-bottom:$size/3 solid rgba(0,0,0,0);
-      transform:translate($size/-6,$size*4/-6)rotate(-45deg) ;
-  }
-  10%, 90% {
-      border-left:$size/3 solid rgba(0,0,0,0);
-      border-bottom:$size/3 solid rgba(0,0,0,0);
-  }
-  50% {
-      border-left:$size/3 solid rgba(0,0,0,$peakopacity);
-      border-bottom:$size/3 solid rgba(0,0,0,$peakopacity);
-      transform:translate($size/-6,0px)rotate(-45deg) ;
-  }
-  100% {
-      border-left:$size/3 solid rgba(0,0,0,0);
-      border-bottom:$size/3 solid rgba(0,0,0,0);
-      transform:translate($size/-6,$size*4/6)rotate(-45deg) ;
-  }
-}
-/*animation for phone size*/
-@keyframes arrowsPhone {
-  0% {
-      border-left:$sizePhone/3 solid rgba(0,0,0,0);
-      border-bottom:$sizePhone/3 solid rgba(0,0,0,0);
-      transform:translate($sizePhone/-6,$sizePhone*4/-6)rotate(-45deg) ;
-  }
-  10%, 90% {
-      border-left:$sizePhone/3 solid rgba(0,0,0,0);
-      border-bottom:$sizePhone/3 solid rgba(0,0,0,0);
-  }
-  50% {
-      border-left:$sizePhone/3 solid rgba(0,0,0,$peakopacity);
-      border-bottom:$sizePhone/3 solid rgba(0,0,0,$peakopacity);
-      transform:translate($sizePhone/-6,0px)rotate(-45deg) ;
-  }
-  100% {
-      border-left:$sizePhone/3 solid rgba(0,0,0,0);
-      border-bottom:$sizePhone/3 solid rgba(0,0,0,0);
-      transform:translate($sizePhone/-6,$sizePhone*4/6)rotate(-45deg) ;
-  }
-}
-//my classes
-.arrows-left{
-  transform: rotate(90deg);
-}
-.arrows-right{
-  transform: rotate(-90deg);
-}

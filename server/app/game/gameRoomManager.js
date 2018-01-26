@@ -48,8 +48,14 @@ class GameRoomManager {
                 this.gameRoom.players.forEach(playerSocket => {
                     playerSocket.join(gameRoomId);
                 });
-                //tell players that match is found
-                this.io.to(gameRoomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId });
+                //tell players that match is found and their partner/s id
+                //OLD -this.io.to(gameRoomId).emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId });
+                const playersId = this.gameRoom.players.map(p => p.user._id.toString());
+                this.gameRoom.players.forEach((playersocket) => {
+                    Logger_1.Logger.d(TAG, `emit to player [${this.getUserNameBySocket(playersocket)}] found partners`, 'gray');
+                    const partnersId = playersId.filter(pId => pId !== playersocket.user._id);
+                    playersocket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId, partnersId: partnersId });
+                });
                 // while (this.gameRoom.miniGamesRemaining > 0) {
                 //generate new mini game:
                 let miniGameType = randomizeGame();
