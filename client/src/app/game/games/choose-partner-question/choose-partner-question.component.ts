@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { GameService } from '../../game.service';
 import { Observable } from 'rxjs/Observable';
 // ===== models
@@ -19,6 +19,7 @@ import { initialState } from './_ngrx/minigame.reducer';//set reducerfunction fo
 import { iMiniGameState } from './_ngrx/minigame.reducer';
 import { Subscription } from 'rxjs/Subscription';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { iInitData } from './iInitData.model';
 // ===== utils
 const TAG: string = 'ChoosePartnerQuestionComponent |';
 
@@ -32,6 +33,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
   minigameState$: Observable<iMiniGameState>;
   minigameState: iMiniGameState = initialState;//get updated each time minigameState$ raise event
   partnersPlayActions$Sub: Subscription;
+  @ViewChild('partnersPlayActionsModal') partnersPlayActionsModal; //modal that pop up to present the partner actions
   constructor(private GameService: GameService,
     private store: Store<iGameState>) {
   }
@@ -40,22 +42,37 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     this.minigameState$ = this.store.select(getMiniGameState);
     this.minigameState$.subscribe((miniGameSate: iMiniGameState) => this.minigameState = miniGameSate);
     this.handleMiniGameInitalization()/**listen to [init_mini_game] event and update the minigamestate */
-    this.handlePartnersActions(); /**listen to partners play actions events and dispach the updateMiniGame action when occurr */
+    this.handlePartnersActions(); /**listen to partners play actions events and  when occurr 
+    1.dispach the updateMiniGame action
+    2.pop up the partnersPlayActionsModal to display the partner action
+    */
+
     this.handleTurns();/**list to your_turn event and change playerTurn to true */
 
 
-    // if (gameEventName === GAME_SOCKET_EVENTS.your_turn) {
-    //   this.playerTurn = true;
-    // }
-
   }
   onQuestionSelected(questionIndex: number) {
-    console.log('question has been selected :' + questionIndex)
     if (this.playerTurn) {
+      //emit the play action
+      console.log('question has been selected :' + questionIndex)
       let data: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex };
       this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, data);
+      //dispatch UPDATE minigame change:
       const playAction: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex }
       this.store.dispatch(new GameActions.updateMinigame({ miniGameType: GAME_TYPE.choose_partner_question, playAction: playAction }));
+      this.playerTurn = false;
+    } else {
+      console.log(TAG, 'its not your turn');
+    }
+  }
+  onAnswerSelected(answerIndex: number) {
+    if (this.playerTurn) {
+      console.log('answer has been selected :' + answerIndex)
+      let data: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, payload: answerIndex };
+      this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, data);
+      const playAction: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, payload: answerIndex }
+      this.store.dispatch(new GameActions.updateMinigame({ miniGameType: GAME_TYPE.choose_partner_question, playAction: playAction }));
+      this.playerTurn = false;
     } else {
       console.log(TAG, 'its not your turn');
     }
@@ -66,8 +83,8 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     initMiniGame$.subscribe((gameEvent: game$Event) => {
       const miniGameType: GAME_TYPE = gameEvent.eventData.miniGameType;
       if (miniGameType === GAME_TYPE.choose_partner_question) { //if the socket get an 'init)mini_game event'
-        const questions: iQuestion[] = gameEvent.eventData.initData;
-        this.store.dispatch(new GameActions.initalNewMinigame({ miniGameType: GAME_TYPE.choose_partner_question, initialData: questions }))
+        const initData: iInitData = gameEvent.eventData;
+        this.store.dispatch(new GameActions.initalNewMinigame(initData))
         this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.ready_for_mini_game);
 
       } else {
@@ -76,7 +93,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     })
   }
   isInAskQuestionMode(): boolean {
-    /**concated condition (this.minigameState && ...) cause error because this method called before this.miniGameState get intialed 'can read currentGameAction of null' (event if i inital the minigameState in the ngOnInit)so i written it this way*/
+    /**concated condition (this.minigameState && ...) cause error because this method called before this.miniGameState get initiated 'cant read currentGameAction of null' (event if i inital the minigameState in the ngOnInit)so i written it this way*/
     if (this.minigameState) {
       return this.minigameState.currentGameAction === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question;
     }
@@ -92,6 +109,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     this.partnersPlayActions$Sub = partnersPlayActions$.subscribe((gameEvent: game$Event) => {
       const playAction: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = gameEvent.eventData;
       this.store.dispatch(new GameActions.updateMinigame({ miniGameType: GAME_TYPE.choose_partner_question, playAction: playAction }));
+      this.partnersPlayActionsModal.openModal()//TEST TODODTODO
     })
   }
   private handleTurns() {

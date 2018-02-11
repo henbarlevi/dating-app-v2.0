@@ -7,6 +7,7 @@ import { iGenericMiniGameState } from "../../minigameState.model";
 import { iQuestion } from "../questions.model";
 import { iPlayAction } from "../../../models/iPlayData";
 import { initalNewMinigame } from "../../../_ngrx/game.actions";
+import { iInitData } from "../iInitData.model";
 const NumberOfQuestionsPerGame: number = 7;
 
 //mini game initial state
@@ -36,13 +37,14 @@ export function minigameReducer(state: iGameState, action: GameActions.GameActio
     switch (action.type) {
         /**INITIAL_NEW_MINIGAME */
         case GameActions.INITIAL_NEW_MINIGAME:
-            const payload = (action as initalNewMinigame).payload;
+            const payload: iInitData = (action as initalNewMinigame).payload;
             return {
                 ...state,
                 miniGameState: {
                     ...initialState,
                     miniGameType: payload.miniGameType,
-                    questions: payload.initialData
+                    questions: payload.initialData.questions,
+                    questionsRemaining: payload.initialData.questionsPerGame
                 }
             }
         /**UPDATE_MINIGAME */
@@ -65,7 +67,7 @@ export function minigameReducer(state: iGameState, action: GameActions.GameActio
             } else if (playAction.type === CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question) {
                 const questionsRemaining: number = state.miniGameState.questionsRemaining - 1;
                 const chosenAnswerIndex: number = playAction.payload;
-                const miniGameState :iMiniGameState= {
+                const miniGameState: iMiniGameState = {
                     ...state.miniGameState,
                     currentAnswerIndex: playAction.payload,
                     currentQuestionIndex: -1,

@@ -4,26 +4,33 @@ const PLAY_ACTIONS_ENUM_1 = require("../PLAY_ACTIONS_ENUM");
 const PLAY_ACTIONS = require("./play.actions");
 const NumberOfQuestionsPerGame = 7;
 const Logger_1 = require("../../../../utils/Logger");
-const GAME_TYPE_ENUM_1 = require("../../../models/GAME_TYPE_ENUM");
 const TAG = 'MiniGameStateReducer |';
 //mini game initial state
-const initialState = {
-    miniGameType: GAME_TYPE_ENUM_1.GAME_TYPE.choose_partner_question,
-    currentAnswerIndex: -1,
-    currentQuestionIndex: -1,
-    currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
-    questionsRemaining: NumberOfQuestionsPerGame,
-    numberOfPlayers: 2,
-    numberOfPlayersLeftToAnswer: 2
-};
-function MiniGameStateReducer(state = initialState, action) {
+// const initialState: iMiniGameState = {
+//     miniGameType: GAME_TYPE.choose_partner_question,
+//     currentAnswerIndex: -1,//answer not yet chosen
+//     currentQuestionIndex: -1,//question not yet chosen
+//     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, //game waiting for player to choose a -question
+//     questionsRemaining: NumberOfQuestionsPerGame,
+//     numberOfPlayers: 2,//number of playerS is 2 if nothing say otherwise [should be permanent]
+//     numberOfPlayersLeftToAnswer: 1,
+//     turnUserId:
+// }
+function MiniGameStateReducer(state, action) {
     switch (action.type) {
+        /**ASK_QUESTION */
         case PLAY_ACTIONS.ASK_QUESTION:
-            return Object.assign({}, state, { currentQuestionIndex: action.payload, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question });
+            const currentTurnIndex = state.playersId.findIndex(p => p === state.turnUserId);
+            const nextTurnIndex = currentTurnIndex < (state.playersId.length - 1) ? (currentTurnIndex + 1) : 0;
+            const nextTurn = state.playersId[nextTurnIndex];
+            return Object.assign({}, state, { currentQuestionIndex: action.payload, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, turnUserId: nextTurn });
+        /**ANSWER_QUESTION */
         case PLAY_ACTIONS.ANSWER_QUESTION:
-            const numberOfPlayersLeftToAnswer = state.numberOfPlayersLeftToAnswer - 1;
-            if (state.numberOfPlayersLeftToAnswer)
-                return Object.assign({}, state, { currentAnswerIndex: action.payload, numberOfPlayersLeftToAnswer: numberOfPlayersLeftToAnswer, currentGameAction: numberOfPlayersLeftToAnswer === 0 ? PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question : state.currentGameAction });
+            const questionsRemaining = --state.questionsRemaining;
+            const currentTurnIndx = state.playersId.findIndex(p => p === state.turnUserId);
+            const nextTurnIndx = currentTurnIndx < (state.playersId.length - 1) ? (currentTurnIndx + 1) : 0;
+            const nxtTurn = state.playersId[nextTurnIndx];
+            return Object.assign({}, state, { currentAnswerIndex: action.payload, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, questionsRemaining: questionsRemaining, turnUserId: nxtTurn });
         default:
             return state;
     }

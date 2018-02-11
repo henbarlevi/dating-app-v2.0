@@ -61,7 +61,7 @@ export abstract class miniGame {
         const playAction: iPlayAction<any> = { ...playActionData, playerId: playerId };
         this.gameRoom.players.forEach(p => {
             if (p.user._id.toString() !== playerId) {//if its not the player that did the action
-                Logger.d(TAG, `telling the player [${this.getUserNameBySocket(p)}] about the playaction`, 'gray');
+                Logger.d(TAG, `** telling the player [${this.getUserNameBySocket(p)}] about the playaction **`, 'gray');
                 p.emit(GAME_SOCKET_EVENTS.partner_played, playAction)
             }
         })

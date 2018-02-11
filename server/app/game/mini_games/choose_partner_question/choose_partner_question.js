@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_minigame_1 = require("../abstract_minigame");
 const questions_1 = require("./questions");
-const NumberOfQuestionsPerGame = 7;
 const GAME_TYPE_ENUM_1 = require("../../models/GAME_TYPE_ENUM");
 const GAME_SOCKET_EVENTS_1 = require("../../models/GAME_SOCKET_EVENTS");
 const utils_service_1 = require("../../../utils/utils.service");
@@ -22,6 +21,13 @@ const minigame_state_reducers_1 = require("./redux/minigame_state.reducers");
 // ===== utils
 const Logger_1 = require("../../../utils/Logger");
 const TAG = 'choose_partner_question';
+// =========================
+// ====== ENV Configutations
+// =========================
+const config = require("config");
+const ENV = process.env.ENV || 'local';
+const envConfig = config.get(ENV);
+const NumberOfQuestionsPerGame = envConfig.game.mini_games.choose_partner_question.questions_per_game; //TODOTODTOD - check its get correct number and no crashing
 class choose_partner_question extends abstract_minigame_1.miniGame {
     /**Ctor */
     constructor(io, gameRoom) {
@@ -31,8 +37,8 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             currentQuestionIndex: -1,
             currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
             questionsRemaining: NumberOfQuestionsPerGame,
-            numberOfPlayers: 2,
-            numberOfPlayersLeftToAnswer: 2
+            playersId: this.gameRoom.players.map(p => p.user._id.toString()),
+            turnUserId: this.randomizeFirstTurn()
         };
         this.miniGameState = redux_1.createStore(minigame_state_reducers_1.MiniGameStateReducer, initialState);
     }
@@ -43,11 +49,12 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             //lading questions:
             this.randomQuestions = choose_partner_question.randomizeQuestions();
             //Logger.d(TAG,`this game random questions : ${randomQuestions.map((q)=>{return q.q})}`) //DEBUG
-            //declaring the mini game that should start - this is how client know to load the minigame screen:
-            this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.init_mini_game, {
+            const initData = {
                 miniGameType: GAME_TYPE_ENUM_1.GAME_TYPE.choose_partner_question,
-                initData: this.randomQuestions
-            });
+                initialData: { questions: this.randomQuestions, questionsPerGame: NumberOfQuestionsPerGame }
+            };
+            //declaring the mini game that should start - this is how client know to load the minigame screen:
+            this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.init_mini_game, initData);
             yield this.WaitForPlayersToBeReady(); //calling super class
             Logger_1.Logger.d(TAG, 'players are ready!');
         });
@@ -57,13 +64,9 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             try {
                 yield this.initMiniGame();
                 //randomize first player to play:
-                let firstTurnPlayerIndex = this.randomizeFirstTurn();
+                const firstTurnPlayer_id = this.miniGameState.getState().turnUserId;
                 //tell players who's turn is
-                this.turn = this.gameRoom.players[firstTurnPlayerIndex];
-                this.gameRoom.players.forEach(player => {
-                    player === this.turn ?
-                        player.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.your_turn) : player.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_turn);
-                });
+                this.tellPlayersWhoTurnItIs(firstTurnPlayer_id);
                 //listen to minigame players actions
                 let play$Subscription = game__service_1.game$
                     .filter((gameEvent) => {
@@ -71,21 +74,25 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
                         gameEvent.socket.gameRoomId === this.gameRoom.roomId;
                 })
                     .filter((gameEvent) => {
-                    return this.ValidatePlayAction(this.miniGameState.getState(), gameEvent);
+                    const playActionValid = this.ValidatePlayAction(this.miniGameState.getState(), gameEvent);
+                    !playActionValid ? Logger_1.Logger.d(TAG, 'WARNING ! PLAY ACTION IS NOT VALID', 'red') : Logger_1.Logger.d(TAG, 'Play Action Valid', 'gray');
+                    return playActionValid;
                 })
                     .subscribe((gameEvent) => {
-                    Logger_1.Logger.d(TAG, `Client User [${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id}] - Emited Event: [${gameEvent.eventName ? gameEvent.eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
                     const playActionData = gameEvent.eventData;
-                    this.miniGameState.dispatch(playActionData);
+                    Logger_1.Logger.d(TAG, ` ** disapching minigame state change **`, 'magenta');
+                    this.miniGameState.dispatch(Object.assign({}, playActionData, { playerId: gameEvent.socket.user._id.toString() }));
                     const playerId = gameEvent.socket.user._id.toString();
                     this.tellPlayersAboutPlayAction(playerId, playActionData);
                 });
+                //log minigame state when it change
                 this.miniGameState.subscribe(() => {
                     Logger_1.Logger.d(TAG, `miniGame (gameRoomId=${this.gameRoom.roomId.slice(0, 5)}..) State Changed :`, 'magenta');
                     let newCurrentState = this.miniGameState.getState();
                     for (let key of Object.keys(newCurrentState)) {
                         Logger_1.Logger.d(TAG, `${key} = ${newCurrentState[key]}`, 'magenta');
                     }
+                    this.tellPlayersWhoTurnItIs(newCurrentState.turnUserId);
                 });
                 //TODO
                 //DONT FORGET TO UNSBSRIBE When FOR EVETNS
@@ -96,8 +103,18 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             }
         });
     }
+    tellPlayersWhoTurnItIs(CurrentTurnPlayerId) {
+        Logger_1.Logger.d(TAG, '** telling users who turn it is **', 'gray');
+        this.gameRoom.players.forEach((playerSocket, playerIndex) => {
+            playerSocket.user._id.toString() === CurrentTurnPlayerId ? playerSocket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.your_turn) : playerSocket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_turn, { playerId: CurrentTurnPlayerId });
+        });
+    }
+    /** randomize the first turn player _id in the this.gameroom.players arr
+     * @return - Player _id
+    */
     randomizeFirstTurn() {
-        return utils_service_1.utilsService.randomizeInt(0, this.gameRoomPlayersAmount - 1);
+        const playerIndex = utils_service_1.utilsService.randomizeInt(0, this.gameRoomPlayersAmount - 1);
+        return this.gameRoom.players[playerIndex].user._id.toString();
     }
     /**receive 'play' event that accure on the gameroom and return if its valid or not
      * by considering the state of the game.
@@ -107,7 +124,7 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
      */
     ValidatePlayAction(miniGameState, gameEvent) {
         const playActionData = gameEvent.eventData;
-        if (this.turn.user._id.toString() !== gameEvent.socket.user._id.toString()) {
+        if (miniGameState.turnUserId !== gameEvent.socket.user._id.toString()) {
             //if its NOT his turn
             Logger_1.Logger.d(TAG, `Warning - the player try to play when its not his turn`, 'red');
             console.log(gameEvent);

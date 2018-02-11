@@ -100,8 +100,8 @@ var a:string = 'namw'
 * when doing JSON.stringify(gameEventOrtimeout) in the gameroomManager on the mreged observable subscribed object - recevied "Converting circular structure to JSON" Fix this to avoid memory leak
 * change the css arrow to gif
 * maybe discard saving roomId in client - it already handled by server, so maybe there is no need to save it in client storage
-
-
+* maybe save gameroom.players as object with key as user_id , to support continuing game event if some players disconnected (in future version when 2+ players games be available)
+* gZip the client app in order to make it event more smaller - check how to do it in node/maybe it do it automatically
 <style>
 .well{
   border-radius: 30px  30px;

@@ -72,21 +72,20 @@ module.exports = function (io) {
             if (alreadyConnectedUsers[userId]) {
                 Logger_1.Logger.d(TAG, `** removing ${userId} from [alreadyConnectedUsers] **`, 'gray');
                 delete alreadyConnectedUsers[userId];
-                console.log(alreadyConnectedUsers);
             }
             else {
                 Logger_1.Logger.d(TAG, `Warning! -Diconnected User ${userId} not exist in the [alreadyConnectedUsers]`, 'red');
             }
             ;
         });
-        //handle reconnection - TODO
+        //handle reconnection - [Deprecated] - reconnection suppose to be handled by the relevant gameroom
         if (socket.handshake.query.roomId) {
             socket.gameRoomId = socket.handshake.query.roomId;
             Logger_1.Logger.d(TAG, `user is trying to reconnect to room ${socket.handshake.query.roomId}..`, 'gray');
             //TODO
-            let userId = socket.user._id;
-            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : '';
-            //socket.disconnect();
+            // let userId = (socket as iGameSocket).user._id
+            // alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : ''
+            // //socket.disconnect();
         }
         //
         // socket.on('add-message', (message) => {

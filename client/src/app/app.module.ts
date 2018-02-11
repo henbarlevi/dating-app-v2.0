@@ -24,6 +24,7 @@ export const metaReducers: MetaReducer<iAppState>[] = !environment.production ? 
 
 /*=========== APP MODULE ===========*/
 @NgModule({
+  /**Components/Pipes/Directives */
   declarations: [
     AppComponent,
   ],

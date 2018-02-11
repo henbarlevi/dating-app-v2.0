@@ -25,37 +25,48 @@ export interface iMiniGameState extends iGenericMiniGameState<GAME_TYPE.choose_p
     currentAnswerIndex: number,
     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS,
     questionsRemaining: number,
-    numberOfPlayers: number,
-    numberOfPlayersLeftToAnswer: number
+    playersId: string[],// players _id
+    // numberOfPlayersLeftToAnswer: number,
+    turnUserId: string //which user _id turn it is
 }
 //mini game initial state
-const initialState: iMiniGameState = {
-    miniGameType:GAME_TYPE.choose_partner_question,
-    currentAnswerIndex: -1,//answer not yet chosen
-    currentQuestionIndex: -1,//question not yet chosen
-    currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, //game waiting for player to choose a -question
-    questionsRemaining: NumberOfQuestionsPerGame,
-    numberOfPlayers: 2,//number of playerS is 2 if nothing say otherwise [should be permanent]
-    numberOfPlayersLeftToAnswer: 2
-}
+// const initialState: iMiniGameState = {
+//     miniGameType: GAME_TYPE.choose_partner_question,
+//     currentAnswerIndex: -1,//answer not yet chosen
+//     currentQuestionIndex: -1,//question not yet chosen
+//     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, //game waiting for player to choose a -question
+//     questionsRemaining: NumberOfQuestionsPerGame,
+//     numberOfPlayers: 2,//number of playerS is 2 if nothing say otherwise [should be permanent]
+//     numberOfPlayersLeftToAnswer: 1,
+//     turnUserId:
+// }
 
-export function MiniGameStateReducer(state = initialState, action: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>) {
+export function MiniGameStateReducer(state: iMiniGameState, action: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS>): iMiniGameState {
     switch (action.type) {
+        /**ASK_QUESTION */
         case PLAY_ACTIONS.ASK_QUESTION:
+            const currentTurnIndex: number = state.playersId.findIndex(p => p === state.turnUserId);
+            const nextTurnIndex: number = currentTurnIndex < (state.playersId.length-1) ? (currentTurnIndex + 1) : 0;
+            const nextTurn: string = state.playersId[nextTurnIndex];
             return {
                 ...state,///...state,//assign all properties of state to the returned obj
                 currentQuestionIndex: action.payload,
-                currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question
+                currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question,
+                turnUserId: nextTurn,
             }
+        /**ANSWER_QUESTION */
         case PLAY_ACTIONS.ANSWER_QUESTION:
-            const numberOfPlayersLeftToAnswer: number = state.numberOfPlayersLeftToAnswer - 1;
-            if (state.numberOfPlayersLeftToAnswer)
-                return {
-                    ...state,
-                    currentAnswerIndex: action.payload,
-                    numberOfPlayersLeftToAnswer: numberOfPlayersLeftToAnswer,
-                    currentGameAction: numberOfPlayersLeftToAnswer === 0 ? CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question : state.currentGameAction
-                }
+            const questionsRemaining: number = --state.questionsRemaining;
+            const currentTurnIndx: number = state.playersId.findIndex(p => p === state.turnUserId);
+            const nextTurnIndx: number = currentTurnIndx < (state.playersId.length-1) ? (currentTurnIndx + 1) : 0;
+            const nxtTurn: string = state.playersId[nextTurnIndx];
+            return {
+                ...state,
+                currentAnswerIndex: action.payload,
+                currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
+                questionsRemaining: questionsRemaining,
+                turnUserId: nxtTurn
+            }
 
         default:
             return state;

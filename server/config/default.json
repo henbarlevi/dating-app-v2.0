@@ -10,7 +10,13 @@
             "redirect_uri": "http%3A%2F%2Flocalhost%3A4200%2Flogin"
         },
         "game": {
-            "reconnection_timeout": 2000 //20 sec to reconnect back to a game
+            "reconnection_timeout": 2000, //20 sec to reconnect back to a game
+            /*mini games*/
+            "mini_games":{
+                "choose_partner_question":{
+                    "questions_per_game":7
+                }
+            }
         }
     }
 }

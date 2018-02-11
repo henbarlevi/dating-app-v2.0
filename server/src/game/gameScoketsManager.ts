@@ -63,12 +63,15 @@ export class GameScoketsManager {
     handleNewConnections() {
         //handle connections //TODO - check how dispose correctly
         game$
-            //check its a new conneciton event (connection + no roomId exist on the conneciton query params):
-            .filter((gameEvent: game$Event) =>
-                gameEvent.eventName === GAME_SOCKET_EVENTS.connection &&
-                // && gameEvent.socket.handshake.query.roomId
-                !this.playersPlaying[gameEvent.socket.user._id]//if its a temporary disconnected its not a new connection (temp disconnections handle by the related gameroom) 
-            )
+            //check its a new conneciton event (connection + the user is not temporary disconnected user):
+            .filter((gameEvent: game$Event) => {
+                if (gameEvent.eventName !== GAME_SOCKET_EVENTS.connection) { return false; }//pass only connection events
+                const userId: string = gameEvent.socket.user._id.toString();
+                const temporaryDisconnected: boolean = this.playersPlaying[userId] ? true : false;//reconnection chance time for that player didint pass
+                const gameRoomIdUserTryingToReconnect: string = this.playersPlaying[userId];
+                const gameStillLive: boolean = this.gameRooms[gameRoomIdUserTryingToReconnect] ? true : false;
+                return !(temporaryDisconnected && gameStillLive) //if the user trying to reconnect and game is still on - its no new connection and this reconnection will be handled by the related gameroom
+            })
             //handle new connection
             .subscribe((gameEvent: game$Event) => {
                 let socket: iGameSocket = gameEvent.socket;
