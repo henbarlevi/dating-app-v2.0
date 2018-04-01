@@ -7,10 +7,9 @@ import questions from "./questions";
  * this is specifically the initialization data  of [choose_partner_question] minigame 
  */
 export interface iInitData{
-    miniGameType: GAME_TYPE.choose_partner_question,
-    initialData: {
-        questions:iQuestion[],
-        questionsPerGame:number
-    }
+    questions: iQuestion[],
+    questionsRemaining: number,
+    playersId: string[],
+    firstPlayerTurnId:string
 }
 

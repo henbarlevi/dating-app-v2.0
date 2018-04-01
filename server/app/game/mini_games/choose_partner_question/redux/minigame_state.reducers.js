@@ -23,14 +23,14 @@ function MiniGameStateReducer(state, action) {
             const currentTurnIndex = state.playersId.findIndex(p => p === state.turnUserId);
             const nextTurnIndex = currentTurnIndex < (state.playersId.length - 1) ? (currentTurnIndex + 1) : 0;
             const nextTurn = state.playersId[nextTurnIndex];
-            return Object.assign({}, state, { currentQuestionIndex: action.payload, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, turnUserId: nextTurn });
+            return Object.assign({}, state, { currentQuestionIndex: action.payload, currentAnswerIndex: -1, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, turnUserId: nextTurn });
         /**ANSWER_QUESTION */
         case PLAY_ACTIONS.ANSWER_QUESTION:
             const questionsRemaining = --state.questionsRemaining;
             const currentTurnIndx = state.playersId.findIndex(p => p === state.turnUserId);
             const nextTurnIndx = currentTurnIndx < (state.playersId.length - 1) ? (currentTurnIndx + 1) : 0;
             const nxtTurn = state.playersId[nextTurnIndx];
-            return Object.assign({}, state, { currentAnswerIndex: action.payload, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, questionsRemaining: questionsRemaining, turnUserId: nxtTurn });
+            return Object.assign({}, state, { currentAnswerIndex: action.payload, currentQuestionIndex: -1, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, questionsRemaining: questionsRemaining, turnUserId: nxtTurn });
         default:
             return state;
     }

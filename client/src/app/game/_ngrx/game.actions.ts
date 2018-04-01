@@ -4,7 +4,7 @@
  */
 import { Action } from '@ngrx/store';
 import { GAME_TYPE } from '../models/GAME_TYPE_ENUM';
-import { iPlayAction } from '../models/iPlayData';
+import { iPlayAction } from '../games/logic/iPlayAction.model';
 /* ==== ACTIONS ====*/
 
 // ------ player perss the 'Play Game' Button
@@ -17,7 +17,7 @@ export class StartNewGame implements Action {
 export const UPDATE_NEW_GAMEROOM_DATA: string = 'UPDATE_NEW_GAMEROOM_DATA';
 export class updateNewGameroomData implements Action {
     readonly type = UPDATE_NEW_GAMEROOM_DATA;
-    constructor(public payload: { roomId: string, partnersId: string[] }) { }
+    constructor(public payload: { roomId: string, partnersId: string[] ,playerId:string}) { }
 }
 
 

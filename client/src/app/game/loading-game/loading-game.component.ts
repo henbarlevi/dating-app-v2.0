@@ -39,12 +39,10 @@ export class LoadingGameComponent implements OnInit, OnDestroy {
           return this.loadingMessage = 'searching for partner';
         case GAME_SOCKET_EVENTS.found_partner:
           const gameroomId: string = event.eventData.roomId as string;
-          const partnersId: string[] = event.eventData.partnersId as string[]
-          console.log('found match ,roomid=' + gameroomId + ' ,partners' + partnersId)
-          //set gameroomId in local storage
+          //set gameroomId in local storage //TODO - check if its needed - we want the server to handle the gamerooms without the client to interfere 
           this.GameService.gameroomId = gameroomId;
           //change state:
-          this.store.dispatch(new GameActions.updateNewGameroomData({ roomId: gameroomId, partnersId: partnersId }))
+          this.store.dispatch(new GameActions.updateNewGameroomData(event.eventData))
           return this.loadingMessage = 'Found Partner';
         case GAME_SOCKET_EVENTS.init_mini_game:
           this.loadingMessage = 'Initializing game';

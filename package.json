@@ -1,13 +1,29 @@
 {
   "scripts": {
-    "dev": "npm run client & npm run server ",
+    "dev": "npm run client & npm run server & gulp ",
     "server": "start cmd /k \"cd server &&  npm run dev\" ",
     "client": "start cmd /k \"cd client &&  npm start\" "
   },
   "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
     "ngrx-store-freeze": "^0.2.0"
   },
   "dependencies": {
     "ngrx-store-logger": "^0.2.0"
-  }
+  },
+  "name": "dating-app-v2.0",
+  "description": "web application that let people expirience online dating in a different way, by letting them play with each other in a co-op\\vs manner in a variety of mini games\r ## Table of Contents\r ### 1.  [OverView](#OverView)\r > - [motivation](#motivation)\r > - Common Language\r > - [how to run project](#howtorun)\r > - tech details\r ### 2. [Best Practice Examples](#bestpractice)\r ### 3. [Project Explanation](#projectexplenation)",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henbarlevi/dating-app-v2.0.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/henbarlevi/dating-app-v2.0/issues"
+  },
+  "homepage": "https://github.com/henbarlevi/dating-app-v2.0#readme"
 }

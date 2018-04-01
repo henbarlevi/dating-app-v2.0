@@ -61,9 +61,10 @@ export class GameRoomManager {
             //OLD -this.io.to(gameRoomId).emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId });
             const playersId: string[] = this.gameRoom.players.map(p => p.user._id.toString())
             this.gameRoom.players.forEach((playersocket: iGameSocket) => {
+                const playerId:string =playersocket.user._id.toString();
                 Logger.d(TAG, `emit to player [${this.getUserNameBySocket(playersocket)}] found partners`, 'gray')
-                const partnersId = playersId.filter(pId => pId !== playersocket.user._id);
-                playersocket.emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId, partnersId: partnersId })
+                const partnersId = playersId.filter(pId => pId !== playerId);
+                playersocket.emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId, partnersId: partnersId,playerId:playerId })
             })
             // while (this.gameRoom.miniGamesRemaining > 0) {
             //generate new mini game:

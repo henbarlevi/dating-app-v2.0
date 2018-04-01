@@ -51,6 +51,7 @@ export function MiniGameStateReducer(state: iMiniGameState, action: iPlayAction<
             return {
                 ...state,///...state,//assign all properties of state to the returned obj
                 currentQuestionIndex: action.payload,
+                currentAnswerIndex:-1,
                 currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question,
                 turnUserId: nextTurn,
             }
@@ -63,6 +64,7 @@ export function MiniGameStateReducer(state: iMiniGameState, action: iPlayAction<
             return {
                 ...state,
                 currentAnswerIndex: action.payload,
+                currentQuestionIndex:-1,
                 currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
                 questionsRemaining: questionsRemaining,
                 turnUserId: nxtTurn

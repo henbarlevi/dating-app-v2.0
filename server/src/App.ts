@@ -41,7 +41,7 @@ class App {
         config: {
           autoIndex: false // http://mongoosejs.com/docs/guide.html#indexes - prevent auto creation of indexes to prevent performance hit
         }
-      });
+      },(err)=>{ err?Logger.d('Mongo Connection:',err,'red'):Logger.d('Mongo Connection:','SUCCESS','green')});
     //Allow Cross Origin requests (https://enable-cors.org/server_expressjs.html): 
     this.express.use(function (req, res, next) {
       res.header("Access-Control-Allow-Origin", "*");

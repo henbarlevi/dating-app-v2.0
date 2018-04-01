@@ -5,21 +5,25 @@ import { Observable } from 'rxjs/Observable';
 import { iSocketData } from '../../models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from '../../models/GAME_SOCKET_EVENTS';
 
-import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../../../../../../contract/miniGames/choose_partner_question/PLAY_ACTIONS_ENUM';
+//import {test} from './_ngrx/minigame.reducer';
+import { minigameReducer } from './_ngrx/minigame.reducer';//set reducerfunction for minigame (setReducerFunction in the bottom)
+/**IMPORTANT! SET REDUCER IN THIS CONTIANER so it could be available in the gameRducer */
+MinigamesReducerContainer.setReducerFunction(GAME_TYPE.choose_partner_question, minigameReducer);
 
 import { iQuestion } from './questions.model';
 import { game$Event } from '../../models/game$Event.model';
 import { iPlayAction } from '../../models/iPlayData';
-import { iGameState, getMiniGameState } from '../../_ngrx/game.reducers';
+import { iGameState, getMiniGameState, getGameState } from '../../_ngrx/game.reducers';
 //ngrx (redux)
 import * as GameActions from '../../_ngrx/game.actions'
 import { Store } from '@ngrx/store';
 import { GAME_TYPE } from '../../models/GAME_TYPE_ENUM';
-import { initialState } from './_ngrx/minigame.reducer';//set reducerfunction for minigame
-import { iMiniGameState } from './_ngrx/minigame.reducer';
 import { Subscription } from 'rxjs/Subscription';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
-import { iInitData } from './iInitData.model';
+// ===== logic
+import { iInitData, iMiniGameState, PlayAction } from '../logic/choose_partner_question/choose_partner_question.logic';
+import { MinigamesReducerContainer } from '../../_ngrx/minigames.reducers';
+import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../logic/choose_partner_question/PLAY_ACTIONS_ENUM';
 // ===== utils
 const TAG: string = 'ChoosePartnerQuestionComponent |';
 
@@ -29,25 +33,33 @@ const TAG: string = 'ChoosePartnerQuestionComponent |';
   styleUrls: ['./choose-partner-question.component.scss']
 })
 export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
-  playerTurn: boolean = false;
-  minigameState$: Observable<iMiniGameState>;
-  minigameState: iMiniGameState = initialState;//get updated each time minigameState$ raise event
+  //playerTurn: boolean = false;
+  playerId: string = '';
+  gameState$: Observable<iGameState>;
+  minigameState: iMiniGameState;//get updated each time minigameState$ raise event
   partnersPlayActions$Sub: Subscription;
   @ViewChild('partnersPlayActionsModal') partnersPlayActionsModal; //modal that pop up to present the partner actions
+
   constructor(private GameService: GameService,
     private store: Store<iGameState>) {
   }
-
+  get playerTurn(){
+    return this.playerId && this.playerId ===this.minigameState.playerTurnId; //is currentTurnId = to the this playerId
+  }
   ngOnInit() {
-    this.minigameState$ = this.store.select(getMiniGameState);
-    this.minigameState$.subscribe((miniGameSate: iMiniGameState) => this.minigameState = miniGameSate);
+    this.gameState$ = this.store.select(getGameState);
+    this.gameState$.subscribe((gameState: iGameState) => {
+      this.minigameState = gameState.miniGameState;
+      this.playerId = gameState.player.id;
+    });
     this.handleMiniGameInitalization()/**listen to [init_mini_game] event and update the minigamestate */
-    this.handlePartnersActions(); /**listen to partners play actions events and  when occurr 
+    /**listen to partners play actions events and  when occurr 
     1.dispach the updateMiniGame action
     2.pop up the partnersPlayActionsModal to display the partner action
     */
+    this.handlePartnersActions();
 
-    this.handleTurns();/**list to your_turn event and change playerTurn to true */
+   // this.handleTurns();/**listen to your_turn event and change playerTurn to true */
 
 
   }
@@ -55,12 +67,12 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     if (this.playerTurn) {
       //emit the play action
       console.log('question has been selected :' + questionIndex)
-      let data: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex };
-      this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, data);
+      const playAction: PlayAction = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex ,playerId:this.playerId};
+      //send playAction to server
+      this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, playAction);
       //dispatch UPDATE minigame change:
-      const playAction: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex }
       this.store.dispatch(new GameActions.updateMinigame({ miniGameType: GAME_TYPE.choose_partner_question, playAction: playAction }));
-      this.playerTurn = false;
+      //this.playerTurn = false;
     } else {
       console.log(TAG, 'its not your turn');
     }
@@ -68,11 +80,10 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
   onAnswerSelected(answerIndex: number) {
     if (this.playerTurn) {
       console.log('answer has been selected :' + answerIndex)
-      let data: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, payload: answerIndex };
-      this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, data);
-      const playAction: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, payload: answerIndex }
+      let playAction: PlayAction = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, payload: answerIndex ,playerId:this.playerId};
+      this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, playAction);
       this.store.dispatch(new GameActions.updateMinigame({ miniGameType: GAME_TYPE.choose_partner_question, playAction: playAction }));
-      this.playerTurn = false;
+      //this.playerTurn = false;
     } else {
       console.log(TAG, 'its not your turn');
     }
@@ -83,8 +94,8 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     initMiniGame$.subscribe((gameEvent: game$Event) => {
       const miniGameType: GAME_TYPE = gameEvent.eventData.miniGameType;
       if (miniGameType === GAME_TYPE.choose_partner_question) { //if the socket get an 'init)mini_game event'
-        const initData: iInitData = gameEvent.eventData;
-        this.store.dispatch(new GameActions.initalNewMinigame(initData))
+        const initData: iInitData = gameEvent.eventData.initData;
+        this.store.dispatch(new GameActions.initalNewMinigame({ initialData: initData, miniGameType: miniGameType }))
         this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.ready_for_mini_game);
 
       } else {
@@ -103,21 +114,24 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.partnersPlayActions$Sub ? this.partnersPlayActions$Sub.unsubscribe() : '';
   }
-
+  /**listen to partners play actions events and  when occurr 
+  1.dispach the updateMiniGame action
+  2.pop up the partnersPlayActionsModal to display the partner action
+  */
   private handlePartnersActions() {
     const partnersPlayActions$: Observable<game$Event> = this.GameService.game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.partner_played);
     this.partnersPlayActions$Sub = partnersPlayActions$.subscribe((gameEvent: game$Event) => {
-      const playAction: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = gameEvent.eventData;
+      const playAction: PlayAction = gameEvent.eventData;
       this.store.dispatch(new GameActions.updateMinigame({ miniGameType: GAME_TYPE.choose_partner_question, playAction: playAction }));
       this.partnersPlayActionsModal.openModal()//TEST TODODTODO
     })
   }
-  private handleTurns() {
-    const yourturn$: Observable<game$Event> = this.GameService.game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.your_turn);
-    yourturn$.subscribe((gameEvent: game$Event) => {
-      this.playerTurn = true;
-    })
-  }
+  // private handleTurns() {
+  //   const yourturn$: Observable<game$Event> = this.mini.game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.your_turn);
+  //   yourturn$.subscribe((gameEvent: game$Event) => {
+  //     this.playerTurn = true;
+  //   })
+  // }
 }
 
 

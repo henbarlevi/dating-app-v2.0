@@ -22,7 +22,7 @@
   <!--ANSWERS-->
   <ng-template #answerModeTemplate>
     <div id="answers-wrapper">
-      <app-answer-list (selected)="onAnswerSelected($event)" id="answers" [answers]="minigameState?.answers"></app-answer-list>
+      <app-answer-list (selected)="onAnswerSelected($event)" id="answers" [answers]="minigameState?.questions[minigameState.currentQuestionIndex].a"></app-answer-list>
     </div>
   </ng-template>
 </div>
