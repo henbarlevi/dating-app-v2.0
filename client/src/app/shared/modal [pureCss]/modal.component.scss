@@ -1,0 +1,98 @@
+/*====================
+ The Modal (background)
+ ====================*/
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 99; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+
+/* The Close (X) Button */
+.close {
+    color: red;
+    float: right;
+    font-size: 3em;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+/* Modal Header */
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+/* Modal Body */
+.modal-body {padding: 2px 16px;}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+/* Modal Content */
+.modal-content {
+    
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    /*Default Modal Location will be Top*/
+    padding: 0;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    &.location-middle{
+        /*locate modal in middle of the screen
+        (How to Center div vertiaclly : https://stackoverflow.com/questions/396145/how-to-vertically-center-a-div-for-all-browsers )
+        */
+        top: 50%;
+        transform: translateY(-50%);
+        animation-name: animateCenter;
+    }
+    &.location-bottom{
+        /*locate modal in bottom of the screen*/        
+        bottom: 0;
+        animation-name: animateBottom;
+    }
+}
+
+/* 
+===============
+Modal Animation
+===============
+  */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+@keyframes animateCenter {
+//    (How to Center div vertiaclly : https://stackoverflow.com/questions/396145/how-to-vertically-center-a-div-for-all-browsers )
+    
+    from {top: 0px; opacity: 0}
+    to {  top: 50%;
+        transform: translateY(-50%); opacity: 1}
+}
+@keyframes animateBottom {
+    from {bottom: -300px; opacity: 0}
+    to {bottom: 0; opacity: 1}
+}

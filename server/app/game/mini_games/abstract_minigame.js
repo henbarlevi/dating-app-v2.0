@@ -8,27 +8,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const GAME_SOCKET_EVENTS_1 = require("../models/GAME_SOCKET_EVENTS");
 const Logger_1 = require("../../utils/Logger");
+const GAME_SOCKET_EVENTS_1 = require("../models/GAME_SOCKET_EVENTS");
 const TAG = 'miniGame Abstract |';
+const game__service_1 = require("../game$.service");
+require("rxjs/add/operator/filter");
 class miniGame {
     constructor(io, gameRoom) {
         this.io = io;
         this.gameRoom = gameRoom;
+        this.gameRoomPlayersAmount = gameRoom.players.length;
     }
     WaitForPlayersToBeReady() {
         return new Promise((resolve, reject) => {
-            let playerOneRadyForMiniGame = false;
-            let playerTwoRadyForMiniGame = false;
-            this.io.to(this.gameRoom.roomId).once(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game, (socket) => __awaiter(this, void 0, void 0, function* () {
+            Logger_1.Logger.d(TAG, '** waiting for players to be ready... **', 'gray');
+            let playersReady = [];
+            //TODO - dont forget to dispose event listener
+            let subscription = game__service_1.game$
+                .filter((event) => {
+                if (event.eventData) {
+                    let gameroomId = event.eventData.roomId;
+                    let eventName = event.eventName;
+                    return eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameroomId === this.gameRoom.roomId;
+                }
+                return false;
+            }) //check if its ready_for_mini_game event + related to that gameRoomId
+                .subscribe((data) => __awaiter(this, void 0, void 0, function* () {
                 try {
-                    socket.user.facebook.id === this.gameRoom.playerOne.user.facebook.id ?
-                        playerOneRadyForMiniGame = true : '';
-                    socket.user.facebook.id === this.gameRoom.playerTwo.user.facebook.id ?
-                        playerTwoRadyForMiniGame = true : '';
-                    //if the 2 players are ready: start the mini game
-                    if (playerOneRadyForMiniGame && playerTwoRadyForMiniGame) {
-                        Logger_1.Logger.d(TAG, '2 players are ready to play', 'green');
+                    let playerReady = data.socket;
+                    let playerRelatedToGameroom = this.gameRoom.players.find(p => p.id === playerReady.id);
+                    playerRelatedToGameroom ? playersReady.push(playerReady) : Logger_1.Logger.d(TAG, 'Warning! Socket That is not related to game room emited event of ready_for_minigame', 'red');
+                    Logger_1.Logger.d(TAG, `game room [${this.gameRoom.roomId}] | Player - ${playerReady.user.facebook ? playerReady.user.facebook.name : playerReady.user._id} is ready`);
+                    if (playersReady.length === this.gameRoomPlayersAmount) {
                         resolve();
                     }
                 }
@@ -38,6 +49,22 @@ class miniGame {
                 }
             }));
         });
+    }
+    /**when some players do an action in the game - this method will inform the other players about the game action occurred
+     * @param playerId - the player that did the action
+     */
+    tellPlayersAboutPlayAction(playerId, playActionData) {
+        const playAction = Object.assign({}, playActionData, { playerId: playerId });
+        this.gameRoom.players.forEach(p => {
+            if (p.user._id.toString() !== playerId) {
+                Logger_1.Logger.d(TAG, `** telling the player [${this.getUserNameBySocket(p)}] about the playaction **`, 'gray');
+                p.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_played, playAction);
+            }
+        });
+    }
+    /**for logs - return a user Name Or Id string */
+    getUserNameBySocket(socket) {
+        return socket.user.facebook ? socket.user.facebook.name : socket.user._id.toString();
     }
 }
 exports.miniGame = miniGame;

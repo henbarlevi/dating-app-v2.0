@@ -1,6 +1,6 @@
 <div class="q-wrapper">
-  <div *ngFor="let question of questions" class="question text-center">
-    <a  class="questionBtn" (click)="onSelected(question)">
+  <div *ngFor="let question of questions ; let i = index" class="question text-center">
+    <a  class="questionBtn" (click)="onSelected(i)">
       <span class="glyphicon glyphicon-play"></span> {{question.q}}</a>
   </div>
 </div>

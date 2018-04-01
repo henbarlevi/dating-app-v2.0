@@ -1,0 +1,26 @@
+<!-- Trigger/Open The Modal -->
+<button (click)="openModal()" id="myBtn">Open Modal</button>
+
+<!-- The Modal -->
+<div #abstractModal id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div #abstractModalContent class="modal-content">
+    <div class="modal-header">
+        <b><span class="close" (click)="closeModal()">&times;</span></b>
+      <ng-content select=".modal-header"></ng-content>
+    </div>
+    <div class="modal-body">
+        <ng-content select=".modal-body"></ng-content>
+        <!-- How to use ng-content
+          https://medium.com/claritydesignsystem/ng-content-the-hidden-docs-96a29d70d11b-->
+    </div>
+    <div class="modal-footer">
+        <ng-content select=".modal-footer"></ng-content>
+      <!-- Example for footer :  <h3>Modal Footer</h3> -->
+    </div>
+  </div>
+  <!-- / Modal content -->
+
+</div>
+<!-- /END The Modal -->

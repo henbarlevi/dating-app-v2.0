@@ -1,0 +1,6 @@
+<div class="a-wrapper">
+  <div *ngFor="let answer of answers ; let i = index" class="answer text-center">
+    <a  class="answerBtn" (click)="onSelected(i)">
+      <span class="glyphicon glyphicon-play"></span> {{answer}}</a>
+  </div>
+</div>

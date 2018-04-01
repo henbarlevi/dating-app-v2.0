@@ -1,4 +1,4 @@
 <div id="home-wrapper" >
   <!--adding class 'animated ' + name of animation in order to use css animations library-->
-  <a id="play-btn" [routerLink]="['./game']" class="animated bounce btn btn-lg btn-default" (click)="startGame()" >play Game</a>
+  <a id="play-btn" [routerLink]="['./game']" class="animated bounce btn btn-lg btn-default" (click)="startGame()"  (mouseover)="gameBtnAnimation($event)" (mouseout)="gameBtnAnimation($event)" [ngClass]="btnAnimationClasses" >play Game</a>
 </div>

@@ -72,11 +72,11 @@ export function authenticationMiddleware(req, res, next) {
 }
 
 /*return User if token is valid*/
-export function verifyToken(token): Promise<iUser> {
+export function verifyToken(token:string): Promise<iUser> {
     return new Promise((resolve, reject) => {
-        Logger.d(TAG, `=============== Verify Token : ${token} ===============`, 'gray');
-        Logger.d(TAG, 'the token > ' + token, 'gray');
-        jwt.verify(token, 'mySecretForJWTtoken', async (err, decoded) => {
+        Logger.st(TAG, `Verify JWT Token`, 'yellow');
+        Logger.d(TAG, `token = ${token?token.slice(0,5)+'...':'Null!'}`, 'gray');
+        jwt.verify(token, 'mySecretForJWTtoken', async (err, decoded:any) => {
             if (err) {//can happen in case token expiers
                 Logger.d(TAG, 'Failed to authenticate token > ' + err, 'red');
                 reject(err);
@@ -89,8 +89,11 @@ export function verifyToken(token): Promise<iUser> {
                     let userRep = new UserRepository();
                     let user: iUser = await userRep.getUserById(userId);
                     Logger.d(TAG, `user is authenticated, userId > ${userId} `, 'green');
-                    Logger.d(TAG, JSON.stringify(user), 'green');
-                    Logger.d(TAG, '=============== / Authentication Middleware ===============', 'gray');
+                    Logger.d(TAG, `userId = ${userId} `, 'gray');
+                    Logger.d(TAG, `userName = ${user.facebook ? user.facebook.name:'Unknwon'} `, 'gray');
+                    
+                    
+                    Logger.st(TAG, '/END Verify JWT Token', 'yellow');
                     resolve(user);
                 } catch (e) {
                     Logger.d(TAG, 'ERR=========>' + e, 'red');

@@ -5,4 +5,5 @@ import { iUser } from "../../models/iUser.model";
  */
 export interface iGameSocket extends SocketIO.Socket{
     user?:iUser
+    gameRoomId?:string
 }
