@@ -1,19 +1,48 @@
 <div id="minigame-wrapper">
   <!--PLAYER DETAILS-->
   <div id="player-details" class="text-center">
-      <img src="http://www.auplod.com/u/aldpuoa0521.png"> <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
+    <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
+    <img src="http://www.auplod.com/u/aldpuoa0521.png">
   </div>
   <div id="arrow-wrapper">
 
-    <div class="arrows" [class.arrows-right]="playerTurn" [class.arrows-left]="!playerTurn"></div>
+    <img class="arrow" src="http://moziru.com/images/arrow-clipart-animated-gif-3.gif"  [class.arrows-right]="!playerTurn" [class.arrows-left]="playerTurn" />
   </div>
 
   <!--PARTNER DETAILS-->
   <div id="partner-details" class="text-center">
-      <img src="http://www.auplod.com/u/loupdaa0522.png"> <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
+    <img src="http://www.auplod.com/u/loupdaa0522.png">
+    <!--http://www.webestools.com/web20-title-generator-logo-title-maker-online-web20-effect-reflect-free-photoshop.html-->
   </div>
+
   <!--QUESTIONS-->
-  <div id="questions-wrapper">
-    <app-question-list (selected)="onQuestionSelected($event)" id="questions" [questions]="questions"></app-question-list>
+  <div id="questions-wrapper" *ngIf="isInAskQuestionMode() ;else answerModeTemplate">
+    <app-question-list (selected)="onQuestionSelected($event)" id="questions" [questions]="minigameState?.questions"></app-question-list><!--(minigameState | async)? also works -->
   </div>
+  <!--ANSWERS-->
+  <ng-template #answerModeTemplate>
+    <div id="answers-wrapper">
+      <app-answer-list (selected)="onAnswerSelected($event)" id="answers" [answers]="minigameState?.questions[minigameState.currentQuestionIndex].a"></app-answer-list>
+    </div>
+  </ng-template>
 </div>
+
+
+
+
+
+<!-- GAME ACTIONS MODAL -->
+<app-modal #partnersPlayActionsModal [id]="'partnersPlayActionsModal'"  [location]="'top'">
+  <div class="modal-header">
+      <h5 style="text-align:center">Game Action</h5>
+           
+           
+   </div>
+   <div class="modal-body">
+          Your partner choose the {{isInAskQuestionMode()?'Answer':'Question'}} : {{'asdas'}}
+   </div>
+   <div class="modal-footer">
+        <p style="text-align:left">   this is modal footer content</p>
+   </div>
+</app-modal>
+

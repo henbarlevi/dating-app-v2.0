@@ -41,10 +41,17 @@ class App {
         config: {
           autoIndex: false // http://mongoosejs.com/docs/guide.html#indexes - prevent auto creation of indexes to prevent performance hit
         }
-      });
-
- 
-    this.express.options('*', cors());
+      },(err)=>{ err?Logger.d('Mongo Connection:',err,'red'):Logger.d('Mongo Connection:','SUCCESS','green')});
+    //Allow Cross Origin requests (https://enable-cors.org/server_expressjs.html): 
+    this.express.use(function (req, res, next) {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      if(req.method === 'OPTIONS'){
+        res.end();
+      }
+      next();
+    });
+    // this.express.options('*', cors()); // suppose to do the same above but not working
     this.express.use(express.static(path.join(__dirname, 'public/dist')));
     this.express.use(logger('dev'));// use morgan to log requests to the console
     this.express.use(bodyParser.json());
@@ -57,6 +64,7 @@ class App {
     /* This is just to get up and running, and to make sure what we've got is
      * working so far. This function will change when we start to add more
      * API endpoints */
+    this.express.options('/', (req, res) => res.send());//if its a pre-flight request - just return ok (https://stackoverflow.com/questions/29954037/why-is-an-options-request-sent-and-can-i-disable-it)
     this.express.use('/api', appRoutes);
     //Handle 404 not found - give app
     this.express.use('/', (req: express.Request, res: express.Response) => {

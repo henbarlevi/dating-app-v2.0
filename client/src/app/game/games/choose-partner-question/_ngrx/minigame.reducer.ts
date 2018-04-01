@@ -1,0 +1,100 @@
+import { iGameState } from "../../../_ngrx/game.reducers";
+import * as GameActions from "../../../_ngrx/game.actions";
+import { MinigamesReducerContainer } from "../../../_ngrx/minigames.reducers";
+import { GAME_TYPE } from "../../../models/GAME_TYPE_ENUM";
+import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from "../models/PLAY_ACTIONS_ENUM.enum";
+import { iQuestion } from "../questions.model";
+import { initalNewMinigame } from "../../../_ngrx/game.actions";
+import { iGenericMiniGameState } from "../../logic/iminiGameState.model";
+//logic
+import { PlayAction, iMiniGameState, iInitData, choose_partner_question_logic } from '../../logic/choose_partner_question/choose_partner_question.logic';
+const logic = new choose_partner_question_logic();
+//const NumberOfQuestionsPerGame: number = 7;
+
+// //mini game initial state
+// export const initialState: iMiniGameState = {
+//     miniGameType: GAME_TYPE.choose_partner_question,
+//     currentAnswerIndex: -1,//answer not yet chosen
+//     currentQuestionIndex: -1,//question not yet chosen
+//     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, //game waiting for player to choose a -question
+//     questionsRemaining: NumberOfQuestionsPerGame,
+//     questions: [],
+//     answers: []
+// }
+
+
+// export interface iMiniGameState extends iGenericMiniGameState<GAME_TYPE.choose_partner_question> {
+//     currentAnswerIndex: number,//answer not yet chosen
+//     currentQuestionIndex: number,//question not yet chosen
+//     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS, //game waiting for player to choose a -question
+//     questionsRemaining: number,
+//     questions: iQuestion[],
+//     playerTurnId: string | null
+// }
+
+
+
+export function minigameReducer(state: iGameState, action: GameActions.GameActions): iGameState {
+
+    switch (action.type) {
+        /**INITIAL_NEW_MINIGAME */
+        case GameActions.INITIAL_NEW_MINIGAME:
+            const initdata: iInitData = (action as initalNewMinigame).payload.initialData;
+            const result = logic.initMiniGame(initdata);
+            !result.valid ? console.log('%c' + `Err ===> logic class received invalid input for .initMiniGame - ErrText:[${result.errText}]`, 'color: red') : '';
+            const miniGameState: iMiniGameState = result.state;
+            return {
+                ...state,
+
+                miniGameState: miniGameState
+            }
+        /**UPDATE_MINIGAME */
+        case GameActions.UPDATE_MINIGAME:
+            // const playAction: iPlayAction<CHOOSE_QUESTIONS_PLAY_ACTIONS> = action.payload.playAction;
+            // if (playAction.type === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
+            //     const chosenQuestionIndex: number = playAction.payload;
+            //     const answers: string[] = state.miniGameState.questions[chosenQuestionIndex].a;
+            //     const miniGameState = {
+            //         ...state.miniGameState,
+            //         currentQuestionIndex: chosenQuestionIndex,
+            //         currentAnswerIndex: -1,
+            //         currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question,
+            //         answers: answers
+            //     }
+            //     return {
+            //         ...state,
+            //         miniGameState: miniGameState
+            //     }
+            // } else if (playAction.type === CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question) {
+            //     const questionsRemaining: number = state.miniGameState.questionsRemaining - 1;
+            //     const chosenAnswerIndex: number = playAction.payload;
+            //     const miniGameState: iMiniGameState = {
+            //         ...state.miniGameState,
+            //         currentAnswerIndex: playAction.payload,
+            //         currentQuestionIndex: -1,
+            //         questionsRemaining: questionsRemaining,
+            //         currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question
+            //     }
+            //     return {
+            //         ...state,
+            //         miniGameState: miniGameState
+            //     }
+            // } else {
+            //     console.log('%c' + `playAction.type is not answer_question/ask_question `, 'color: red');
+
+            // }
+            const playAction: PlayAction = action.payload.playAction;
+            const updateResult = logic.play(state.miniGameState,playAction);
+            !updateResult.valid ? console.log('%c' + `Err ===> logic class received invalid input for .play - ErrText:[${updateResult.errText}]`, 'color: red') : '';
+            const updatedMinigameState: iMiniGameState = updateResult.state;
+            return {
+                ...state,
+                miniGameState: updatedMinigameState
+            }
+        /**DEFAULT */
+        default:
+            console.log('%c' + `[WARNING] - minigameReducer of [choose_questions] received the action [${action.type}] but didnt changed the state `, 'color: red');
+            return state;
+
+    }
+}

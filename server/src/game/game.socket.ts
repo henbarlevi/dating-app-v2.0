@@ -5,6 +5,9 @@ import * as Rx from 'rxjs';
 import * as request from 'request';
 import * as jwt from 'jsonwebtoken'; //jwt authentication
 
+import 'rxjs/add/observable/merge';
+import 'rxjs/add/observable/timer';
+
 //======db
 import { UserRepository } from '../db/repository/user-rep';
 
@@ -25,15 +28,15 @@ const envConfig: any = config.get(ENV);
 import { Logger } from '../utils/Logger';
 import { iGameSocket } from './models/iGameSocket';
 import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { Game$ } from './game$.service';
 const TAG: string = 'GameSockets |';
 
-let alreadyConnectedUsers: { [user_id: string]: boolean } = {};
-
+let alreadyConnectedUsers: { [user_id: string]: iGameSocket } = {};
 // SOCKET.IO with TOKEN BASED : https://auth0.com/blog/auth-with-socket-io/
 module.exports = function (io) {
     Logger.d(TAG, 'establishing sockets.io for games..');
     let gameSocketsManager: GameScoketsManager = new GameScoketsManager(io);
-
+    gameSocketsManager.run();
     /*authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
     io.use((socket: iGameSocket, next) => {
         console.log(socket.handshake.query);
@@ -41,51 +44,80 @@ module.exports = function (io) {
         if (token) {
             verifyToken(token)
                 .then((user: iUser) => {
-                    Logger.d(TAG, 'user socket authenticated', 'green');
-                    Logger.d(TAG, JSON.stringify(alreadyConnectedUsers))
+                    Logger.d(TAG, `Already Connected Users _id = ${Object.keys(alreadyConnectedUsers).join()}`)
+                    const userId: string = user._id.toString();
+                    Logger.d(TAG, `This User _id =  ${userId}`)
+                    Logger.d(TAG, `${alreadyConnectedUsers[userId]}`)
 
-                    //if the user alredy connected - prevent duplication (user start multi game at once)
-                    if (alreadyConnectedUsers[user._id]) {
-                        socket.emit(GAME_SOCKET_EVENTS.already_connected);
-                        next(new Error("Already Connected"));
-                        Logger.d(TAG, 'user already connected from another tab/device', 'red');
+                    //if the user alredy connected - prevent duplication (disconnect the first tab)
+                    if (alreadyConnectedUsers[userId]) {
+                        Logger.d(TAG, 'user already connected from another tab/device, **disconnect previous connection and saving the new socket into [alreadyConnectedUsers] **', 'yellow');
+                        //alreadyConnectedUsers[user._id].emit(GAME_SOCKET_EVENTS.already_connected);
 
-                    } else { //User is Ok
-                        Logger.d(TAG, 'saving ' + user._id + ' into alradyConnectedUsers');
-                        alreadyConnectedUsers[user._id] = true;
+                        alreadyConnectedUsers[userId].disconnect();
                         //set user into socket socket.user
                         socket.user = user;
+                        //saving into alreadyConnectedUsers
+                        alreadyConnectedUsers[userId] = socket;
+                        next();
+
+
+                    } else {
+
+                        Logger.d(TAG, 'user socket authenticated', 'green');
+                        Logger.d(TAG, 'saving ' + user._id + ' into alradyConnectedUsers');
+                        //set user into socket socket.user
+                        socket.user = user;
+                        //saving into alreadyConnectedUsers
+                        alreadyConnectedUsers[userId] = socket;
                         next();
                     }
+
 
                 })
                 .catch(e => {
                     next(new Error("not authenticated"));
-                    Logger.d(TAG, 'user socket not authenticated', 'red');
+                    Logger.d(TAG, `user socket not authenticated ${e}`, 'red');
 
                 })
         } else {
             next(new Error("not authenticated"));
-            Logger.d(TAG, 'user socket not authenticated', 'red');
+            Logger.d(TAG, 'user socket not authenticated - client didnt sent token', 'red');
         }
     });
+
+    //service that export Observable that raise event every time client send emit evetm through socket.io
+    Game$.init(io);
     /*handle connection*/
-    io.sockets.on('connection', (socket: SocketIO.Socket) => {
-        console.log('user connected');
+    io.sockets.on('connection', (socket: iGameSocket) => {
+        let connectionQueryParams = socket.handshake.query;
 
-
-        gameSocketsManager.handle(socket);
         socket.on('disconnect', () => {
             //remove player from alreadyConnectedUsers
-            let userId = (socket as iGameSocket).user._id
-            alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = false : '';
-            console.log('user disconnected');
-        });
 
-        socket.on('add-message', (message) => {
-            io.emit('message', { type: 'new-message', text: message });
+            const userId: string = (socket as iGameSocket).user._id.toString()
+            if (alreadyConnectedUsers[userId]) {
+                Logger.d(TAG, `** removing ${userId} from [alreadyConnectedUsers] **`, 'gray')
+                delete alreadyConnectedUsers[userId];
+            } else { Logger.d(TAG, `Warning! -Diconnected User ${userId} not exist in the [alreadyConnectedUsers]`, 'red') };
         });
+        //handle reconnection - [Deprecated] - reconnection suppose to be handled by the relevant gameroom
+        if (socket.handshake.query.roomId) {
+            socket.gameRoomId = socket.handshake.query.roomId;
+            Logger.d(TAG, `user is trying to reconnect to room ${socket.handshake.query.roomId}..`, 'gray')
+            //TODO
+            // let userId = (socket as iGameSocket).user._id
+            // alreadyConnectedUsers[userId] ? alreadyConnectedUsers[userId] = null : ''
+            // //socket.disconnect();
+
+        }
+        //
+
+        // socket.on('add-message', (message) => {
+        //     io.emit('message', { type: 'new-message', text: message });
+        // });
     });
+
 
 
 

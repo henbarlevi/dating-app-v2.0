@@ -15,7 +15,7 @@ const schema = new Schema({
     }
 });
 
-schema.index({"facebook.id":1})
+schema.index({"facebook.id":1}) //in case of performace issues :https://stackoverflow.com/questions/14342708/mongoose-indexing-in-production-code
 /*define indexes: 
 http://mongoosejs.com/docs/guide.html#indexes
 https://docs.mongodb.com/manual/indexes/

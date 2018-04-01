@@ -4,29 +4,29 @@
 #page-wrapper{
     height: 100vh;
     padding-top:3.5em;//prevent nav-bar from covering the page
-	background: $strong-pink;
-	background: linear-gradient(276deg, #16c1e0, #193d4c, #cb0e66, #cb0e48, #1f2022);
-	background-size: 1000% 1000%;
+	background: $strong-gray;//$strong-pink;
+	// background: linear-gradient(276deg, #16c1e0, #193d4c, #cb0e66, #cb0e48, #1f2022);
+	// background-size: 1000% 1000%;
 	
-	-webkit-animation: AnimationName 8s ease infinite;
-	-moz-animation: AnimationName 8s ease infinite;
-	animation: AnimationName 8s ease infinite;
+	// -webkit-animation: AnimationName 8s ease infinite;
+	// -moz-animation: AnimationName 8s ease infinite;
+	// animation: AnimationName 8s ease infinite;
 	
-	@-webkit-keyframes AnimationName {
-		0%{background-position:0% 58%}
-		50%{background-position:100% 43%}
-		100%{background-position:0% 58%}
-	}
-	@-moz-keyframes AnimationName {
-		0%{background-position:0% 58%}
-		50%{background-position:100% 43%}
-		100%{background-position:0% 58%}
-	}
-	@keyframes AnimationName { 
-		0%{background-position:0% 58%}
-		50%{background-position:100% 43%}
-		100%{background-position:0% 58%}
-	}
+	// @-webkit-keyframes AnimationName {
+	// 	0%{background-position:0% 58%}
+	// 	50%{background-position:100% 43%}
+	// 	100%{background-position:0% 58%}
+	// }
+	// @-moz-keyframes AnimationName {
+	// 	0%{background-position:0% 58%}
+	// 	50%{background-position:100% 43%}
+	// 	100%{background-position:0% 58%}
+	// }
+	// @keyframes AnimationName { 
+	// 	0%{background-position:0% 58%}
+	// 	50%{background-position:100% 43%}
+	// 	100%{background-position:0% 58%}
+	// }
 }
 /*GENERATED BACKGROUND
 background: linear-gradient(276deg, #16c1e0, #193d4c, #cb0e66, #cb0e48, #1f2022);

@@ -8,62 +8,104 @@ import * as io from 'socket.io-client';
 import * as plugin from 'socketio-wildcard'
 import { iSocketData } from './models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { game$Event } from './models/game$Event.model';
 const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
-
+//ngrx (redux)
+import { iState } from './_ngrx/game.reducers';
+import { Store } from '@ngrx/store';
+import * as GameActions from './_ngrx/game.actions';
+//==== utils
+const TAG: string = 'GameService |';
 @Injectable()
 export class GameService {
   baseUrl: string = 'http://localhost:3000';
   private gameSocket: SocketIOClient.Socket;
-  private _game$: ReplaySubject<iSocketData> = new ReplaySubject<iSocketData>(1);
-  public game$: Observable<iSocketData> = this._game$.asObservable();
   /*
   Raise events with services (BehaviourSubject,ReplaySubject) :
   https://stackoverflow.com/questions/34376854/delegation-eventemitter-or-observable-in-angular2/35568924#35568924*/
-  private _gameStatusChanged = new BehaviorSubject<GAME_STATUS>(GAME_STATUS.not_playing);
-  public gameStatusChanged$ = this._gameStatusChanged.asObservable();
+  private _game$: ReplaySubject<game$Event> = new ReplaySubject<game$Event>(1);
+  public game$: Observable<game$Event> = this._game$.asObservable();
 
-  raiseGameStatusChange(gameStatus: GAME_STATUS) {
-    this._gameStatusChanged.next(gameStatus);
+  constructor(private store: Store<iState>) {
+    this.printAllEvents();//log $game events
   }
 
+  private printAllEvents() {
+    this.game$.subscribe(async (socketEvent: game$Event) => {
+      try {
 
-  constructor() {
+        console.log('%c' + `[RECEIVED] EVENT [${socketEvent.eventName}] - Occured with data:  With the Data [${socketEvent.eventData ? JSON.stringify(socketEvent.eventData) : 'None'}]`, 'color: blue');
+      }
+      catch (e) {
+        console.log('%c' + `Err =====> while printing event ` + e, 'color: red');
+      }
 
+    })
   }
-
+  /**estabslish web socket and return observable that emits the websocket events coming from server */
   startGame() {
+    console.log('creating game socket..');
     let token: String = localStorage.getItem('token');
-
-
-    console.log('creating game socket');
+    let query: any = { token: token } //conncetion query params
+    if (this.gameroomId) { query.roomId = this.gameroomId } //if user trying to recoonect
     //connecting :
     this.gameSocket = io.connect(this.baseUrl
       /*with token :authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
       , {
-        query: {
-          token: token
-        }
+        query: query
       });
     socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
-    this.gameSocket.on('*', (data) => {
-      this._game$.next(data);
+    this.gameSocket.on('*', (data: iSocketData) => {
+      this._game$.next({
+        eventName: data.data[0],
+        eventData: data.data[1]
+      });
     });
-
-
+    this.gameSocket.once('disconnect', () => {
+      //emit disconnection to game$
+      this._game$.next({
+        eventName: GAME_SOCKET_EVENTS.disconnect,
+      });
+      //delete roomId from localstorage
+      this.gameroomId = null;
+      //clean listener and observable emits
+      this.gameSocket.removeAllListeners();
+      this._game$ = new ReplaySubject<game$Event>(1);
+      this.game$ = this._game$.asObservable();
+      //change gamestate:
+      this.store.dispatch(new GameActions.socketDisconnection())
+    })
+    //change gamestate:
+    this.store.dispatch(new GameActions.StartNewGame());
     return this.game$;
   }
-  //send to server  game event
-  emitGameEvent(eventName:GAME_SOCKET_EVENTS,data?:any){
-    this.gameSocket.emit(eventName,data);
+  /*send to server game event*/
+  emitGameEvent(eventName: GAME_SOCKET_EVENTS, data?: any) {
+    console.log(`%c ** [Emited] Event :[${eventName}] **`, 'color: blue');
+    let roomId = this.gameroomId;
+    if (roomId) {
+      data ? data.roomId = roomId : data = { roomId: roomId };
+    }
+    this.gameSocket.emit(eventName, data);
   }
+
+  /**get gameroomId from local storage */
+  get gameroomId(): string {
+    return localStorage.getItem('roomId');
+  }
+  set gameroomId(roomId: string) {
+    if (roomId === null) { localStorage.removeItem('roomId') }
+    else {
+
+      localStorage.setItem('roomId', roomId);
+    }
+  }
+
+
 }
 
-export enum GAME_STATUS {
-  not_playing,
-  searching_player,
-  playing,
-  game_ended
-}
+
+
 
 export enum GAME_TYPE {
   choose_partner_question /**a game where the partner decide what question the other player will answer */

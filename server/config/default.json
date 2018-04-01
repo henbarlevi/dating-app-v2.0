@@ -1,20 +1,22 @@
 {
-    "prod":{
-
-    },
-    "staging":{
-
-    },
-    "local":{
-        "connectionString":"mongodb://localhost/myLocaldb",
-        "baseUrl":"otherserverRoot",
-        "facebook":{
-            "client_id":"570641329993499",
-            "client_secret":"82ae7f7f713557a5ab08508179df0140",
-            "redirect_uri":"http%3A%2F%2Flocalhost%3A3000%2Flogin"
-            
+    "prod": {},
+    "staging": {},
+    "local": {
+        "connectionString": "mongodb://localhost/myLocaldb",
+        "baseUrl": "otherserverRoot",
+        "facebook": {
+            "client_id": "570641329993499",
+            "client_secret": "82ae7f7f713557a5ab08508179df0140",
+            "redirect_uri": "http%3A%2F%2Flocalhost%3A4200%2Flogin"
+        },
+        "game": {
+            "reconnection_timeout": 2000, //20 sec to reconnect back to a game
+            /*mini games*/
+            "mini_games":{
+                "choose_partner_question":{
+                    "questions_per_game":7
+                }
+            }
         }
     }
-
-    
 }

@@ -1,6 +1,6 @@
 import { MongooseDocument } from "mongoose";
 
-export interface iUser extends MongooseDocument {
+export interface iUser extends MongooseDocument { //NOTE +id is a string but typeof _id is object
     facebook?: {
         id: string,
         name: string,

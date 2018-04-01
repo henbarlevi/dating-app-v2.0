@@ -6,6 +6,10 @@ import { GameRoutingModule } from './game-routing.module';
 import { GameService } from './game.service';
 import { LoadingGameComponent } from './loading-game/loading-game.component';
 import { ChoosePartnerQuestionModule } from './games/choose-partner-question/choose-partner-question.module';
+//ngrx (redux)
+import { StoreModule } from '@ngrx/store';
+import { gameReducer } from './_ngrx/game.reducers';
+
 //TODO - move each game component to individual lazy module:
 
 /*NOTE - there is NO need to import SharedModule for his services, (because we already using the forRoot pattern in the app module),
@@ -14,8 +18,11 @@ import { ChoosePartnerQuestionModule } from './games/choose-partner-question/cho
   imports: [
     CommonModule,
     GameRoutingModule,
+
     //TODO - move each game component to individual lazy module:
-    ChoosePartnerQuestionModule
+    ChoosePartnerQuestionModule,
+    //ngrx (redux)
+    StoreModule.forFeature('game', gameReducer)
   ],
   //components ,directives ,pipes:
   declarations: [

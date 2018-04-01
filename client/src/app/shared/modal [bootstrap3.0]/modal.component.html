@@ -1,0 +1,31 @@
+
+<!-- Modal -->
+<div #abstractmodal class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <ng-content select=".modal-header"></ng-content>
+
+        <!-- 
+        Example for header:  
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Modal Header</h4> -->
+      </div>
+      <div class="modal-body">
+        <ng-content select=".modal-body"></ng-content>
+        <!-- How to use ng-content
+          https://medium.com/claritydesignsystem/ng-content-the-hidden-docs-96a29d70d11b-->
+      </div>
+      <div class="modal-footer">
+        <ng-content select=".modal-footer"></ng-content>
+
+        <!-- Example for footer: 
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
+      </div>
+    </div>
+    <!-- /END Modal content-->
+  </div>
+</div>
+<!-- /END Modal -->
