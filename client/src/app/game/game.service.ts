@@ -45,14 +45,12 @@ export class GameService {
   /**estabslish web socket and return observable that emits the websocket events coming from server */
   startGame() {
     console.log('creating game socket..');
-    let token: String = localStorage.getItem('token');
-    let query: any = { token: token } //conncetion query params
-    if (this.gameroomId) { query.roomId = this.gameroomId } //if user trying to recoonect
+    const token: String = localStorage.getItem('token');
     //connecting :
     this.gameSocket = io.connect(this.baseUrl
       /*with token :authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
       , {
-        query: query
+        query:  { token: token } 
       });
     socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
     this.gameSocket.on('*', (data: iSocketData) => {
@@ -66,8 +64,6 @@ export class GameService {
       this._game$.next({
         eventName: GAME_SOCKET_EVENTS.disconnect,
       });
-      //delete roomId from localstorage
-      this.gameroomId = null;
       //clean listener and observable emits
       this.gameSocket.removeAllListeners();
       this._game$ = new ReplaySubject<game$Event>(1);
@@ -82,24 +78,10 @@ export class GameService {
   /*send to server game event*/
   emitGameEvent(eventName: GAME_SOCKET_EVENTS, data?: any) {
     console.log(`%c ** [Emited] Event :[${eventName}] **`, 'color: blue');
-    let roomId = this.gameroomId;
-    if (roomId) {
-      data ? data.roomId = roomId : data = { roomId: roomId };
-    }
     this.gameSocket.emit(eventName, data);
   }
 
-  /**get gameroomId from local storage */
-  get gameroomId(): string {
-    return localStorage.getItem('roomId');
-  }
-  set gameroomId(roomId: string) {
-    if (roomId === null) { localStorage.removeItem('roomId') }
-    else {
 
-      localStorage.setItem('roomId', roomId);
-    }
-  }
 
 
 }

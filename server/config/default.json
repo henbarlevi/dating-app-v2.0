@@ -11,6 +11,7 @@
         },
         "game": {
             "reconnection_timeout": 2000, //20 sec to reconnect back to a game
+            "minigames_per_game":3,//NOT YET USED
             /*mini games*/
             "mini_games":{
                 "choose_partner_question":{

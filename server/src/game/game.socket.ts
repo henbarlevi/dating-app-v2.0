@@ -16,7 +16,6 @@ import { UserRepository } from '../db/repository/user-rep';
 import { GameScoketsManager } from './gameScoketsManager';
 import { verifyToken } from '../helpers/middlewares';
 //====== models
-import { GAME_STATUS } from './GAME_STATUS_ENUM';
 import { iUser } from '../models';
 import { iFacebookCredentials } from '../facebook/models/iFacebookCredentials.model'
 import { iFacebookUserInfo } from '../facebook/models/index';

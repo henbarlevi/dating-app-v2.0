@@ -33,7 +33,6 @@ const TAG: string = 'ChoosePartnerQuestionComponent |';
   styleUrls: ['./choose-partner-question.component.scss']
 })
 export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
-  //playerTurn: boolean = false;
   playerId: string = '';
   gameState$: Observable<iGameState>;
   minigameState: iMiniGameState;//get updated each time minigameState$ raise event
@@ -43,8 +42,17 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
   constructor(private GameService: GameService,
     private store: Store<iGameState>) {
   }
-  get playerTurn(){
-    return this.playerId && this.playerId ===this.minigameState.playerTurnId; //is currentTurnId = to the this playerId
+  /**is it this player turn */
+  get playerTurn() {
+    return this.playerId && this.playerId === this.minigameState.playerTurnId; //is currentTurnId = to the this playerId
+  }
+  /**return the latest chosen question. if not exist return empty string */
+  get chosenQuestion():string {
+    return this.minigameState && this.minigameState.currentQuestionIndex >= 0 ? this.minigameState.questions[this.minigameState.currentQuestionIndex].q : '';
+  }
+  /**return the latest chosen Answer. if not exist return empty string */
+  get chosenAnswer():string {
+    return this.minigameState && this.minigameState.currentAnswerIndex >= 0 ? this.minigameState.questions[this.minigameState.currentQuestionIndex].a[this.minigameState.currentAnswerIndex] : '';
   }
   ngOnInit() {
     this.gameState$ = this.store.select(getGameState);
@@ -59,15 +67,12 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     */
     this.handlePartnersActions();
 
-   // this.handleTurns();/**listen to your_turn event and change playerTurn to true */
-
-
   }
   onQuestionSelected(questionIndex: number) {
     if (this.playerTurn) {
       //emit the play action
       console.log('question has been selected :' + questionIndex)
-      const playAction: PlayAction = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex ,playerId:this.playerId};
+      const playAction: PlayAction = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: questionIndex, playerId: this.playerId };
       //send playAction to server
       this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, playAction);
       //dispatch UPDATE minigame change:
@@ -80,7 +85,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
   onAnswerSelected(answerIndex: number) {
     if (this.playerTurn) {
       console.log('answer has been selected :' + answerIndex)
-      let playAction: PlayAction = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, payload: answerIndex ,playerId:this.playerId};
+      let playAction: PlayAction = { type: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, payload: answerIndex, playerId: this.playerId };
       this.GameService.emitGameEvent(GAME_SOCKET_EVENTS.play, playAction);
       this.store.dispatch(new GameActions.updateMinigame({ miniGameType: GAME_TYPE.choose_partner_question, playAction: playAction }));
       //this.playerTurn = false;
@@ -126,12 +131,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
       this.partnersPlayActionsModal.openModal()//TEST TODODTODO
     })
   }
-  // private handleTurns() {
-  //   const yourturn$: Observable<game$Event> = this.mini.game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.your_turn);
-  //   yourturn$.subscribe((gameEvent: game$Event) => {
-  //     this.playerTurn = true;
-  //   })
-  // }
+
 }
 
 

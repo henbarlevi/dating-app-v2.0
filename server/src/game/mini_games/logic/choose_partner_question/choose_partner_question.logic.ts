@@ -82,7 +82,7 @@ export class choose_partner_question_logic extends minigameLogic<MINIGAME_TYPE.c
                         state: {
                             ...currentState,///...state,//assign all properties of state to the returned obj
                             currentQuestionIndex: playAction.payload,
-                            currentAnswerIndex: -1,
+                            //currentAnswerIndex: -1,
                             currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question,
                             playerTurnId: nextTurn,
                         }
@@ -94,7 +94,7 @@ export class choose_partner_question_logic extends minigameLogic<MINIGAME_TYPE.c
                     const newState = {
                         ...currentState,
                         currentAnswerIndex: playAction.payload,
-                        currentQuestionIndex: -1,
+                        //currentQuestionIndex: -1,
                         currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
                         questionsRemaining: questionsRemaining,
 

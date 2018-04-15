@@ -52,12 +52,16 @@ class choose_partner_question_logic extends minigame_logic_1.minigameLogic {
                     const nextTurn = this.getNextStringInArray(currentState.playersId, currentTurn);
                     return {
                         valid: true,
-                        state: Object.assign({}, currentState, { currentQuestionIndex: playAction.payload, currentAnswerIndex: -1, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, playerTurnId: nextTurn })
+                        state: Object.assign({}, currentState, { currentQuestionIndex: playAction.payload, 
+                            //currentAnswerIndex: -1,
+                            currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, playerTurnId: nextTurn })
                     };
                 /**ANSWER_QUESTION */
                 case PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question:
                     const questionsRemaining = currentState.questionsRemaining - 1;
-                    const newState = Object.assign({}, currentState, { currentAnswerIndex: playAction.payload, currentQuestionIndex: -1, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, questionsRemaining: questionsRemaining });
+                    const newState = Object.assign({}, currentState, { currentAnswerIndex: playAction.payload, 
+                        //currentQuestionIndex: -1,
+                        currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, questionsRemaining: questionsRemaining });
                     if (questionsRemaining <= 0) {
                         return this.end(newState);
                     }

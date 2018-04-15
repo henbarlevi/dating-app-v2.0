@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const iGameSocket_1 = require("../models/iGameSocket");
 const Logger_1 = require("../../utils/Logger");
 const GAME_SOCKET_EVENTS_1 = require("../models/GAME_SOCKET_EVENTS");
 const TAG = 'miniGame Abstract |';
@@ -17,29 +18,35 @@ class miniGame {
     constructor(io, gameRoom) {
         this.io = io;
         this.gameRoom = gameRoom;
-        this.gameRoomPlayersAmount = gameRoom.players.length;
+    }
+    /**@description return the players _id in the gameroom */
+    get playersId() {
+        return this.gameRoom.players.map(p => p.user._id.toString());
+    }
+    /**@description return the players amount the gameroom */
+    get playersAmount() {
+        return this.gameRoom.players.length;
     }
     WaitForPlayersToBeReady() {
         return new Promise((resolve, reject) => {
             Logger_1.Logger.d(TAG, '** waiting for players to be ready... **', 'gray');
-            let playersReady = [];
+            let playersIdReady = [];
             //TODO - dont forget to dispose event listener
             let subscription = game__service_1.game$
                 .filter((event) => {
-                if (event.eventData) {
-                    let gameroomId = event.eventData.roomId;
-                    let eventName = event.eventName;
-                    return eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameroomId === this.gameRoom.roomId;
-                }
-                return false;
+                const eventName = event.eventName;
+                const gameRoomId = event.socket.gameRoomId;
+                eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameRoomId !== this.gameRoom.roomId ? Logger_1.Logger.d(TAG, `Warning! ready_for_mini_game occur but the socket.gameRoomId=${gameRoomId}`, 'red') : '';
+                return eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameRoomId === this.gameRoom.roomId;
             }) //check if its ready_for_mini_game event + related to that gameRoomId
                 .subscribe((data) => __awaiter(this, void 0, void 0, function* () {
                 try {
-                    let playerReady = data.socket;
-                    let playerRelatedToGameroom = this.gameRoom.players.find(p => p.id === playerReady.id);
-                    playerRelatedToGameroom ? playersReady.push(playerReady) : Logger_1.Logger.d(TAG, 'Warning! Socket That is not related to game room emited event of ready_for_minigame', 'red');
-                    Logger_1.Logger.d(TAG, `game room [${this.gameRoom.roomId}] | Player - ${playerReady.user.facebook ? playerReady.user.facebook.name : playerReady.user._id} is ready`);
-                    if (playersReady.length === this.gameRoomPlayersAmount) {
+                    const playerReady = data.socket;
+                    const playerIdReady = playerReady.user._id.toString();
+                    const playerRelatedToGameroom = this.playersId.some(pId => pId === playerIdReady);
+                    playerRelatedToGameroom ? playersIdReady.push(playerIdReady) : Logger_1.Logger.d(TAG, 'Warning! Socket That is not related to game room emited event of ready_for_minigame', 'red');
+                    Logger_1.Logger.d(TAG, `game room [${this.gameRoom.roomId}] | Player - ${iGameSocket_1.getUserNameBySocket(playerReady)} is ready, [${playersIdReady.length}] players are ready`);
+                    if (playersIdReady.length === this.playersAmount) {
                         resolve();
                     }
                 }

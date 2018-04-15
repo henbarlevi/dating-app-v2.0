@@ -33,8 +33,12 @@ export class ModalComponent implements OnInit, AfterContentInit {
      * This is the recommended approach because it then makes it easier to develop apps that can be rendered in environments that don’t have DOM access, like on the server, in a web worker or on native mobile. (https://alligator.io/angular/using-renderer2/)
      */
     const nativeElModal = this.modal.nativeElement;
-    this.renderer.addClass(nativeElModal, this.modalClass);
-    this.renderer.setProperty(nativeElModal, 'id', this.modalId);
+    if (this.modalClass) {
+      this.renderer.addClass(nativeElModal, this.modalClass);
+    }
+    if (this.modalClass) {
+      this.renderer.setProperty(nativeElModal, 'id', this.modalId);
+    }
     //set modal location appearence if [location] specified
     if (this.location) {
       this.setModalLocation(this.location);
@@ -57,12 +61,12 @@ export class ModalComponent implements OnInit, AfterContentInit {
   /**declare where the modal apear when it opened (top/center/bottom)
    * depend on the @param location:string
    */
-  setModalLocation(location:string): any {
+  setModalLocation(location: string): any {
     //// This is equivalent to document.querySelector("input")
     const nativeModalContent = this.modalContent.nativeElement;
-    if(location ==='middle'){
+    if (location === 'middle') {
       this.renderer.addClass(nativeModalContent, 'location-middle');
-    }else if(location ==='bottom'){
+    } else if (location === 'bottom') {
       this.renderer.addClass(nativeModalContent, 'location-bottom');
 
     }
