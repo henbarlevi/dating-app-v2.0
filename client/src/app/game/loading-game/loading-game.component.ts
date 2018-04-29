@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { GameService } from '../game.service';
 import { Observable } from 'rxjs/Observable';
 import { iSocketData } from '../models/iSocketData.model';
-import { GAME_SOCKET_EVENTS } from '../models/GAME_SOCKET_EVENTS';
+import { GAME_SOCKET_EVENTS } from '../models/GAME_SOCKET_EVENTS.enum';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GAME_TYPE } from '../models/GAME_TYPE_ENUM';
 import { game$Event } from '../models/game$Event.model';
@@ -44,8 +44,8 @@ export class LoadingGameComponent implements OnInit, OnDestroy {
         case GAME_SOCKET_EVENTS.init_mini_game:
           this.loadingMessage = 'Initializing game';
           //navigating to game
-          let initGameData: any = event.eventData;
-          let gameName: string = GAME_TYPE[initGameData.miniGameType];
+          const initGameData: any = event.eventData;
+          const gameName: string = GAME_TYPE[initGameData.miniGameType];
           console.log(TAG, `initing the game :` + gameName);
           return this.Router.navigate(['../' + gameName], { relativeTo: this.route });
         default:

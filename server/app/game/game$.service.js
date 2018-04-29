@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Logger_1 = require("../utils/Logger");
 const ReplaySubject_1 = require("rxjs/ReplaySubject");
-const GAME_SOCKET_EVENTS_1 = require("./models/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_enum_1 = require("./models/GAME_SOCKET_EVENTS.enum");
 const GAMEROOM_EVENTS_1 = require("./models/GAMEROOM_EVENTS");
 const TAG = 'Game$ |';
 /**This Service purpose is to export Observable that raise event every time client send emit event through socket.io */
@@ -28,7 +28,7 @@ class Game$ {
             //emit connection event to observable:
             _game$.next({
                 socket: socket,
-                eventName: GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection
+                eventName: GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.connection
             });
             //catch all events on socket and emit them to the observable
             socket.on('*', (data) => {
@@ -46,7 +46,7 @@ class Game$ {
                 // Logger.d(TAG,'disconnect socket '+socket.id,'cyan');
                 _game$.next({
                     socket: socket,
-                    eventName: GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.disconnect
+                    eventName: GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.disconnect
                 });
             });
         });
@@ -85,7 +85,7 @@ class Game$ {
     }
 }
 exports.Game$ = Game$;
-const gameSocketEventsNames = Object.keys(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS).map(e => GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS[e]);
+const gameSocketEventsNames = Object.keys(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS).map(e => GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS[e]);
 function isGAME_SOCKET_EVENT(event_name) {
     return gameSocketEventsNames.some(evName => evName === event_name);
 }

@@ -10,7 +10,6 @@ import * as config from 'config';
 import { choose_partner_question_logic, iMiniGameState, iInitData, PlayAction } from '../../game/mini_games/logic/choose_partner_question/choose_partner_question.logic';
 import { iQuestion } from '../../game/mini_games/choose_partner_question/questions.model';
 import { iPlayAction } from '../../game/models/iPlayData';
-import { GAME_TYPE } from '../../game/models/GAME_TYPE_ENUM';
 import { CHOOSE_QUESTIONS_PLAY_ACTIONS } from '../../game/mini_games/logic/choose_partner_question/PLAY_ACTIONS_ENUM';
 import { Logger } from '../../utils/Logger';
 import { MINIGAME_STATUS } from '../../game/mini_games/logic/MINIGAME_STATUS_ENUM';
@@ -49,7 +48,7 @@ describe('choose_partner_question_logic', () => {
         it('should return valid=false if initialization data of playersId contain 1 player', () => {
             //init
             const mockQUestiosn: iQuestion[] = [{ q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }];
-            const initData: iInitData = { questions: mockQUestiosn, questionsRemaining: mockQUestiosn.length, playersId: ['player1'] };
+            const initData: iInitData = { questions: mockQUestiosn, questionsRemaining: mockQUestiosn.length, playersId: ['player1'],firstPlayerTurnId:'player1' };
             //action
             const result: { valid: boolean, state: iMiniGameState } = logic.initMiniGame(initData);
             //asset

@@ -5,9 +5,8 @@ import { iGameSocket } from '../../models/iGameSocket';
 import { miniGame } from "../abstract_minigame";
 
 import allQuestions from './questions';
-import { GAME_TYPE } from "../../models/GAME_TYPE_ENUM";
-import { GAME_SOCKET_EVENTS } from "../../models/GAME_SOCKET_EVENTS";
-import { utilsService } from "../../../utils/utils.service";
+import { GAME_SOCKET_EVENTS } from "../../models/GAME_SOCKET_EVENTS.enum";
+import {  randomizeInt } from "../../../utils/utils.service";
 import { game$, game$Event } from "../../game$.service";
 import { Subscription } from "rxjs/Subscription";
 import { iQuestion } from "./questions.model";
@@ -25,6 +24,7 @@ const TAG: string = 'choose_partner_question';
 // ====== ENV Configutations
 // =========================
 import * as config from 'config';
+import { MINIGAME_TYPE } from "../logic/MINIGAME_TYPE_ENUM";
 //import { iInitData } from "./iInitData.model";
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
@@ -35,10 +35,15 @@ export class choose_partner_question extends miniGame {
     private miniGameState: iMiniGameState;//NEW
     private logic: choose_partner_question_logic;//NEW
 
+
     /**Ctor */
     constructor(io: SocketIO.Namespace, gameRoom: iGameRoom) {
         super(io, gameRoom);
 
+    }
+
+    get MiniGameState():iMiniGameState {
+        return this.miniGameState;
     }
 
     /**tell players what minigame theyplay + initial data for the game, and wait until they say they ready */
@@ -60,7 +65,7 @@ export class choose_partner_question extends miniGame {
         console.dir(this.miniGameState);
 
         //declaring the mini game that should start - this is how client know to load the minigame screen:
-        this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.init_mini_game, { initData: initData, miniGameType: GAME_TYPE.choose_partner_question });
+        this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.init_mini_game, { initData: initData, miniGameType: MINIGAME_TYPE.choose_partner_question });
         await this.WaitForPlayersToBeReady(); //calling super class
         Logger.d(TAG, 'players are ready!');
     }
@@ -119,7 +124,7 @@ export class choose_partner_question extends miniGame {
     private static randomizeQuestions(): Array<iQuestion> {
         let min: number = 0;
         let max: number = allQuestions.length - NumberOfQuestionsPerGame;
-        let startIndex = Math.floor(Math.random() * (max - min + 1) + min);
+        let startIndex =randomizeInt(min,max);
         let randomQuestions = allQuestions.slice(startIndex, startIndex + NumberOfQuestionsPerGame);
         return randomQuestions
     }
@@ -128,7 +133,7 @@ export class choose_partner_question extends miniGame {
     */
     private randomizeFirstTurn(playersId: string[]): string {
         const playersAmount = playersId.length;
-        const playerIndex: number = utilsService.randomizeInt(0, playersAmount - 1);
+        const playerIndex: number = randomizeInt(0, playersAmount - 1);
         return playersId[playerIndex];
     }
 

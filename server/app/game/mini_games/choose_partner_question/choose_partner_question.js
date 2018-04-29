@@ -10,8 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_minigame_1 = require("../abstract_minigame");
 const questions_1 = require("./questions");
-const GAME_TYPE_ENUM_1 = require("../../models/GAME_TYPE_ENUM");
-const GAME_SOCKET_EVENTS_1 = require("../../models/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_enum_1 = require("../../models/GAME_SOCKET_EVENTS.enum");
 const utils_service_1 = require("../../../utils/utils.service");
 const game__service_1 = require("../../game$.service");
 // ===== redux
@@ -26,6 +25,7 @@ const TAG = 'choose_partner_question';
 // ====== ENV Configutations
 // =========================
 const config = require("config");
+const MINIGAME_TYPE_ENUM_1 = require("../logic/MINIGAME_TYPE_ENUM");
 //import { iInitData } from "./iInitData.model";
 const ENV = process.env.ENV || 'local';
 const envConfig = config.get(ENV);
@@ -34,6 +34,9 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
     /**Ctor */
     constructor(io, gameRoom) {
         super(io, gameRoom);
+    }
+    get MiniGameState() {
+        return this.miniGameState;
     }
     /**tell players what minigame theyplay + initial data for the game, and wait until they say they ready */
     initMiniGame() {
@@ -54,7 +57,7 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
             Logger_1.Logger.d(TAG, `init state:`, 'magenta');
             console.dir(this.miniGameState);
             //declaring the mini game that should start - this is how client know to load the minigame screen:
-            this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.init_mini_game, { initData: initData, miniGameType: GAME_TYPE_ENUM_1.GAME_TYPE.choose_partner_question });
+            this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.init_mini_game, { initData: initData, miniGameType: MINIGAME_TYPE_ENUM_1.MINIGAME_TYPE.choose_partner_question });
             yield this.WaitForPlayersToBeReady(); //calling super class
             Logger_1.Logger.d(TAG, 'players are ready!');
         });
@@ -74,10 +77,10 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
                     //listen to minigame players actions
                     let play$Subscription = game__service_1.game$
                         .filter((gameEvent) => {
-                        const isPlayEvent = gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.play;
+                        const isPlayEvent = gameEvent.eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.play;
                         const isThisRoom = gameEvent.socket.gameRoomId === this.gameRoom.roomId;
                         isPlayEvent && !isThisRoom ? Logger_1.Logger.d(TAG, `this gameroom id is [${this.gameRoom.roomId}] but the socket is related to ${gameEvent.socket.gameRoomId}`, 'yellow') : '';
-                        return gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.play &&
+                        return gameEvent.eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.play &&
                             gameEvent.socket.gameRoomId === this.gameRoom.roomId;
                     })
                         .subscribe((gameEvent) => {
@@ -108,7 +111,7 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
     static randomizeQuestions() {
         let min = 0;
         let max = questions_1.default.length - NumberOfQuestionsPerGame;
-        let startIndex = Math.floor(Math.random() * (max - min + 1) + min);
+        let startIndex = utils_service_1.randomizeInt(min, max);
         let randomQuestions = questions_1.default.slice(startIndex, startIndex + NumberOfQuestionsPerGame);
         return randomQuestions;
     }
@@ -117,7 +120,7 @@ class choose_partner_question extends abstract_minigame_1.miniGame {
     */
     randomizeFirstTurn(playersId) {
         const playersAmount = playersId.length;
-        const playerIndex = utils_service_1.utilsService.randomizeInt(0, playersAmount - 1);
+        const playerIndex = utils_service_1.randomizeInt(0, playersAmount - 1);
         return playersId[playerIndex];
     }
 }

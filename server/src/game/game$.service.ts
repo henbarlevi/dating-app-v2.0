@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 import { iSocketData } from "./models/iSocketData.model";
-import { GAME_SOCKET_EVENTS } from "./models/GAME_SOCKET_EVENTS";
+import { GAME_SOCKET_EVENTS } from "./models/GAME_SOCKET_EVENTS.enum";
 import { GAMEROOM_EVENT } from "./models/GAMEROOM_EVENTS";
 
 const TAG: string = 'Game$ |';

@@ -18,12 +18,12 @@ import { iUser } from '../models';
 import { iFacebookCredentials } from '../facebook/models/iFacebookCredentials.model'
 import { iFacebookUserInfo } from '../facebook/models/index';
 import { iGameRoom } from './models/iGameRoom';
+import { MINIGAME_TYPE } from './mini_games/logic/MINIGAME_TYPE_ENUM';
 
 //=======utils
 import { Logger } from '../utils/Logger';
 import { iGameSocket } from './models/iGameSocket';
-import { GAME_TYPE } from './models/GAME_TYPE_ENUM';
-import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS.enum';
 const TAG: string = 'GameRoomManager |';
 
 // ====== Games
@@ -43,15 +43,13 @@ const envConfig: any = config.get(ENV);
 const reconnection_timeout: number = envConfig.game.reconnection_timeout //time to reconnect if a player is inside a game
 
 
-// ====== / Games
-
 /**handle an individual game room that contains 2 sockets (or more -in future version) of players 
  * 
 */
 export class GameRoomManager {
 
     private gameRoomState: iGameRoomState;//save the gameroom state 
-
+    private minigame: miniGame = null;//current minigame the players playing
 
     constructor(private io: SocketIO.Namespace, private gameRoom: iGameRoom) {
 
@@ -94,15 +92,15 @@ export class GameRoomManager {
             while (this.gameRoom.miniGamesRemaining > 0) {
                 //generate new mini game:
 
-                let miniGameType: GAME_TYPE = randomizeGame();
+                let miniGameType: MINIGAME_TYPE = randomizeGame();
                 Logger.d(TAG, `gameRoom [${gameRoomId}] - minigames Remaining [${this.gameRoom.miniGamesRemaining}] `);
-                Logger.d(TAG, `gameRoom [${gameRoomId}] - ** generating the miniGame ${GAME_TYPE[miniGameType]}`);
+                Logger.d(TAG, `gameRoom [${gameRoomId}] - ** generating the miniGame ${MINIGAME_TYPE[miniGameType]}`);
 
                 let minigameClass = miniGames[miniGameType];
 
-                let miniGame: miniGame = new minigameClass(this.io, this.gameRoom);
+                this.minigame = new minigameClass(this.io, this.gameRoom);
 
-                await miniGame.playMiniGame();
+                await this.minigame.playMiniGame();
 
             }
         }
@@ -189,6 +187,7 @@ export class GameRoomManager {
             s.emit(GAME_SOCKET_EVENTS.partner_reconnected, { partner: reconnectedUserId })
         })
         //2.inform the reconnected player the current game state (in case he didnt cached it)
+        this.gameRoomState.miniGameState = this.minigame ? { ...this.minigame.MiniGameState } : null;//assign minigame state to gameroom state
         const clientGameState: iClientGameState = this.RoomState_To_ClientGameState(this.gameRoomState, socket);
         socket.emit(GAME_SOCKET_EVENTS.reconnection_data, clientGameState);
         //3.add him to the players list (gameroom.players)
@@ -237,8 +236,8 @@ export class GameRoomManager {
     }
 }
 
-function randomizeGame(): GAME_TYPE {
+function randomizeGame(): MINIGAME_TYPE {
     let min: number = 0;
-    let max: number = Object.keys(GAME_TYPE).length / 2 - 1;
+    let max: number = Object.keys(MINIGAME_TYPE).length / 2 - 1;
     return Math.floor(Math.random() * (max - min + 1) + min);
 }

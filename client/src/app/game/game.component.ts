@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { GameService } from './game.service';
 import { Observable } from 'rxjs/Observable';
 import { game$Event } from './models/game$Event.model';
-import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS.enum';
 import { Router } from '@angular/router';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Subscription } from 'rxjs/Subscription';

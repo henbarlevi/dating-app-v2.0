@@ -19,7 +19,7 @@ import { iUser } from '../models';
 import { iFacebookCredentials } from '../facebook/models/iFacebookCredentials.model'
 import { iFacebookUserInfo } from '../facebook/models/index';
 import { iGameRoom } from './models/iGameRoom';
-import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS.enum';
 import { iGameSocket } from './models/iGameSocket';
 //=======utils
 import { Logger } from '../utils/Logger';

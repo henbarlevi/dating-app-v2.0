@@ -1,15 +1,15 @@
 import { iGameRoom } from "../models/iGameRoom";
 import { iGameSocket, getUserNameBySocket } from "../models/iGameSocket";
 import { Logger } from "../../utils/Logger";
-import { GAME_TYPE } from "../models/GAME_TYPE_ENUM";
 import { } from "./choose_partner_question/choose_partner_question";
-import { GAME_SOCKET_EVENTS } from "../models/GAME_SOCKET_EVENTS";
+import { GAME_SOCKET_EVENTS } from "../models/GAME_SOCKET_EVENTS.enum";
 const TAG: string = 'miniGame Abstract |';
 import { game$, game$Event } from '../game$.service';
 import 'rxjs/add/operator/filter';
 import { iSocketData } from "../models/iSocketData.model";
 import { retry } from "rxjs/operator/retry";
 import { iPlayAction } from "../models/iPlayData";
+import { iGenericMiniGameState } from "./logic/iminiGameState.model";
 export abstract class miniGame {
     protected gameRoomPlayersAmount: number;
     constructor(protected io: SocketIO.Namespace, protected gameRoom: iGameRoom) {
@@ -26,6 +26,9 @@ export abstract class miniGame {
     protected get playersAmount(): number {
         return this.gameRoom.players.length;
     }
+    /**@description return current state of the minigame */
+    public abstract get MiniGameState():iGenericMiniGameState<any>;
+
     WaitForPlayersToBeReady() {
         return new Promise((resolve, reject) => {
             Logger.d(TAG, '** waiting for players to be ready... **', 'gray');

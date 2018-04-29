@@ -26,7 +26,6 @@ const envConfig: any = config.get(ENV);
 //=======utils
 import { Logger } from '../utils/Logger';
 import { iGameSocket } from './models/iGameSocket';
-import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
 import { Game$ } from './game$.service';
 const TAG: string = 'GameSockets |';
 

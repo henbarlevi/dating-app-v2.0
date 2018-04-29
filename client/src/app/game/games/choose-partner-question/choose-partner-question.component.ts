@@ -3,7 +3,7 @@ import { GameService } from '../../game.service';
 import { Observable } from 'rxjs/Observable';
 // ===== models
 import { iSocketData } from '../../models/iSocketData.model';
-import { GAME_SOCKET_EVENTS } from '../../models/GAME_SOCKET_EVENTS';
+import { GAME_SOCKET_EVENTS } from '../../models/GAME_SOCKET_EVENTS.enum';
 
 //import {test} from './_ngrx/minigame.reducer';
 import { minigameReducer } from './_ngrx/minigame.reducer';//set reducerfunction for minigame (setReducerFunction in the bottom)
@@ -58,7 +58,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     this.gameState$ = this.store.select(getGameState);
     this.gameState$.subscribe((gameState: iGameState) => {
       this.minigameState = gameState.miniGameState;
-      this.playerId = gameState.player.id;
+      this.playerId = gameState && gameState.player ? gameState.player.id: '';
     });
     this.handleMiniGameInitalization()/**listen to [init_mini_game] event and update the minigamestate */
     /**listen to partners play actions events and  when occurr 

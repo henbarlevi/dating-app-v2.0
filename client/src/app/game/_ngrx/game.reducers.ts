@@ -14,7 +14,7 @@ const miniGamesPerGame: number = environment.miniGamesPerGame
 export interface iGameState {
     GAME_STATUS: GAME_STATUS// laoding, playing, paused,game ended etc
     partners: { [partnerId: string]: iPartner } | null //the partners that playing with the player , Id's and exposed info to the player
-    player:  iPartner  | null //player Id,and the current exposed info about him to his partners    
+    player: iPartner | null //player Id,and the current exposed info about him to his partners    
     miniGameState: any | null//the minigame state if the player inside minigame
     miniGamesRemaining: number,
     roomId: string | null //roomId of the gameroom
@@ -23,7 +23,7 @@ const initialState: iGameState = {
     miniGamesRemaining: 0,
     miniGameState: null,
     partners: null,
-    player:null,
+    player: null,
     GAME_STATUS: GAME_STATUS.not_playing,
     roomId: null
 }
@@ -38,16 +38,21 @@ export function gameReducer(state = initialState, action: GameActions.GameAction
                 GAME_STATUS: GAME_STATUS.start_new_game,
             }
         case GameActions.UPDATE_NEW_GAMEROOM_DATA:
-            const payload: { roomId: string, partnersId: string[],playerId:string } = action.payload;
+            const payload: { roomId: string, partnersId: string[], playerId: string } = action.payload;
             const partnersId: string[] = payload.partnersId;
             let partners: { [partnerId: string]: iPartner } = {};
             partnersId.forEach((pId: string) => partners[pId] = { id: pId });
-            const player :iPartner = {id:payload.playerId};
+            const player: iPartner = { id: payload.playerId };
             return {
                 ...state,
                 roomId: payload.roomId,
                 partners: partners,
-                player:player
+                player: player
+            }
+        case GameActions.SET_RECONNECTED_GAMEDATA:
+            return {
+                ...state,//not sure if necessary
+                ...action.payload
             }
         case GameActions.INITIAL_NEW_MINIGAME:
         case GameActions.UPDATE_MINIGAME:

@@ -7,7 +7,7 @@ require("rxjs/add/operator/first");
 //====== services
 const gameRoomManager_1 = require("./gameRoomManager");
 const game__service_1 = require("./game$.service");
-const GAME_SOCKET_EVENTS_1 = require("./models/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_enum_1 = require("./models/GAME_SOCKET_EVENTS.enum");
 //=======utils
 const Logger_1 = require("../utils/Logger");
 const TAG = 'GameSocketsManager |';
@@ -49,7 +49,7 @@ class GameScoketsManager {
         //handle connections //TODO - check how dispose correctly
         game__service_1.game$
             .filter((gameEvent) => {
-            if (gameEvent.eventName !== GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection) {
+            if (gameEvent.eventName !== GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.connection) {
                 return false;
             } //pass only connection events
             const userId = gameEvent.socket.user._id.toString();
@@ -64,7 +64,7 @@ class GameScoketsManager {
             let socket = gameEvent.socket;
             this.printCurrentState(socket);
             Logger_1.Logger.d(TAG, `** Handle New Connection **`, 'gray');
-            socket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.searchForPartner);
+            socket.emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.searchForPartner);
             let partner = this.searchForPartner(socket);
             if (!partner) {
                 Logger_1.Logger.d(TAG, `**inserting ${socket.user.facebook ? socket.user.facebook.name : ''} to waiting list**`, 'yellow');
@@ -81,7 +81,7 @@ class GameScoketsManager {
                 gameRoomManager.handle();
                 //if one of the players disconnected, tell the other user about it - TODO fix this
                 this.io.to(gameRoom.roomId).on('disconnect', (socket) => {
-                    socket.broadcast.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_disconnected);
+                    socket.broadcast.to(gameRoom.roomId).emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.partner_disconnected);
                 });
                 this.gameRooms[gameRoom.roomId] = gameRoom;
             }
@@ -92,7 +92,7 @@ class GameScoketsManager {
      * when 'leave game' the user removed from his game session permenantly
      */
     handlePlayersLeavingGame() {
-        game__service_1.game$.filter((gameEvent) => gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.leave_game)
+        game__service_1.game$.filter((gameEvent) => gameEvent.eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.leave_game)
             .subscribe((gameEvent) => {
             let userId = gameEvent.socket.user._id;
             if (this.playersPlaying[userId]) {
@@ -130,7 +130,7 @@ class GameScoketsManager {
     /**handle socket's disconnection */
     handleDisconnections() {
         //handle disconnections //TODO - check how dispose correctly
-        game__service_1.game$.filter((gameEvent) => gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.disconnect)
+        game__service_1.game$.filter((gameEvent) => gameEvent.eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.disconnect)
             .subscribe((gameEvent) => {
             Logger_1.Logger.d(TAG, `** Handle Disconnection For ${this.getUserNameBySocket(gameEvent.socket)}`, 'gray');
             this.handleDisconnectionEvent(gameEvent);

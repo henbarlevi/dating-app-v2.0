@@ -41,7 +41,7 @@ describe('choose_partner_question_logic', () => {
         it('should return valid=false if initialization data of playersId contain 1 player', () => {
             //init
             const mockQUestiosn = [{ q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }];
-            const initData = { questions: mockQUestiosn, questionsRemaining: mockQUestiosn.length, playersId: ['player1'] };
+            const initData = { questions: mockQUestiosn, questionsRemaining: mockQUestiosn.length, playersId: ['player1'], firstPlayerTurnId: 'player1' };
             //action
             const result = logic.initMiniGame(initData);
             //asset

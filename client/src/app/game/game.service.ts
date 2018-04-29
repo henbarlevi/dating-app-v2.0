@@ -7,17 +7,21 @@ import { Observable } from 'rxjs/Observable';
 import * as io from 'socket.io-client';
 import * as plugin from 'socketio-wildcard'
 import { iSocketData } from './models/iSocketData.model';
-import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS';
+import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS.enum';
 import { game$Event } from './models/game$Event.model';
 const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
 //ngrx (redux)
-import { iState } from './_ngrx/game.reducers';
+import { iState, iGameState } from './_ngrx/game.reducers';
 import { Store } from '@ngrx/store';
 import * as GameActions from './_ngrx/game.actions';
+import { Router } from '@angular/router';
+import { MINIGAME_TYPE } from './games/logic/MINIGAME_TYPE_ENUM';
+import { iGenericMiniGameState } from './games/logic/iminiGameState.model';
 //==== utils
 const TAG: string = 'GameService |';
 @Injectable()
 export class GameService {
+
   baseUrl: string = 'http://localhost:3000';
   private gameSocket: SocketIOClient.Socket;
   /*
@@ -26,8 +30,9 @@ export class GameService {
   private _game$: ReplaySubject<game$Event> = new ReplaySubject<game$Event>(1);
   public game$: Observable<game$Event> = this._game$.asObservable();
 
-  constructor(private store: Store<iState>) {
+  constructor(private store: Store<iState>, private router: Router) {
     this.printAllEvents();//log $game events
+    this.handleGameSocketEvents();
   }
 
   private printAllEvents() {
@@ -50,7 +55,7 @@ export class GameService {
     this.gameSocket = io.connect(this.baseUrl
       /*with token :authenction + authorization for socket.io : https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/ */
       , {
-        query:  { token: token } 
+        query: { token: token }
       });
     socketListenToAllEventsPlugin(this.gameSocket);// add the '*' option
     this.gameSocket.on('*', (data: iSocketData) => {
@@ -64,12 +69,7 @@ export class GameService {
       this._game$.next({
         eventName: GAME_SOCKET_EVENTS.disconnect,
       });
-      //clean listener and observable emits
-      this.gameSocket.removeAllListeners();
-      this._game$ = new ReplaySubject<game$Event>(1);
-      this.game$ = this._game$.asObservable();
-      //change gamestate:
-      this.store.dispatch(new GameActions.socketDisconnection())
+
     })
     //change gamestate:
     this.store.dispatch(new GameActions.StartNewGame());
@@ -81,9 +81,40 @@ export class GameService {
     this.gameSocket.emit(eventName, data);
   }
 
+  private handleGameSocketEvents(): any {
+    this.game$.subscribe((gameEvent: game$Event) => {
+      switch (gameEvent.eventName) {
+        case GAME_SOCKET_EVENTS.disconnect:
+          this.handleDisconnection();
+          break;
+        /**happens if the client temporarly disconnected and reconnected: */
+        case GAME_SOCKET_EVENTS.reconnection_data:
+          const eventData: iGameState = gameEvent.eventData; //the state of the game the player reconnected
+          const miniGameState: iGenericMiniGameState<MINIGAME_TYPE> = eventData.miniGameState;
+          const miniGameType: MINIGAME_TYPE | '' = miniGameState ? miniGameState.miniGameType : '';
+          const miniGameName: string = MINIGAME_TYPE[miniGameType];
+          this.store.dispatch(new GameActions.setReconnectedGameData(eventData));
+          this.router.navigate([`/dashboard/game/${miniGameName}`]);//if no minigame is currently played - will navigate to loading page 
+        default:
+          break;
+      }
+    })
+  }
 
-
-
+  /**
+   * @description when the client socket disconnect from server
+   * - remove listeners of the socket (prevent duplicated listeners when the user reconnect)
+   * - reset game$ Observable
+   * - dispatch GameAction : 'socketDisconnection'
+   */
+  private handleDisconnection(): any {
+    //clean listener and observable emits
+    this.gameSocket.removeAllListeners();
+    this._game$ = new ReplaySubject<game$Event>(1);
+    this.game$ = this._game$.asObservable();
+    //change gamestate:
+    this.store.dispatch(new GameActions.socketDisconnection())
+  }
 }
 
 

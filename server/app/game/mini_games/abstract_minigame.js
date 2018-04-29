@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const iGameSocket_1 = require("../models/iGameSocket");
 const Logger_1 = require("../../utils/Logger");
-const GAME_SOCKET_EVENTS_1 = require("../models/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_enum_1 = require("../models/GAME_SOCKET_EVENTS.enum");
 const TAG = 'miniGame Abstract |';
 const game__service_1 = require("../game$.service");
 require("rxjs/add/operator/filter");
@@ -36,8 +36,8 @@ class miniGame {
                 .filter((event) => {
                 const eventName = event.eventName;
                 const gameRoomId = event.socket.gameRoomId;
-                eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameRoomId !== this.gameRoom.roomId ? Logger_1.Logger.d(TAG, `Warning! ready_for_mini_game occur but the socket.gameRoomId=${gameRoomId}`, 'red') : '';
-                return eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameRoomId === this.gameRoom.roomId;
+                eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameRoomId !== this.gameRoom.roomId ? Logger_1.Logger.d(TAG, `Warning! ready_for_mini_game occur but the socket.gameRoomId=${gameRoomId}`, 'red') : '';
+                return eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.ready_for_mini_game && gameRoomId === this.gameRoom.roomId;
             }) //check if its ready_for_mini_game event + related to that gameRoomId
                 .subscribe((data) => __awaiter(this, void 0, void 0, function* () {
                 try {
@@ -65,7 +65,7 @@ class miniGame {
         this.gameRoom.players.forEach(p => {
             if (p.user._id.toString() !== playerId) {
                 Logger_1.Logger.d(TAG, `** telling the player [${this.getUserNameBySocket(p)}] about the playaction **`, 'gray');
-                p.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_played, playAction);
+                p.emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.partner_played, playAction);
             }
         });
     }

@@ -1,9 +1,9 @@
 import { iGameSocket } from "./iGameSocket";
-import { GAME_TYPE } from "./GAME_TYPE_ENUM";
+import { MINIGAME_TYPE } from "../mini_games/logic/MINIGAME_TYPE_ENUM";
 
 export interface iGameRoom {
     roomId: any,
     miniGamesRemaining: number,
-    currentGameType?:GAME_TYPE,
+    currentGameType?:MINIGAME_TYPE,
     players:iGameSocket[]
 }

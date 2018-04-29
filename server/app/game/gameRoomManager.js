@@ -12,10 +12,10 @@ const Observable_1 = require("rxjs/Observable");
 require("rxjs/add/observable/timer");
 require("rxjs/add/observable/merge");
 require("rxjs/add/operator/first");
+const MINIGAME_TYPE_ENUM_1 = require("./mini_games/logic/MINIGAME_TYPE_ENUM");
 //=======utils
 const Logger_1 = require("../utils/Logger");
-const GAME_TYPE_ENUM_1 = require("./models/GAME_TYPE_ENUM");
-const GAME_SOCKET_EVENTS_1 = require("./models/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_enum_1 = require("./models/GAME_SOCKET_EVENTS.enum");
 const TAG = 'GameRoomManager |';
 // ====== Games
 const choose_partner_question_1 = require("./mini_games/choose_partner_question/choose_partner_question");
@@ -32,7 +32,6 @@ const GAMEROOM_EVENTS_1 = require("./models/GAMEROOM_EVENTS");
 const ENV = process.env.ENV || 'local';
 const envConfig = config.get(ENV);
 const reconnection_timeout = envConfig.game.reconnection_timeout; //time to reconnect if a player is inside a game
-// ====== / Games
 /**handle an individual game room that contains 2 sockets (or more -in future version) of players
  *
 */
@@ -40,6 +39,7 @@ class GameRoomManager {
     constructor(io, gameRoom) {
         this.io = io;
         this.gameRoom = gameRoom;
+        this.minigame = null; //current minigame the players playing
     }
     /**
      * return a default of gameroom state
@@ -69,16 +69,16 @@ class GameRoomManager {
                     const playerId = playersocket.user._id.toString();
                     Logger_1.Logger.d(TAG, `emit to player [${this.getUserNameBySocket(playersocket)}] found partners`, 'gray');
                     const partnersId = playersId.filter(pId => pId !== playerId);
-                    playersocket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId, partnersId: partnersId, playerId: playerId });
+                    playersocket.emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId, partnersId: partnersId, playerId: playerId });
                 });
                 while (this.gameRoom.miniGamesRemaining > 0) {
                     //generate new mini game:
                     let miniGameType = randomizeGame();
                     Logger_1.Logger.d(TAG, `gameRoom [${gameRoomId}] - minigames Remaining [${this.gameRoom.miniGamesRemaining}] `);
-                    Logger_1.Logger.d(TAG, `gameRoom [${gameRoomId}] - ** generating the miniGame ${GAME_TYPE_ENUM_1.GAME_TYPE[miniGameType]}`);
+                    Logger_1.Logger.d(TAG, `gameRoom [${gameRoomId}] - ** generating the miniGame ${MINIGAME_TYPE_ENUM_1.MINIGAME_TYPE[miniGameType]}`);
                     let minigameClass = miniGames[miniGameType];
-                    let miniGame = new minigameClass(this.io, this.gameRoom);
-                    yield miniGame.playMiniGame();
+                    this.minigame = new minigameClass(this.io, this.gameRoom);
+                    yield this.minigame.playMiniGame();
                 }
             }
             catch (e) {
@@ -100,7 +100,7 @@ class GameRoomManager {
         game__service_1.game$
             .filter((gameEvent) => 
         //check a socket disconnected and its from the same room
-        gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.disconnect &&
+        gameEvent.eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.disconnect &&
             this.gameRoom.roomId === gameEvent.socket.gameRoomId)
             .subscribe((gameEvent) => this.handleDisconnection(gameEvent));
     }
@@ -114,13 +114,13 @@ class GameRoomManager {
         // this.gameRoom.players = this.gameRoom.players.filter(socket => socket !== disconnectedSocket);
         // Logger.d(TAG, `** removed player from players list , there are now [${this.gameRoom.players.length}] players **`, 'gray');
         //3.tell other players about disconnected partner
-        this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_disconnected, { partner: disconnectedSocket.user });
+        this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.partner_disconnected, { partner: disconnectedSocket.user });
         //4.give a player a certien time to reconnect:
         const time_to_reconnect = reconnection_timeout; //in milisec
         Logger_1.Logger.d(TAG, `** give ${this.getUserNameBySocket(disconnectedSocket)} ${reconnection_timeout / 1000} sec cahnce   to reconnect.. **`, 'gray');
         const reconnected$ = game__service_1.game$.filter((gameEvent) => 
         //check a socket connected and its the disconnected player from this room
-        gameEvent.eventName === GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection &&
+        gameEvent.eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.connection &&
             gameEvent.socket.user._id.toString() === disconnectedUserId);
         const timeOut$ = Observable_1.Observable.timer(time_to_reconnect);
         Observable_1.Observable.merge(reconnected$, timeOut$).first().subscribe((gameEventOrTimeout) => {
@@ -154,11 +154,12 @@ class GameRoomManager {
         //1.tell his partners he reconnected
         const reconnectedUserId = socket.user.id.toString();
         this.gameRoom.players.forEach(s => {
-            s.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.partner_reconnected, { partner: reconnectedUserId });
+            s.emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.partner_reconnected, { partner: reconnectedUserId });
         });
         //2.inform the reconnected player the current game state (in case he didnt cached it)
+        this.gameRoomState.miniGameState = this.minigame ? Object.assign({}, this.minigame.MiniGameState) : null; //assign minigame state to gameroom state
         const clientGameState = this.RoomState_To_ClientGameState(this.gameRoomState, socket);
-        socket.emit(GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.reconnection_data, clientGameState);
+        socket.emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.reconnection_data, clientGameState);
         //3.add him to the players list (gameroom.players)
         this.gameRoom.players.push(socket);
         //4.add him to room
@@ -198,6 +199,6 @@ class GameRoomManager {
 exports.GameRoomManager = GameRoomManager;
 function randomizeGame() {
     let min = 0;
-    let max = Object.keys(GAME_TYPE_ENUM_1.GAME_TYPE).length / 2 - 1;
+    let max = Object.keys(MINIGAME_TYPE_ENUM_1.MINIGAME_TYPE).length / 2 - 1;
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
