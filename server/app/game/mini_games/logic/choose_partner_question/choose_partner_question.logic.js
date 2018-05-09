@@ -22,7 +22,8 @@ class choose_partner_question_logic extends minigame_logic_1.minigameLogic {
                 miniGameType: MINIGAME_TYPE_ENUM_1.MINIGAME_TYPE.choose_partner_question,
                 minigameStatus: MINIGAME_STATUS_ENUM_1.MINIGAME_STATUS.initialization,
                 currentAnswerIndex: -1,
-                currentQuestionIndex: -1,
+                //currentQuestionIndex: -1,
+                currentQuestion: null,
                 currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
                 questionsRemaining: initData.questionsRemaining,
                 questions: initData.questions,
@@ -50,11 +51,15 @@ class choose_partner_question_logic extends minigame_logic_1.minigameLogic {
                 case PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question:
                     const currentTurn = currentState.playerTurnId;
                     const nextTurn = this.getNextStringInArray(currentState.playersId, currentTurn);
+                    const chosenQuestionIndex = playAction.payload;
+                    const chosenQuestion = currentState.questions[chosenQuestionIndex];
+                    const questions = currentState.questions.filter(q => q.q !== chosenQuestion.q); // remove the chosen question from arr
+                    //
                     return {
                         valid: true,
-                        state: Object.assign({}, currentState, { currentQuestionIndex: playAction.payload, 
-                            //currentAnswerIndex: -1,
-                            currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, playerTurnId: nextTurn })
+                        state: Object.assign({}, currentState, { 
+                            //currentQuestionIndex: playAction.payload,
+                            currentQuestion: chosenQuestion, currentAnswerIndex: -1, currentGameAction: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question, playerTurnId: nextTurn, questions: questions })
                     };
                 /**ANSWER_QUESTION */
                 case PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question:
@@ -96,9 +101,8 @@ class choose_partner_question_logic extends minigame_logic_1.minigameLogic {
         }
         else {
             //check its a valid answer index value:
-            let currentQuestionIndex = currentState.currentQuestionIndex;
-            let chosenAnswerIndex = playActionData.payload;
-            let AnswersMaxIndex = currentState.questions[currentQuestionIndex].a.length - 1; //max valid index
+            const chosenAnswerIndex = playActionData.payload;
+            const AnswersMaxIndex = currentState.currentQuestion.a.length - 1; //max valid index
             return !(chosenAnswerIndex < 0 || chosenAnswerIndex > AnswersMaxIndex) ? { valid: true } : { valid: false, errText: 'chosenAnswerIndex not in the valid boundry' };
         }
     }

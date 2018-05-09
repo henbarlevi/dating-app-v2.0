@@ -13,7 +13,10 @@ const ReplaySubject_1 = require("rxjs/ReplaySubject");
 const GAME_SOCKET_EVENTS_enum_1 = require("./models/GAME_SOCKET_EVENTS.enum");
 const GAMEROOM_EVENTS_1 = require("./models/GAMEROOM_EVENTS");
 const TAG = 'Game$ |';
-/**This Service purpose is to export Observable that raise event every time client send emit event through socket.io */
+/**This Service purpose is to export Observable that raise event every time a game event occur :
+ *  a.when client send emit event through socket.io
+ *  b.gameroom raise an event
+ * */
 /*
   Raise events with services (BehaviourSubject,ReplaySubject) :
   https://stackoverflow.com/questions/34376854/delegation-eventemitter-or-observable-in-angular2/35568924#35568924*/
@@ -67,7 +70,7 @@ class Game$ {
                     Logger_1.Logger.d(TAG, `Client User [${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id}] - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
             }
             catch (e) {
-                Logger_1.Logger.d(TAG, `Err =====> while printing event ` + e, 'red');
+                Logger_1.Logger.d(TAG, `Err =====> while printing event ` + e + 'the eventName was ' + gameEvent ? gameEvent.eventName : 'unknown', 'red');
             }
         }));
     }
@@ -79,7 +82,7 @@ class Game$ {
                     Logger_1.Logger.d(TAG, `GAMEROOM [] - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
             }
             catch (e) {
-                Logger_1.Logger.d(TAG, `Err =====> while printing event ` + e, 'red');
+                Logger_1.Logger.d(TAG, `Err =====> while printing gameroom event ` + e, 'red');
             }
         }));
     }

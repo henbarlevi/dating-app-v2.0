@@ -11,12 +11,16 @@ import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS.enum';
 import { game$Event } from './models/game$Event.model';
 const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
 //ngrx (redux)
-import { iState, iGameState } from './_ngrx/game.reducers';
+import { iState, iGameState, getGameState } from './_ngrx/game.reducers';
 import { Store } from '@ngrx/store';
 import * as GameActions from './_ngrx/game.actions';
 import { Router } from '@angular/router';
 import { MINIGAME_TYPE } from './games/logic/MINIGAME_TYPE_ENUM';
 import { iGenericMiniGameState } from './games/logic/iminiGameState.model';
+import { MINIGAME_STATUS } from './games/logic/MINIGAME_STATUS_ENUM';
+import { GAME_STATUS } from './models/GAME_STATUS_ENUM';
+import { Logger } from '../shared/logger.service';
+import { logger } from '../app.module';
 //==== utils
 const TAG: string = 'GameService |';
 @Injectable()
@@ -30,9 +34,12 @@ export class GameService {
   private _game$: ReplaySubject<game$Event> = new ReplaySubject<game$Event>(1);
   public game$: Observable<game$Event> = this._game$.asObservable();
 
-  constructor(private store: Store<iState>, private router: Router) {
+  constructor(
+    private store: Store<iState>,
+    private router: Router,
+    private Logger: Logger) {
     this.printAllEvents();//log $game events
-    this.handleGameSocketEvents();
+    //this.handleGameSocketEvents();//TODOTODO - something is wrong with the refreshing of the observables when restarting new game
   }
 
   private printAllEvents() {
@@ -73,7 +80,11 @@ export class GameService {
     })
     //change gamestate:
     this.store.dispatch(new GameActions.StartNewGame());
+    this.handleGameSocketEvents();
     return this.game$;
+  }
+  disconnect() {
+    this.gameSocket.disconnect();
   }
   /*send to server game event*/
   emitGameEvent(eventName: GAME_SOCKET_EVENTS, data?: any) {
@@ -81,12 +92,12 @@ export class GameService {
     this.gameSocket.emit(eventName, data);
   }
 
+  getGameEventsByName(eventName: GAME_SOCKET_EVENTS): Observable<game$Event> {
+    return this.game$.filter((gameEvent: game$Event) => gameEvent.eventName === eventName);
+  }
   private handleGameSocketEvents(): any {
-    this.game$.subscribe((gameEvent: game$Event) => {
+    this.game$.subscribe(async (gameEvent: game$Event) => {
       switch (gameEvent.eventName) {
-        case GAME_SOCKET_EVENTS.disconnect:
-          this.handleDisconnection();
-          break;
         /**happens if the client temporarly disconnected and reconnected: */
         case GAME_SOCKET_EVENTS.reconnection_data:
           const eventData: iGameState = gameEvent.eventData; //the state of the game the player reconnected
@@ -94,7 +105,29 @@ export class GameService {
           const miniGameType: MINIGAME_TYPE | '' = miniGameState ? miniGameState.miniGameType : '';
           const miniGameName: string = MINIGAME_TYPE[miniGameType];
           this.store.dispatch(new GameActions.setReconnectedGameData(eventData));
-          this.router.navigate([`/dashboard/game/${miniGameName}`]);//if no minigame is currently played - will navigate to loading page 
+          return this.router.navigate([`/dashboard/game/${miniGameName}`]);//if no minigame is currently played - will navigate to loading page 
+        /**MINIGAME_ENDED - maybe should be handled by the specific game */
+        // case GAME_SOCKET_EVENTS.mini_game_ended:
+        //   const currentState: iGameState = await this.store.select(getGameState).take(1).toPromise();
+        //   console.dir(currentState);
+        //   this.store.dispatch(new GameActions.endMinigame(null));
+        //   if (currentState.miniGameState.minigameStatus === MINIGAME_STATUS.playing) {
+        //     this.router.navigate([`/dashboard/game`]);// navigate to loading page 
+        //   }
+        //   return;
+        case GAME_SOCKET_EVENTS.game_ended:
+          this.store.dispatch(new GameActions.endGame(null));
+          return this.router.navigate([`/dashboard/game/end`]); // navigate to end game page
+        case GAME_SOCKET_EVENTS.disconnect:
+          this.handleDisconnection();
+          const gameState = this.store.select(getGameState);//same as this.store.select('movies'); //'movies'= the name of the partial store as mentioned in the StoreModule.provideStore()
+          const isGameEnded: boolean = (await gameState.first().toPromise()).GAME_STATUS !== GAME_STATUS.game_ended;
+          this.Logger.l(TAG, `isGameEnded=${isGameEnded}`, 'amber');
+
+          if (!isGameEnded) {
+
+            this.router.navigate(['/dashboard']);
+          }
         default:
           break;
       }

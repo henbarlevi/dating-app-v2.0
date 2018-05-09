@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DebugGuard } from './debug.guard';
 //import { ModalComponent } from './modal [bootstrap3.0]/modal.component';
 import { ModalComponent } from './modal [pureCss]/modal.component';
+import { Logger } from './logger.service';
 
 //components:
 
@@ -25,7 +26,7 @@ export class SharedModule {
   static forRoot(): ModuleWithProviders {
     return {
       ngModule: SharedModule,
-      providers: [DebugGuard]
+      providers: [DebugGuard,Logger]
     }
   }
 }

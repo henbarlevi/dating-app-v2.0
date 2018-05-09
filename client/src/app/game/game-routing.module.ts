@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router'; //import router module
 import { GameComponent } from './game.component';
 import { LoadingGameComponent } from './loading-game/loading-game.component';
 import { ChoosePartnerQuestionComponent } from './games/choose-partner-question/choose-partner-question.component';
+import { EndGamePageComponent } from './end-game-page/end-game-page.component';
 
 const gameRouting = RouterModule.forChild([
 
@@ -14,8 +15,10 @@ const gameRouting = RouterModule.forChild([
       //lading page:
       { path: '', pathMatch: "full", component: LoadingGameComponent },
       //games :
-      { path: 'choose_partner_question', component: ChoosePartnerQuestionComponent }
-
+      { path: 'choose_partner_question', component: ChoosePartnerQuestionComponent },
+      //game ended page:
+      { path: 'end', component: EndGamePageComponent },
+      
     ]
 
   },

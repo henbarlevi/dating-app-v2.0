@@ -8,7 +8,8 @@ import { MINIGAME_TYPE } from "../MINIGAME_TYPE_ENUM";
 const TAG: string = 'choose_partner_question_LOGIC';
 export interface iMiniGameState extends iGenericMiniGameState<MINIGAME_TYPE.choose_partner_question> {
     currentAnswerIndex: number,//answer not yet chosen
-    currentQuestionIndex: number,//question not yet chosen
+    //currentQuestionIndex: number,//question not yet chosen
+    currentQuestion: iQuestion 
     currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS, //game waiting for player to choose a -question
     questionsRemaining: number,
     questions: iQuestion[],
@@ -22,7 +23,7 @@ export interface iInitData {
     questions: iQuestion[],
     questionsRemaining: number,
     playersId: string[],
-    firstPlayerTurnId:string
+    firstPlayerTurnId: string
 }
 
 
@@ -46,7 +47,8 @@ export class choose_partner_question_logic extends minigameLogic<MINIGAME_TYPE.c
                 miniGameType: MINIGAME_TYPE.choose_partner_question,
                 minigameStatus: MINIGAME_STATUS.initialization,
                 currentAnswerIndex: -1,
-                currentQuestionIndex: -1,
+                //currentQuestionIndex: -1,
+                currentQuestion: null,
                 currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question,
                 questionsRemaining: initData.questionsRemaining,
                 questions: initData.questions,
@@ -69,27 +71,33 @@ export class choose_partner_question_logic extends minigameLogic<MINIGAME_TYPE.c
     play(currentState: iMiniGameState, playAction: PlayAction): { valid: boolean, state: iMiniGameState, errText?: string } {
         const playActionValidation: { valid: boolean, errText?: string } = this.ValidatePlayAction(currentState, playAction);
         if (!playActionValidation.valid) { return { ...playActionValidation, state: currentState } }
-        
+
         else {
             switch (playAction.type) {
                 /**ASK_QUESTION */
                 case CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question:
                     const currentTurn: string = currentState.playerTurnId;
                     const nextTurn: string = this.getNextStringInArray(currentState.playersId, currentTurn);
-
+                    const chosenQuestionIndex: number = playAction.payload;
+                    const chosenQuestion :iQuestion = currentState.questions[chosenQuestionIndex];
+                    const questions =  currentState.questions.filter(q => q.q !== chosenQuestion.q);// remove the chosen question from arr
+                   //
                     return {
                         valid: true,
                         state: {
                             ...currentState,///...state,//assign all properties of state to the returned obj
-                            currentQuestionIndex: playAction.payload,
-                            //currentAnswerIndex: -1,
+                            //currentQuestionIndex: playAction.payload,
+                            currentQuestion: chosenQuestion,
+                            currentAnswerIndex: -1,
                             currentGameAction: CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question,
                             playerTurnId: nextTurn,
+                            questions:questions
                         }
                     }
                 /**ANSWER_QUESTION */
                 case CHOOSE_QUESTIONS_PLAY_ACTIONS.answer_question:
-                    const questionsRemaining: number = currentState.questionsRemaining-1;
+                    const questionsRemaining: number = currentState.questionsRemaining - 1;
+                    
 
                     const newState = {
                         ...currentState,
@@ -114,7 +122,7 @@ export class choose_partner_question_logic extends minigameLogic<MINIGAME_TYPE.c
     private ValidatePlayAction(currentState: iMiniGameState, playActionData: PlayAction): { valid: boolean, errText?: string } {
         if (!playActionData || (!playActionData.payload && playActionData.payload !== 0)) { return { valid: false, errText: 'payload not exist' } }///TODOTODOTODO decide how client will send the play action data -currently client send the full question string but index its enough
         if (playActionData.type !== currentState.currentGameAction) { return { valid: false, errText: `playaction type not fit to currentGameAction, the playAction.type is [${CHOOSE_QUESTIONS_PLAY_ACTIONS[playActionData.type]}] but the currentGameAction is [${CHOOSE_QUESTIONS_PLAY_ACTIONS[currentState.currentGameAction]}] ` } }
-        if(playActionData.playerId !==currentState.playerTurnId){return{ valid: false, errText: `Its Not this player Turn, you provided the playerId [${playActionData.playerId}] but its [${currentState.playerTurnId}] turn` }}
+        if (playActionData.playerId !== currentState.playerTurnId) { return { valid: false, errText: `Its Not this player Turn, you provided the playerId [${playActionData.playerId}] but its [${currentState.playerTurnId}] turn` } }
         //if player choose a question
         if (currentState.currentGameAction === CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
             if (playActionData.type !== CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question) {
@@ -127,9 +135,8 @@ export class choose_partner_question_logic extends minigameLogic<MINIGAME_TYPE.c
 
         } else {//if player choose an answer
             //check its a valid answer index value:
-            let currentQuestionIndex = currentState.currentQuestionIndex;
-            let chosenAnswerIndex = playActionData.payload as number;
-            let AnswersMaxIndex: number = currentState.questions[currentQuestionIndex].a.length - 1;//max valid index
+            const chosenAnswerIndex = playActionData.payload as number;
+            const AnswersMaxIndex: number = currentState.currentQuestion.a.length - 1;//max valid index
             return !(chosenAnswerIndex < 0 || chosenAnswerIndex > AnswersMaxIndex) ? { valid: true } : { valid: false, errText: 'chosenAnswerIndex not in the valid boundry' };
         }
     }

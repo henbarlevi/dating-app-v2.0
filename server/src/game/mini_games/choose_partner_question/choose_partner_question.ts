@@ -6,7 +6,7 @@ import { miniGame } from "../abstract_minigame";
 
 import allQuestions from './questions';
 import { GAME_SOCKET_EVENTS } from "../../models/GAME_SOCKET_EVENTS.enum";
-import {  randomizeInt } from "../../../utils/utils.service";
+import { randomizeInt } from "../../../utils/utils.service";
 import { game$, game$Event } from "../../game$.service";
 import { Subscription } from "rxjs/Subscription";
 import { iQuestion } from "./questions.model";
@@ -25,6 +25,7 @@ const TAG: string = 'choose_partner_question';
 // =========================
 import * as config from 'config';
 import { MINIGAME_TYPE } from "../logic/MINIGAME_TYPE_ENUM";
+import { MINIGAME_STATUS } from "../logic/MINIGAME_STATUS_ENUM";
 //import { iInitData } from "./iInitData.model";
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
@@ -32,17 +33,17 @@ const NumberOfQuestionsPerGame: number = envConfig.game.mini_games.choose_partne
 
 
 export class choose_partner_question extends miniGame {
-    private miniGameState: iMiniGameState;//NEW
-    private logic: choose_partner_question_logic;//NEW
+    private miniGameState: iMiniGameState;//contain the current minigame state
+    private logic: choose_partner_question_logic;//logic of the game - receive play action and return the next minigame state
 
-
+    private play$Subscription :Subscription;
     /**Ctor */
     constructor(io: SocketIO.Namespace, gameRoom: iGameRoom) {
         super(io, gameRoom);
 
     }
 
-    get MiniGameState():iMiniGameState {
+    get MiniGameState(): iMiniGameState {
         return this.miniGameState;
     }
 
@@ -54,7 +55,7 @@ export class choose_partner_question extends miniGame {
         const initData: iInitData = {
             questionsRemaining: NumberOfQuestionsPerGame,
             playersId: playersId,
-            questions: choose_partner_question.randomizeQuestions(),
+            questions: choose_partner_question.randomizeQuestions(NumberOfQuestionsPerGame + 1),
             firstPlayerTurnId: this.randomizeFirstTurn(playersId)
         }
         this.logic = new choose_partner_question_logic();
@@ -72,7 +73,7 @@ export class choose_partner_question extends miniGame {
 
     /**
      * @description the main method
-     * 1.initMiniGame
+     * 1. initMiniGame
      * 2. listen to players actions and manage the minigame
      * 
      * will resolve when minigame ended
@@ -82,31 +83,33 @@ export class choose_partner_question extends miniGame {
             try {
                 await this.initMiniGame();
                 //listen to minigame players actions
-                let play$Subscription: Subscription = game$
+                this.play$Subscription =
                     //pass only "play" game events that related to this gameroomId
-                    .filter((gameEvent: game$Event) => {
-                        const isPlayEvent: boolean = gameEvent.eventName === GAME_SOCKET_EVENTS.play;
-                        const isThisRoom: boolean = gameEvent.socket.gameRoomId === this.gameRoom.roomId;
-                        isPlayEvent && !isThisRoom ? Logger.d(TAG, `this gameroom id is [${this.gameRoom.roomId}] but the socket is related to ${gameEvent.socket.gameRoomId}`, 'yellow') : '';
-                        return gameEvent.eventName === GAME_SOCKET_EVENTS.play &&
-                            gameEvent.socket.gameRoomId === this.gameRoom.roomId
-                    })
-                    .subscribe((gameEvent: game$Event) => {
-
-                        const playerId: string = gameEvent.socket.user._id.toString();
-                        const playAction: PlayAction = { ...gameEvent.eventData, playerId: playerId };
-                        const result = this.logic.play(this.miniGameState, playAction);
-                        if (result.valid) {
-                            this.miniGameState = result.state;//update state
-                            Logger.d(TAG, ` ** minigame state change **`, 'magenta');
-                            console.dir(TAG, this.miniGameState, 'magenta');
-                            this.tellPlayersAboutPlayAction(playerId, playAction);
-
-                        } else {
-                            Logger.d(TAG, `WARNING ! PLAY ACTION IS NOT VALID ${result.errText}: `, 'red');
-                        }
-
-                    })
+                    this.getEventsByNameInGameroom(GAME_SOCKET_EVENTS.play)
+                        .subscribe(async (gameEvent: game$Event) => {
+                            try {
+                                const playerId: string = gameEvent.socket.user._id.toString();
+                                const playAction: PlayAction = { ...gameEvent.eventData, playerId: playerId };
+                                const result = this.logic.play(this.miniGameState, playAction);
+                                if (result.valid) {
+                                    this.miniGameState = result.state;//update state
+                                    Logger.d(TAG, ` ** minigame state change **`, 'magenta');
+                                    console.dir(TAG, this.miniGameState, 'magenta');
+                                    this.tellPlayersAboutPlayAction(playerId, playAction);
+                                    //if game ended
+                                    if (this.miniGameState.minigameStatus === MINIGAME_STATUS.ended) {
+                                   
+                                        await this.endMinigame();
+                                        resolve();// playMiniGame ended
+                                    }
+                                } else {
+                                    Logger.d(TAG, `WARNING ! PLAY ACTION IS NOT VALID ${result.errText}: `, 'red');
+                                }
+                            }
+                            catch (e) {
+                                Logger.d(TAG, `Err =======>${e}`, 'red');
+                            }
+                        })
 
                 //TODO
                 //DONT FORGET TO UNSBSRIBE When FOR EVETNS
@@ -120,12 +123,18 @@ export class choose_partner_question extends miniGame {
 
     }
 
-
-    private static randomizeQuestions(): Array<iQuestion> {
+    /**when game Ends - dispose all used observables */
+    onDestory() {
+        super.onDestory();
+        this.play$Subscription ? this.play$Subscription.unsubscribe():'';
+        this.miniGameState = null;
+        this.logic = null
+    }
+    private static randomizeQuestions(numberOfQuestions: number): Array<iQuestion> {
         let min: number = 0;
-        let max: number = allQuestions.length - NumberOfQuestionsPerGame;
-        let startIndex =randomizeInt(min,max);
-        let randomQuestions = allQuestions.slice(startIndex, startIndex + NumberOfQuestionsPerGame);
+        let max: number = allQuestions.length - numberOfQuestions;
+        let startIndex = randomizeInt(min, max);
+        let randomQuestions = allQuestions.slice(startIndex, startIndex + numberOfQuestions);
         return randomQuestions
     }
     /** randomize the first turn player _id in the this.gameroom.players arr

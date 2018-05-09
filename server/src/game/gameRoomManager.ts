@@ -22,7 +22,7 @@ import { MINIGAME_TYPE } from './mini_games/logic/MINIGAME_TYPE_ENUM';
 
 //=======utils
 import { Logger } from '../utils/Logger';
-import { iGameSocket } from './models/iGameSocket';
+import { iGameSocket, getUserNameBySocket } from './models/iGameSocket';
 import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS.enum';
 const TAG: string = 'GameRoomManager |';
 
@@ -38,10 +38,11 @@ let miniGames = [
 import * as config from 'config';
 import { iGameRoomState, initialState, GAME_STATUS, iPartner, iClientGameState } from './models/iGameState.model';
 import { GAMEROOM_EVENT } from './models/GAMEROOM_EVENTS';
+import { Socket } from 'net';
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
 const reconnection_timeout: number = envConfig.game.reconnection_timeout //time to reconnect if a player is inside a game
-
+const minigames_per_game: number = envConfig.game.minigames_per_game
 
 /**handle an individual game room that contains 2 sockets (or more -in future version) of players 
  * 
@@ -50,7 +51,7 @@ export class GameRoomManager {
 
     private gameRoomState: iGameRoomState;//save the gameroom state 
     private minigame: miniGame = null;//current minigame the players playing
-
+    private disconnection$Sub: Rx.Subscription;
     constructor(private io: SocketIO.Namespace, private gameRoom: iGameRoom) {
 
     }
@@ -64,7 +65,7 @@ export class GameRoomManager {
         })
         return {
             ...initialState,
-            miniGamesRemaining: this.gameRoom.miniGamesRemaining,
+            miniGamesRemaining: minigames_per_game,
             GAME_STATUS: GAME_STATUS.playing,
             //players exposed data
             players: initPlayersExposedData
@@ -85,24 +86,28 @@ export class GameRoomManager {
             const playersId: string[] = this.gameRoom.players.map(p => p.user._id.toString())
             this.gameRoom.players.forEach((playersocket: iGameSocket) => {
                 const playerId: string = playersocket.user._id.toString();
-                Logger.d(TAG, `emit to player [${this.getUserNameBySocket(playersocket)}] found partners`, 'gray')
+                Logger.d(TAG, `emit to player [${getUserNameBySocket(playersocket)}] found partners`, 'gray')
                 const partnersId = playersId.filter(pId => pId !== playerId);
                 playersocket.emit(GAME_SOCKET_EVENTS.found_partner, { roomId: gameRoomId, partnersId: partnersId, playerId: playerId })
             })
-            while (this.gameRoom.miniGamesRemaining > 0) {
+            while (this.gameRoomState.miniGamesRemaining > 0) {
                 //generate new mini game:
 
                 let miniGameType: MINIGAME_TYPE = randomizeGame();
-                Logger.d(TAG, `gameRoom [${gameRoomId}] - minigames Remaining [${this.gameRoom.miniGamesRemaining}] `);
-                Logger.d(TAG, `gameRoom [${gameRoomId}] - ** generating the miniGame ${MINIGAME_TYPE[miniGameType]}`);
-
+                Logger.d(TAG, `gameRoom [${gameRoomId}] - ** generating the miniGame:[${MINIGAME_TYPE[miniGameType]}] MiniGames Remaining :[${this.gameRoomState.miniGamesRemaining}]`,'green');
                 let minigameClass = miniGames[miniGameType];
 
                 this.minigame = new minigameClass(this.io, this.gameRoom);
 
                 await this.minigame.playMiniGame();
+                this.gameRoomState.miniGamesRemaining = this.gameRoomState.miniGamesRemaining - 1;
+                Logger.d(TAG, `MiniGame [${MINIGAME_TYPE[miniGameType]}] Ended , MiniGames Remaining [${this.gameRoomState.miniGamesRemaining}]`, 'green');
+
 
             }
+            /*game ended:*/
+            this.handleGameEnded();
+
         }
         catch (e) {
             Logger.d(TAG, `Err =====>${e}`, 'red')
@@ -120,7 +125,7 @@ export class GameRoomManager {
      * receive session expierd
     */
     handeDisconnections() {
-        game$
+        this.disconnection$Sub = game$
             .filter((gameEvent: game$Event) =>
                 //check a socket disconnected and its from the same room
                 gameEvent.eventName === GAME_SOCKET_EVENTS.disconnect &&
@@ -132,7 +137,7 @@ export class GameRoomManager {
     /**handle indevidual player disconnection */
     handleDisconnection(gameEvent: game$Event) {
         const disconnectedSocket: iGameSocket = gameEvent.socket;
-        Logger.st(TAG, `handling disconnection of player ${this.getUserNameBySocket(disconnectedSocket)} `, 'gray');
+        Logger.st(TAG, `handling disconnection of player ${getUserNameBySocket(disconnectedSocket)} `, 'gray');
         const disconnctedSocketId = disconnectedSocket.id;
         const disconnectedUserId: string = disconnectedSocket.user._id.toString();
         // // 2.remove player from players list
@@ -142,7 +147,7 @@ export class GameRoomManager {
         this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.partner_disconnected, { partner: disconnectedSocket.user });
         //4.give a player a certien time to reconnect:
         const time_to_reconnect: number = reconnection_timeout;//in milisec
-        Logger.d(TAG, `** give ${this.getUserNameBySocket(disconnectedSocket)} ${reconnection_timeout / 1000} sec cahnce   to reconnect.. **`, 'gray')
+        Logger.d(TAG, `** give ${getUserNameBySocket(disconnectedSocket)} ${reconnection_timeout / 1000} sec cahnce   to reconnect.. **`, 'gray')
 
         const reconnected$ = game$.filter((gameEvent: game$Event) =>
             //check a socket connected and its the disconnected player from this room
@@ -156,17 +161,15 @@ export class GameRoomManager {
                 if (gameEventOrTimeout.eventName) {
                     const gameEvent = gameEventOrTimeout as game$Event;
                     const reconnectedUser: iGameSocket = gameEvent.socket;
-                    Logger.d(TAG, `User [${this.getUserNameBySocket(disconnectedSocket)}] reconnected back to gameRoomId: [${this.gameRoom.roomId}]`, 'gray');
+                    Logger.d(TAG, `User [${getUserNameBySocket(disconnectedSocket)}] reconnected back to gameRoomId: [${this.gameRoom.roomId}]`, 'gray');
                     this.handleReconnection(reconnectedUser);
 
                 } else {//timeout 
                     //emit game_ended event
-                    Logger.d(TAG, `User [${this.getUserNameBySocket(disconnectedSocket)}] chance to reconnection passed, goomRoomId: [${this.gameRoom.roomId}]`, 'gray');
+                    Logger.d(TAG, `User [${getUserNameBySocket(disconnectedSocket)}] chance to reconnection passed, goomRoomId: [${this.gameRoom.roomId}]`, 'gray');
                     const playersId: string[] = this.gameRoom.players.map(p => p.user._id.toString()) //players that leaving
-                    this.gameRoom.players.forEach(p => p.disconnect());
-                    const gameroomEvent: game$Event = { eventName: GAMEROOM_EVENT.game_ended, socket: disconnectedSocket, eventData: { roomId: this.gameRoom.roomId, playersId: playersId } }
-                    Game$.emit(gameroomEvent);
-                    this.onDestory();//TODO - make sure unsubscribing from all subscription before disconnecting the sockets(2 lines above)
+
+                    this.handleGameEnded();//tell players game ended + dispose room
                 }
             }
         )
@@ -227,12 +230,32 @@ export class GameRoomManager {
         delete clientState.players;
         return clientState as iClientGameState;
     }
-    private getUserNameBySocket(socket: iGameSocket) { //return userName or userId
-        return socket.user.facebook ? socket.user.facebook.name : socket.user._id
+    /**
+     * handleGameEnded
+     * a. emit gameroom event 'game_ended'
+     * b. call onDestory to dispose gameroom
+     * @param disconnectedSocket - in case of game ended because some user disconnected - the user that disconnected
+     */
+    private handleGameEnded(disconnectedSocket?: iGameSocket) {
+        Logger.d(TAG,'**handle Game Ended**')
+        Logger.d(TAG,`** emit [game_ended] to ${this.gameRoom.players.map(s=>`${getUserNameBySocket(s)+'that in room'+ Object.keys(s.rooms)},`)}`)
+        
+        //emit to players game eneded
+        this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS.game_ended);
+        //emit to server
+        const playersId: string[] = this.gameRoom.players.map(p => p.user._id.toString()) //players that leaving        
+        const gameroomEvent: game$Event = { eventName: GAMEROOM_EVENT.gameroom_session_ended, socket: disconnectedSocket, eventData: { roomId: this.gameRoom.roomId, playersId: playersId } }
+        Game$.emit(gameroomEvent);
+        //dispose gameroom
+        this.onDestory();
     }
-
     onDestory(): any {
         Logger.d(TAG, `** disposing gameroom ${this.gameRoom.roomId}`, 'gray');
+        this.disconnection$Sub ? this.disconnection$Sub.unsubscribe() : '';
+        if(this.minigame){
+            this.minigame.onDestory();
+            this.minigame = null;
+        }
     }
 }
 

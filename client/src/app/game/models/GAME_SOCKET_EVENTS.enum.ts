@@ -4,7 +4,8 @@ export enum GAME_SOCKET_EVENTS {
     disconnect= 'disconnect',//some client disconnected
     connection = 'connection', //some client connected
     leave_game = 'leave_game',//some client left a game permenantly
-    
+    game_ended = 'game_ended',
+
     partner_left_game = 'partner_left_game',/**telling other players that their partner left the game permenantly */
     partner_disconnected = 'partner_disconnected' ,//if one of the players disconnected while in game 
     partner_reconnection_time_ended = 'partner_reconnection_time_ended', //partner didnt reconnected after disconneciton and his session expierd
