@@ -38,7 +38,6 @@ let miniGames = [
 import * as config from 'config';
 import { iGameRoomState, initialState, GAME_STATUS, iPartner, iClientGameState } from './models/iGameState.model';
 import { GAMEROOM_EVENT } from './models/GAMEROOM_EVENTS';
-import { Socket } from 'net';
 const ENV: string = process.env.ENV || 'local';
 const envConfig: any = config.get(ENV);
 const reconnection_timeout: number = envConfig.game.reconnection_timeout //time to reconnect if a player is inside a game

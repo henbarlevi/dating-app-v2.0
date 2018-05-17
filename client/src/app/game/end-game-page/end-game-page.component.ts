@@ -2,6 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GameService } from '../game.service';
 import { Observable } from 'rxjs/Observable';
+import {filter, first} from 'rxjs/operators'
 import { iSocketData } from '../models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from '../models/GAME_SOCKET_EVENTS.enum';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -38,8 +39,8 @@ export class EndGamePageComponent implements OnInit, OnDestroy {
     this.GameService.startGame();
     const gameState$: Observable<iGameState> = this.store.select(getGameState);
     gameState$
-      .filter((gameState: iGameState) => gameState.GAME_STATUS === GAME_STATUS.start_new_game)
-      .first()
+      .pipe(filter((gameState: iGameState) => gameState.GAME_STATUS === GAME_STATUS.start_new_game)
+      ,first())
       .subscribe(() => {
         this.Router.navigate(['/dashboard/game']);
       })

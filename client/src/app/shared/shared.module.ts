@@ -1,7 +1,7 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DebugGuard } from './debug.guard';
-//import { ModalComponent } from './modal [bootstrap3.0]/modal.component';
+import { BootstrapModalComponent } from './modal [bootstrap3.0]/modal.component';
 import { ModalComponent } from './modal [pureCss]/modal.component';
 import { Logger } from './logger.service';
 
@@ -12,8 +12,8 @@ import { Logger } from './logger.service';
     CommonModule,
   ],
   declarations: [
-    ModalComponent//reusable abstract modal 
-
+    ModalComponent,//reusable abstract modal 
+    BootstrapModalComponent
   ],
   //export only that components directives and pipes
   // that need to be used outside of this module 

@@ -39,7 +39,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
     // })
     //listen to disconneciton event - if disconnected - navigate back to dashboard:
-    const gamesocketDisconnection$ = game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.disconnect)
+    const gamesocketDisconnection$ =this.GameService.getGameEventsByName( GAME_SOCKET_EVENTS.disconnect);
     this.disconnection$Subscription = gamesocketDisconnection$.subscribe(async event => {
       if (event.eventName === GAME_SOCKET_EVENTS.disconnect) {
         console.log(`%c ** Emiting Socket Event : ${event.eventName}**`, 'color: red');

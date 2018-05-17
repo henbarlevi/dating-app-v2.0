@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponseBase } from '@angular/common/http';
 import 'rxjs';
 import { Observable } from "rxjs/Observable";
+import { catchError } from "rxjs/operators";
+
 import { environment } from '../../environments/environment';
 const TAG:string = 'AuthService |';
 @Injectable()
@@ -33,10 +35,12 @@ export class AuthService {
       headers: headers,
       //params: queryParams
     })
-      .catch(e => {
+    .pipe(
+      catchError(e => {
         this.errorHandler(e);
         return Observable.throw(e);
-      });
+      })
+    );
   }
   logout() {
     localStorage.clear();

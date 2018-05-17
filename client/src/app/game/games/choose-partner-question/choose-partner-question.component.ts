@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { GameService } from '../../game.service';
 import { Observable } from 'rxjs/Observable';
+import { filter,first} from 'rxjs/operators';
 // ===== models
 import { iSocketData } from '../../models/iSocketData.model';
 import { GAME_SOCKET_EVENTS } from '../../models/GAME_SOCKET_EVENTS.enum';
@@ -98,8 +99,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
     }
   }
   private handleMiniGameInitalization() {
-    const game$: Observable<game$Event> = this.GameService.game$;
-    const initMiniGame$ = game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.init_mini_game).first();
+    const initMiniGame$ = this.GameService.getGameEventsByName(GAME_SOCKET_EVENTS.init_mini_game).pipe(first());
     initMiniGame$.subscribe((gameEvent: game$Event) => {
       const miniGameType: MINIGAME_TYPE = gameEvent.eventData.miniGameType;
       if (miniGameType === MINIGAME_TYPE.choose_partner_question) { //if the socket get an 'init)mini_game event'
@@ -128,7 +128,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
   2.pop up the partnersPlayActionsModal to display the partner action
   */
   private handlePartnersActions() {
-    const partnersPlayActions$: Observable<game$Event> = this.GameService.game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.partner_played);
+    const partnersPlayActions$: Observable<game$Event> = this.GameService.getGameEventsByName( GAME_SOCKET_EVENTS.partner_played);
     this.partnersPlayActions$Sub = partnersPlayActions$.subscribe((gameEvent: game$Event) => {
       const playAction: PlayAction = gameEvent.eventData;
       this.store.dispatch(new GameActions.updateMinigame({ miniGameType: MINIGAME_TYPE.choose_partner_question, playAction: playAction }));
@@ -139,7 +139,7 @@ export class ChoosePartnerQuestionComponent implements OnInit, OnDestroy {
   private handleMinigameEnd() {
     this.GameService
       .getGameEventsByName(GAME_SOCKET_EVENTS.mini_game_ended)
-      .first()
+      .pipe(first())
       .subscribe(() => {
         //TODO - do some general handling when minigame ends (show modal for example before navigating to the next game)
         setTimeout(() => {
