@@ -1,4 +1,4 @@
-import { GAME_SOCKET_EVENTS } from "./GAME_SOCKET_EVENTS";
+import { GAME_SOCKET_EVENTS } from "./GAME_SOCKET_EVENTS.enum";
 
 //each time socket io emit event , this is what the body contain
 export interface iSocketData{

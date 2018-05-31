@@ -14,7 +14,7 @@ web application that let people expirience online dating in a different way, by 
 # OverView 
 # ===============================
 > ## motivation
-the purpose of this app is to let users expirience date online in a different and special way
+the purpose of this app is to let users expirience date online in a different and special way by let them play with anonymous partner a variety of mini-games
 > ## How to run project <a name="howtorun"></a>
 * ### option 1: 
 for development i created shortcut - write *<span class="well">"npm run dev" </span>* in the <b> root folder</b>
@@ -63,7 +63,19 @@ var a:string = 'namw'
   *use indexing (if u change indexing on schema in production read [this](:https://stackoverflow.com/questions/14342708/mongoose-indexing-in-production-code) to prevent performence issue)
 > ### utils
 - write good README.md with markdown format
-- write chained commands in the npm scripts (CMD) : & - will run the commands at the same time | && - will run command only after the first command finished
+- write chained commands in the npm scripts (CMD) : <b>& </b>- will run the commands at the same time | <b>&& </b>- will run command only after the first command finished
+- [set environment variable in the npm scripts (CMD)](https://stackoverflow.com/questions/9249830/how-can-i-set-node-env-production-on-windows?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa) :<br>
+<b>```set NODE_ENV=production ```</b> - work on windows<br>
+<b>```npm run env NODE_ENV=prod -- <another command> ```</b> - work cross platform (windows/mac etc.) - NOTE that in order to chain another command we use ```-- ``` instead of ```&& ```
+- how to use gulp:
+```
+ * How to use Gulp:
+ * 1. install the gulp 4.0 v package with [npm i gulp@next --save-dev]
+ * 2. create gulpefile.js in the root folder
+ * 3. when runing the command "gulp" - it will look for task named 'default'
+  in the gulpfile.js and run it.
+  see gulpfile.js for more info
+```
 # ====================================
 # Project Explanation <a name="projectexplenation"></a>
 # ====================================
@@ -95,14 +107,19 @@ var a:string = 'namw'
 # TODO 
 # ====================================
 * handle reconnection of user
-* handle sockets emits from client with RXJS
 * replace all hardcoded urls with environment variables
 * do research on how to make the site be in top in google search - maybe this is the key : [Search Conosole](https://www.google.com/webmasters/tools/home?hl=en)
-* when doing JSON.stringify(gameEventOrtimeout) in the gameroomManager on the mreged observable subscribed object - recevied "Converting circular structure to JSON" Fix this to avoid memory leak
-* change the css arrow to gif
 * maybe discard saving roomId in client - it already handled by server, so maybe there is no need to save it in client storage
 * maybe save gameroom.players as object with key as user_id , to support continuing game event if some players disconnected (in future version when 2+ players games be available)
 * gZip the client app in order to make it event more smaller - check how to do it in node/maybe it do it automatically
+
+# BUGS
+- ERROR in 0.4df7b54b7d47fca64a9e.chunk.js from UglifyJs Unexpected token: name (lastArguments)
+# BUGS - History
+- after 2 games ended it doest redirect to the endgame page - something was wrong with the refreshing of the observables in gameService (client) when restarting new game
+---
+# Trouble Shoot
+- ERROR in 0.4df7b54b7d47fca64a9e.chunk.js from UglifyJs Unexpected token: name (lastArguments) - can be caused by incompatible typescript version
 <style>
 .well{
   border-radius: 30px  30px;

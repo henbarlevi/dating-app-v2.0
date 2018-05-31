@@ -10,6 +10,7 @@ var GAME_SOCKET_EVENTS;
     GAME_SOCKET_EVENTS["partner_left_game"] = "partner_left_game";
     GAME_SOCKET_EVENTS["partner_disconnected"] = "partner_disconnected";
     GAME_SOCKET_EVENTS["partner_reconnection_time_ended"] = "partner_reconnection_time_ended";
+    GAME_SOCKET_EVENTS["partner_reconnected"] = "partner_reconnected";
     /** search for game*/
     GAME_SOCKET_EVENTS["searchForPartner"] = "searching_for_partner";
     GAME_SOCKET_EVENTS["found_partner"] = "found_partner";

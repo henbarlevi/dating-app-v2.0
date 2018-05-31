@@ -2,7 +2,8 @@
   "scripts": {
     "dev": "npm run client & npm run server & gulp ",
     "server": "start cmd /k \"cd server &&  npm run dev\" ",
-    "client": "start cmd /k \"cd client &&  npm start\" "
+    "client": "start cmd /k \"cd client &&  npm start\" ",
+    "gulp":"gulp"
   },
   "devDependencies": {
     "del": "^3.0.0",

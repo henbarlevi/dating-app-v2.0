@@ -5,6 +5,7 @@ import { GameComponent } from './game.component';
 import { GameRoutingModule } from './game-routing.module';
 import { GameService } from './game.service';
 import { LoadingGameComponent } from './loading-game/loading-game.component';
+import { EndGamePageComponent } from './end-game-page/end-game-page.component';
 import { ChoosePartnerQuestionModule } from './games/choose-partner-question/choose-partner-question.module';
 //ngrx (redux)
 import { StoreModule } from '@ngrx/store';
@@ -28,6 +29,7 @@ import { gameReducer } from './_ngrx/game.reducers';
   declarations: [
     GameComponent,
     LoadingGameComponent,
+    EndGamePageComponent
 
   ],
   //LazyPrivateService = accessable only inside the module
