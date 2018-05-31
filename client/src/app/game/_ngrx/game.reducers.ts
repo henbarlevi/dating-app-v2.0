@@ -7,25 +7,27 @@ import { GAME_STATUS } from '../models/GAME_STATUS_ENUM';
 import { iPartner } from '../models/iPartner.model';
 import { environment } from '../../../environments/environment';
 import { MinigamesReducerContainer } from './minigames.reducers';
-import { GAME_TYPE } from '../models/GAME_TYPE_ENUM';
-const miniGamesPerGame: number = environment.miniGamesPerGame
+
+import { iGenericMiniGameState } from '../games/logic/iminiGameState.model';
+import { MINIGAME_TYPE } from '../games/logic/MINIGAME_TYPE_ENUM';
+//const miniGamesPerGame: number = environment.miniGamesPerGame
 /* === INITIAL STATE ===*/
 
 export interface iGameState {
     GAME_STATUS: GAME_STATUS// laoding, playing, paused,game ended etc
     partners: { [partnerId: string]: iPartner } | null //the partners that playing with the player , Id's and exposed info to the player
-    player:  iPartner  | null //player Id,and the current exposed info about him to his partners    
+    player: iPartner | null //player Id,and the current exposed info about him to his partners    
     miniGameState: any | null//the minigame state if the player inside minigame
     miniGamesRemaining: number,
-    roomId: string | null //roomId of the gameroom
+  //  roomId: string | null //roomId of the gameroom
 }
 const initialState: iGameState = {
     miniGamesRemaining: 0,
     miniGameState: null,
     partners: null,
-    player:null,
+    player: null,
     GAME_STATUS: GAME_STATUS.not_playing,
-    roomId: null
+   // roomId: null
 }
 /** ==== Auth REDUCER ==== */
 
@@ -34,20 +36,25 @@ export function gameReducer(state = initialState, action: GameActions.GameAction
         case GameActions.START_NEW_GAME:
             return {
                 ...state,
-                miniGamesRemaining: miniGamesPerGame,
+                miniGamesRemaining: 3,//TODOTODO
                 GAME_STATUS: GAME_STATUS.start_new_game,
             }
         case GameActions.UPDATE_NEW_GAMEROOM_DATA:
-            const payload: { roomId: string, partnersId: string[],playerId:string } = action.payload;
+            const payload: { /*roomId: string,*/ partnersId: string[], playerId: string } = action.payload;
             const partnersId: string[] = payload.partnersId;
             let partners: { [partnerId: string]: iPartner } = {};
             partnersId.forEach((pId: string) => partners[pId] = { id: pId });
-            const player :iPartner = {id:payload.playerId};
+            const player: iPartner = { id: payload.playerId };
             return {
                 ...state,
-                roomId: payload.roomId,
+              //  roomId: payload.roomId,
                 partners: partners,
-                player:player
+                player: player
+            }
+        case GameActions.SET_RECONNECTED_GAMEDATA:
+            return {
+                ...state,//not sure if necessary
+                ...action.payload
             }
         case GameActions.INITIAL_NEW_MINIGAME:
         case GameActions.UPDATE_MINIGAME:
@@ -56,13 +63,21 @@ export function gameReducer(state = initialState, action: GameActions.GameAction
                 those functions will be stored in the MinigamesReducerContainer class
                 those functions will be pulled from MinigamesReducerContainer to here to be executed
                 */
-            const miniGameType: GAME_TYPE = action.payload.miniGameType;
+            const miniGameType: MINIGAME_TYPE = action.payload.miniGameType;
             const reducerFunc: (state, action: GameActions.GameActions) => iGameState = MinigamesReducerContainer.getReducerFunction(miniGameType);
             !reducerFunc ? console.log('%c' + `Err ===> reducerFunction for minigameType:[${miniGameType}] didnt set correctly`, 'color: red') : ''
             return reducerFunc ? reducerFunc(state, action) : state;
+        case GameActions.END_MINIGAME:
+            return{
+                ...state,
+                miniGamesRemaining:state.miniGamesRemaining -1,
+                miniGameState:null
+            }
+
         case GameActions.END_GAME:
             return {
-                ...initialState
+                ...state,
+                GAME_STATUS:GAME_STATUS.game_ended
             }
         case GameActions.SOCKET_DISCONNECTION:
             return {

@@ -23,7 +23,7 @@ describe('choose_partner_question_logic', () => {
     });
     beforeEach((done) => {
         logic = new choose_partner_question_logic_1.choose_partner_question_logic();
-        mockQUestiosn = [{ q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }];
+        mockQUestiosn = [{ q: 'q1', a: ['answer1', 'answer2'] }, { q: 'q2', a: ['answer1', 'answer2'] }, { q: 'q3', a: ['answer1', 'answer2'] }];
         questionsRemaining = 3;
         playersId = ['A', 'B', 'C'];
         firstPlayerId = 'A';
@@ -41,7 +41,7 @@ describe('choose_partner_question_logic', () => {
         it('should return valid=false if initialization data of playersId contain 1 player', () => {
             //init
             const mockQUestiosn = [{ q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }, { q: 'daa', a: ['answer1', 'answer2'] }];
-            const initData = { questions: mockQUestiosn, questionsRemaining: mockQUestiosn.length, playersId: ['player1'] };
+            const initData = { questions: mockQUestiosn, questionsRemaining: mockQUestiosn.length, playersId: ['player1'], firstPlayerTurnId: 'player1' };
             //action
             const result = logic.initMiniGame(initData);
             //asset
@@ -106,7 +106,6 @@ describe('choose_partner_question_logic', () => {
         it('should [Decrease] [questionsRemaining] By 1 each time player [Answer] and playActions are [Valid]', () => {
             //init        
             const initResult = logic.initMiniGame({ questions: mockQUestiosn, questionsRemaining: questionsRemaining, playersId: playersId, firstPlayerTurnId: firstPlayerId });
-            console.dir(initResult);
             chai_1.expect(initResult.valid).to.be.true;
             const askAction = { type: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: 0, playerId: initResult.state.playerTurnId }; //chose first question
             const firstTurnResult = logic.play(initResult.state, askAction);
@@ -127,6 +126,18 @@ describe('choose_partner_question_logic', () => {
             const questionRemainingAfterAsking = firstTurnResult.state.questionsRemaining;
             //assert
             chai_1.expect(questionRemainingAfterAsking).to.eq(questionsRemaining);
+        });
+        it('should [Substract] the chosen question when player [Ask] it', () => {
+            //init        
+            const initResult = logic.initMiniGame({ questions: mockQUestiosn, questionsRemaining: questionsRemaining, playersId: playersId, firstPlayerTurnId: firstPlayerId });
+            chai_1.expect(initResult.valid).to.be.true;
+            const questionsNumber = mockQUestiosn.length;
+            console.dir(initResult);
+            const askAction = { type: PLAY_ACTIONS_ENUM_1.CHOOSE_QUESTIONS_PLAY_ACTIONS.ask_question, payload: 0, playerId: initResult.state.playerTurnId }; //chose first question
+            const firstTurnResult = logic.play(initResult.state, askAction);
+            console.dir(firstTurnResult);
+            const leftQuestionsNumber = firstTurnResult.state.questions.length;
+            chai_1.expect(leftQuestionsNumber).to.eq(questionsNumber - 1);
         });
         it('should change [minigameStatus] to [ended] when [questionsRemaining] equal [0] and playActions are [Valid]', () => {
             //init        

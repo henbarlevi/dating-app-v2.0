@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
     if (codeparam) {
       this.AuthService.sendFacebookCode(codeparam)
         .subscribe({
-          next: (data) => {
+          next: (data:any) => {
             console.log(TAG,'the login response:')
             console.log(TAG,data);
             localStorage.setItem('token', data.token);

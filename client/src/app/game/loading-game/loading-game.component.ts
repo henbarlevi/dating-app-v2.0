@@ -3,16 +3,17 @@ import { Component, OnInit } from '@angular/core';
 import { GameService } from '../game.service';
 import { Observable } from 'rxjs/Observable';
 import { iSocketData } from '../models/iSocketData.model';
-import { GAME_SOCKET_EVENTS } from '../models/GAME_SOCKET_EVENTS';
+import { GAME_SOCKET_EVENTS } from '../models/GAME_SOCKET_EVENTS.enum';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GAME_TYPE } from '../models/GAME_TYPE_ENUM';
 import { game$Event } from '../models/game$Event.model';
 import { Subscription } from 'rxjs/Subscription';
 //ngrx (redux)
-import { iGameState } from '../_ngrx/game.reducers';
+import { iGameState, getGameState } from '../_ngrx/game.reducers';
 import { Store } from '@ngrx/store';
 import * as GameActions from '../_ngrx/game.actions'
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { MINIGAME_TYPE } from '../games/logic/MINIGAME_TYPE_ENUM';
+import { GAME_STATUS } from '../models/GAME_STATUS_ENUM';
 //utils
 const TAG: string = 'LoadingGame |';
 @Component({
@@ -23,6 +24,7 @@ const TAG: string = 'LoadingGame |';
 export class LoadingGameComponent implements OnInit, OnDestroy {
   private game$: Observable<game$Event>;
   private game$Sub: Subscription;
+  private gameState$Sub: Subscription;
   loadingMessage: string = 'loading...';
   constructor(
     private Router: Router,
@@ -30,7 +32,8 @@ export class LoadingGameComponent implements OnInit, OnDestroy {
     private GameService: GameService,
     private store: Store<iGameState>) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+ 
     this.game$ = this.GameService.game$;
 
     this.game$Sub = this.game$.subscribe((event: game$Event) => {
@@ -38,19 +41,16 @@ export class LoadingGameComponent implements OnInit, OnDestroy {
         case GAME_SOCKET_EVENTS.searchForPartner:
           return this.loadingMessage = 'searching for partner';
         case GAME_SOCKET_EVENTS.found_partner:
-          const gameroomId: string = event.eventData.roomId as string;
-          //set gameroomId in local storage //TODO - check if its needed - we want the server to handle the gamerooms without the client to interfere 
-          this.GameService.gameroomId = gameroomId;
           //change state:
           this.store.dispatch(new GameActions.updateNewGameroomData(event.eventData))
           return this.loadingMessage = 'Found Partner';
         case GAME_SOCKET_EVENTS.init_mini_game:
           this.loadingMessage = 'Initializing game';
           //navigating to game
-          let initGameData: any = event.eventData;
-          let gameName: string = GAME_TYPE[initGameData.miniGameType];
+          const initGameData: any = event.eventData;
+          const gameName: string = MINIGAME_TYPE[initGameData.miniGameType];
           console.log(TAG, `initing the game :` + gameName);
-          return this.Router.navigate(['../' + gameName], { relativeTo: this.route });
+          return this.Router.navigate(['../' + gameName], { relativeTo: this.route });     
         default:
           break;
       }

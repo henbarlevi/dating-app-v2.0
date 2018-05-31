@@ -10,9 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Logger_1 = require("../utils/Logger");
 const ReplaySubject_1 = require("rxjs/ReplaySubject");
-const GAME_SOCKET_EVENTS_1 = require("./models/GAME_SOCKET_EVENTS");
+const GAME_SOCKET_EVENTS_enum_1 = require("./models/GAME_SOCKET_EVENTS.enum");
+const GAMEROOM_EVENTS_1 = require("./models/GAMEROOM_EVENTS");
 const TAG = 'Game$ |';
-/**This Service purpose is to export Observable that raise event every time client send emit evetm through socket.io */
+/**This Service purpose is to export Observable that raise event every time a game event occur :
+ *  a.when client send emit event through socket.io
+ *  b.gameroom raise an event
+ * */
 /*
   Raise events with services (BehaviourSubject,ReplaySubject) :
   https://stackoverflow.com/questions/34376854/delegation-eventemitter-or-observable-in-angular2/35568924#35568924*/
@@ -27,7 +31,7 @@ class Game$ {
             //emit connection event to observable:
             _game$.next({
                 socket: socket,
-                eventName: GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.connection
+                eventName: GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.connection
             });
             //catch all events on socket and emit them to the observable
             socket.on('*', (data) => {
@@ -45,21 +49,50 @@ class Game$ {
                 // Logger.d(TAG,'disconnect socket '+socket.id,'cyan');
                 _game$.next({
                     socket: socket,
-                    eventName: GAME_SOCKET_EVENTS_1.GAME_SOCKET_EVENTS.disconnect
+                    eventName: GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.disconnect
                 });
             });
         });
         this.printAllEvents(); //print to console all observable events
     }
+    static emit(gameEvent) {
+        _game$.next(gameEvent);
+    }
     static printAllEvents() {
-        game$.subscribe((socketEvent) => __awaiter(this, void 0, void 0, function* () {
+        this.printAllGameSocketEvents();
+        this.printAllGameroomEvents();
+    }
+    static printAllGameSocketEvents() {
+        game$.subscribe((gameEvent) => __awaiter(this, void 0, void 0, function* () {
             try {
-                Logger_1.Logger.d(TAG, `Client User [${socketEvent.socket.user.facebook ? socketEvent.socket.user.facebook.name : socketEvent.socket.user._id}] - Emited Event: [${socketEvent.eventName ? socketEvent.eventName : 'Unknwon'}] With the Data [${socketEvent.eventData ? JSON.stringify(socketEvent.eventData) : 'None'}]`, 'cyan');
+                const eventName = gameEvent.eventName;
+                if (isGAME_SOCKET_EVENT(eventName))
+                    Logger_1.Logger.d(TAG, `Client User [${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id}] - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
             }
             catch (e) {
-                Logger_1.Logger.d(TAG, `Err =====> while printing event ` + e, 'red');
+                Logger_1.Logger.d(TAG, `Err =====> while printing event ` + e + 'the eventName was ' + gameEvent ? gameEvent.eventName : 'unknown', 'red');
+            }
+        }));
+    }
+    static printAllGameroomEvents() {
+        game$.subscribe((gameEvent) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const eventName = gameEvent.eventName;
+                if (isGAMEROOM_EVENT(eventName))
+                    Logger_1.Logger.d(TAG, `GAMEROOM [] - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
+            }
+            catch (e) {
+                Logger_1.Logger.d(TAG, `Err =====> while printing gameroom event ` + e, 'red');
             }
         }));
     }
 }
 exports.Game$ = Game$;
+const gameSocketEventsNames = Object.keys(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS).map(e => GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS[e]);
+function isGAME_SOCKET_EVENT(event_name) {
+    return gameSocketEventsNames.some(evName => evName === event_name);
+}
+const gameRoomEvents = Object.keys(GAMEROOM_EVENTS_1.GAMEROOM_EVENT).map(e => GAMEROOM_EVENTS_1.GAMEROOM_EVENT[e]);
+function isGAMEROOM_EVENT(event_name) {
+    return gameRoomEvents.some(evName => evName === event_name);
+}

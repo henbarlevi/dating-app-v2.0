@@ -1,4 +1,4 @@
-import { GAME_SOCKET_EVENTS } from "./GAME_SOCKET_EVENTS";
+import { GAME_SOCKET_EVENTS } from "./GAME_SOCKET_EVENTS.enum";
 
 //events of the game$ observable
 export interface game$Event {

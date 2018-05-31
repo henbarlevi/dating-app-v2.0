@@ -22,7 +22,7 @@
   <!--ANSWERS-->
   <ng-template #answerModeTemplate>
     <div id="answers-wrapper">
-      <app-answer-list (selected)="onAnswerSelected($event)" id="answers" [answers]="minigameState?.questions[minigameState.currentQuestionIndex].a"></app-answer-list>
+      <app-answer-list (selected)="onAnswerSelected($event)" id="answers" [answers]="minigameState?.currentQuestion.a"></app-answer-list>
     </div>
   </ng-template>
 </div>
@@ -34,15 +34,17 @@
 <!-- GAME ACTIONS MODAL -->
 <app-modal #partnersPlayActionsModal [id]="'partnersPlayActionsModal'"  [location]="'top'">
   <div class="modal-header">
-      <h5 style="text-align:center">Game Action</h5>
+      <h5 style="text-align:center">{{isInAskQuestionMode()?'Answer':'Question'}} </h5>
            
            
    </div>
    <div class="modal-body">
-          Your partner choose the {{isInAskQuestionMode()?'Answer':'Question'}} : {{'asdas'}}
+      <p *ngIf="isInAskQuestionMode() ;else questionP">    Your partner choose the Answer : {{chosenAnswer }}</p>
+      <ng-template #questionP>    Your partner choose the Question : {{chosenQuestion}} </ng-template>
+      
    </div>
-   <div class="modal-footer">
+   <!-- <div class="modal-footer">
         <p style="text-align:left">   this is modal footer content</p>
-   </div>
+   </div> -->
 </app-modal>
 

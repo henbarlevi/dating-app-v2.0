@@ -2,11 +2,11 @@ import { Component, OnInit, ViewChild, ElementRef, Input, Renderer2 } from '@ang
 import { AfterContentInit } from '@angular/core/src/metadata/lifecycle_hooks';
 declare var $: any;
 @Component({
-  selector: 'app-modal',
+  selector: 'app-bootstrap-modal',
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss']
 })
-export class ModalComponent implements OnInit, AfterContentInit {
+export class BootstrapModalComponent implements OnInit, AfterContentInit {
 
   @ViewChild('abstractmodal') private modal: ElementRef;
   @Input('id') private modalId: string;/**[REQUIERD] */

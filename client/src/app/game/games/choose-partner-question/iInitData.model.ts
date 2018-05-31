@@ -1,4 +1,3 @@
-import { GAME_TYPE } from "../../models/GAME_TYPE_ENUM";
 import { iQuestion } from "./questions.model";
 
 /**minigame Initialization data transfer to each client playing the game
