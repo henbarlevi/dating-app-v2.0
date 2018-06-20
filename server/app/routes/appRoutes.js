@@ -30,46 +30,48 @@ router.get('/', (req, res) => {
 });
 //redirect client to facebook consent page 
 router.get('/auth-with-facebook', (req, res) => {
-    let url = facebook_service_1.FackbookService.getConsentPageUrl();
+    Logger_1.Logger.t(TAG, 'Facebook Auth', 'green');
+    const url = facebook_service_1.FackbookService.getConsentPageUrl();
     res.send(url);
 });
 /*
 1.get code from client and exchange it for an access_token
-2.create/update user with his authentication credentials*/
+2.create/update user - with his authentication credentials and fetched user info*/
 router.post('/facebook/code', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    let code = req.body.code;
-    console.log('the code :' + code);
-    if (code) {
-        Logger_1.Logger.d(TAG, 'got code from client >' + code, 'yellow');
-        //1.get code from client and exchange it for an access_token:
-        facebook_service_1.FackbookService.getAccessToken(code)
-            .then((userCredentials) => __awaiter(this, void 0, void 0, function* () {
-            let access_token = userCredentials.access_token;
+    try {
+        const code = req.body.code;
+        console.log('the code :' + code);
+        if (code) {
+            Logger_1.Logger.d(TAG, 'got code from client >' + code, 'yellow');
+            //1.get code from client and exchange it for an access_token:
+            const creds = yield facebook_service_1.FackbookService.getAccessToken(code);
+            const access_token = creds.access_token;
             if (access_token) {
-                printFacebookCreds(userCredentials); //just print info
+                Logger_1.Logger.st(TAG, 'got user Creds', 'green');
+                console.dir(creds);
+                let userInfo = yield facebook_service_1.FackbookService.getUserInfo(access_token);
+                Logger_1.Logger.d(TAG, 'got user info >' + JSON.stringify(userInfo), 'yellow');
+                //2.create/update user with his authentication credentials*/                      
+                //create user if not exist /if exist - update his gender,name,link in case they have changed
+                let user = {
+                    oauth_provider: 'facebook',
+                    oauth_provider_userid: userInfo.id,
+                    first_name: userInfo.first_name,
+                    last_name: userInfo.last_name,
+                    location: userInfo.location ? `${userInfo.location.city} ${userInfo.location.country}` : userInfo.hometown ? userInfo.hometown.name : '',
+                    birth_day: new Date(userInfo.birthday),
+                    gender: userInfo.gender,
+                    profile_link: userInfo.link,
+                    photo_link: userInfo.picture.data.url,
+                    access_token: creds.access_token,
+                    refresh_token: creds.refresh_token ? creds.refresh_token : '',
+                    token_expiration: new Date(Date.now() + creds.expires_in * 1000) // facebook return the seconds untill token expiers
+                    //TODO - check if expires_in is really in seconds
+                };
                 try {
-                    //GETTING USER CREDENTIALS
-                    let userInfo = yield facebook_service_1.FackbookService.getUserInfo(access_token);
-                    Logger_1.Logger.d(TAG, 'got user info >' + JSON.stringify(userInfo), 'yellow');
-                    //2.create/update user with his authentication credentials*/                      
-                    //create user if not exist /if exist - update his gender,name,link in case they have changed
-                    let user = {
-                        facebook: {
-                            id: userInfo.id,
-                            name: userInfo.name,
-                            gender: userInfo.gender,
-                            link: userInfo.link,
-                            access_token: userCredentials.access_token,
-                            token_type: userCredentials.token_type,
-                            expires_in: userCredentials.expires_in // { seconds - til - expiration }
-                        }
-                    };
+                    //update/create user
                     let userRep = new user_rep_1.UserRepository();
                     let userDB = yield userRep.updateOrCreateFacebookCreds(user);
-                    //TODO - check if that user exist first -and if so - change only its relation to facebook authorization
-                    /*in case user relation to facebook not exist -create it (user -AUTHENTICATED_WITH-> facebook)
-                    if exist -update credentials (access token etc..)*/
-                    //let userId: string = results.records[0]._fields[0].properties.userId;
                     //create token for authenticated user:
                     let token = jwt.sign({
                         userId: userDB._id
@@ -80,7 +82,6 @@ router.post('/facebook/code', (req, res) => __awaiter(this, void 0, void 0, func
                         token: token
                         // ,userId:userId
                     });
-                    // Logger.d(TAG, JSON.stringify(results.records[0]), 'yellow');
                 }
                 catch (e) {
                     Logger_1.Logger.d(TAG, 'ERR========> couldnt get user info/ couldnt create user', 'red');
@@ -88,10 +89,13 @@ router.post('/facebook/code', (req, res) => __awaiter(this, void 0, void 0, func
                     res.status(500).send('couldnt save user in db');
                 }
             }
-        }))
-            .catch(code => {
-            res.status(401).send('couldnt authenticate user via facebook, the code isnt valid or already been user');
-        });
+        }
+        else {
+            res.status(400).send(`didn't provide 'code' parameter`);
+        }
+    }
+    catch (e) {
+        res.status(401).send('couldnt authenticate user via facebook, the code isnt valid or already been used');
     }
 }));
 //====================================== UnAuthetication Middleware ======================================
@@ -137,3 +141,10 @@ exports.default = router;
 // //converting node callback function to reactive version:
 // const readdir$ = Rx.Observable.bindNodeCallback(fs.readdir); //save it as a function
 // readdir$('./dist/routes').subscribe(items=>{console.log(items)}); 
+//CHECK WHAT getuserInfo print:
+// FackbookService.getUserInfo("EAAIGZCsnEtxsBABfNGExBhIhtJ9AvEacOyV45iLRiWFFZBdguDsvrEvQCIjoYxzY7fykBfylj9fripsD4ZAQvNZCpQZAJQb557eHuZAQBSeKMH5IF7wDT7zuyo38QZC6uglfqtLUCwZAyd7ZAJtzQrGp0hUZAn4g0SOLyKLoUgMj2RmAZDZD")
+//     .then(res => {
+//         Logger.t(TAG, 'User INfo TEst', 'green');
+//         console.log(res);
+//         Logger.t(TAG, 'User INfo TEst', 'green');
+//     })

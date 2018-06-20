@@ -1,10 +1,30 @@
-
 <!-- Cards that present Players Details-->
 <div id="player" class="col-xs-6 col-sm-offset-1 col-sm-5 col-md-offset-2 col-md-3 col-xl-3 col-xl-offset-1">
-  this is player Details
+ 
+  <b class="text-center">Your Exposed Data :</b>
+  <ul  *ngIf="gameState && gameState.player" class="list-group">
+      <li *ngFor="let propKey of filterPlayerUnExposableProps(gameState.player) ; let i = index"  class="list-group-item" >
+       <ng-template [ngIf]="propKey!=='photo_link'">
+        <strong> {{propKey}} : </strong> {{gameState.player[propKey]}} <!--property expsode : Value-->
+       </ng-template> 
+       <ng-template [ngIf]="propKey==='photo_link'" >
+          <img [src]="gameState.player[propKey]"><!--can also use src={{gameState.player[propKey]}}-->
+       </ng-template> 
+      </li>
+  </ul>
 </div>
 <div id="partner" class="col-xs-6 col-sm-5 col-md-offset-2 col-md-3 col-xl-4 ">
-  this is his match details
+  <b class="text-center">Partner Exposed Data :</b>
+  <ul  *ngIf="gameState && gameState.partners" class="list-group">
+    <li *ngFor="let propKey of filterPlayerUnExposableProps(partner) ; let i = index"  class="list-group-item" >
+     <ng-template [ngIf]="propKey!=='photo_link'">
+      <strong> {{propKey}} : </strong> {{partner[propKey]}} <!--property expsode : Value-->
+     </ng-template> 
+     <ng-template [ngIf]="propKey==='photo_link'" >
+        <img [src]="partner[propKey]"><!--can also use src={{gameState.player[propKey]}}-->
+     </ng-template> 
+    </li>
+</ul>
 </div>
 <!-- / Cards that present Players Details-->
 <!--this is where the game will be displayed-->

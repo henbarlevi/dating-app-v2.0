@@ -1,6 +1,9 @@
+import { iPartner } from "./iPartner.model";
+import { GAME_STATUS } from "./GAME_STATUS.enum";
+
 /**
  * gameroom should save the current game state in case
- * user disconnected and reconnected
+ * user disconnected temporarly and reconnected
    this is the format the gameroom should save the state
  */
 export interface iGameRoomState {
@@ -19,25 +22,9 @@ export interface iClientGameState {
     miniGamesRemaining: number,
 }
 
-
-/**data about that partner that plays with the player */
-export interface iPartner {
-    id: string,
-    name?: string,
-    score?: number,
-    location?: string,
-    link?: string //link to his personal social page (facebook/instegram) 
-}
-export enum GAME_STATUS {
-    start_new_game = 'start_new_game',
-    loading_minigame = 'loading_minigame',
-    playing = 'playing',
-    game_ended = 'game_ended',
-    //disconnected = 'disconnected' //only exist in client
-}
 //init state
 export const initialState: iGameRoomState = {
-    GAME_STATUS: GAME_STATUS.start_new_game,
+    GAME_STATUS: GAME_STATUS.loading_new_game,
     miniGamesRemaining: 0,
     miniGameState: null,
     players: null

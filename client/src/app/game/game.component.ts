@@ -10,7 +10,8 @@ import { Subscription } from 'rxjs/Subscription';
 import { iGameState, getMiniGameState, getGameState, iState } from './_ngrx/game.reducers';
 import { Store } from '@ngrx/store';
 import * as GameActions from './_ngrx/game.actions';
-import { GAME_STATUS } from './models/GAME_STATUS_ENUM';
+import { GAME_STATUS } from './models/GAME_STATUS.enum';
+import { iPartner } from './models/iPartner.model';
 
 @Component({
   selector: 'app-game',
@@ -19,7 +20,8 @@ import { GAME_STATUS } from './models/GAME_STATUS_ENUM';
 })
 export class GameComponent implements OnInit, OnDestroy {
   private disconnection$Subscription: Subscription
-  private gameState: Observable<iGameState>;
+   gameState: iGameState;
+   gameState$Sub :Subscription
   constructor(private store: Store<iState>,
     private GameService: GameService, private router: Router) { }
 
@@ -32,6 +34,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
 
     //
+    this.gameState$Sub =this.store.select( getGameState).subscribe(gameState=>this.gameState=gameState);//TODO work on display exposed partners info
+    
     console.log('game component ngOninit');
     const game$: Observable<game$Event> = this.GameService.startGame();
     // const startGame$: Observable<iGameState> = this.gameState.filter((gameState: iGameState) => gameState.GAME_STATUS === GAME_STATUS.start_new_game)
@@ -50,6 +54,26 @@ export class GameComponent implements OnInit, OnDestroy {
   }
   ngOnDestroy() {
     this.disconnection$Subscription ? this.disconnection$Subscription.unsubscribe() : ''
+  }
+
+  objectKeys(obj) {
+    return Object.keys(obj);
+  }
+
+  /**get player exposed data and filter the unrelevant ones (id for now) */
+  filterPlayerUnExposableProps(player:iPartner):string[]{
+    const exposeDataProps:string[] =Object.keys(player);
+    return exposeDataProps.filter(prop => prop!='id' && prop!='profile_link');
+  }
+
+
+  /**
+   * TO BE DELETED - currently there is only 1 parnter in the game (=2 players)
+   *so it @returns the partner exposed info
+   */
+  get partner(){
+    const partnerId = Object.keys(this.gameState.partners)[0];
+    return this.gameState.partners[partnerId];
   }
 
 }

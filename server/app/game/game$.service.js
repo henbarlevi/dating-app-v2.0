@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Logger_1 = require("../utils/Logger");
+const iGameSocket_1 = require("./models/iGameSocket");
 const ReplaySubject_1 = require("rxjs/ReplaySubject");
 const GAME_SOCKET_EVENTS_enum_1 = require("./models/GAME_SOCKET_EVENTS.enum");
 const GAMEROOM_EVENTS_1 = require("./models/GAMEROOM_EVENTS");
@@ -58,6 +59,9 @@ class Game$ {
     static emit(gameEvent) {
         _game$.next(gameEvent);
     }
+    static getByEventName(eventName) {
+        return game$.filter(gameEvent => gameEvent.eventName === eventName);
+    }
     static printAllEvents() {
         this.printAllGameSocketEvents();
         this.printAllGameroomEvents();
@@ -67,7 +71,7 @@ class Game$ {
             try {
                 const eventName = gameEvent.eventName;
                 if (isGAME_SOCKET_EVENT(eventName))
-                    Logger_1.Logger.d(TAG, `Client User [${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id}] - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
+                    Logger_1.Logger.d(TAG, `${gameEvent.socket ? `Client User [${iGameSocket_1.getUserNameBySocket(gameEvent.socket)}]` : 'Server'}  - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
             }
             catch (e) {
                 Logger_1.Logger.d(TAG, `Err =====> while printing event ` + e + 'the eventName was ' + gameEvent ? gameEvent.eventName : 'unknown', 'red');
@@ -88,6 +92,7 @@ class Game$ {
     }
 }
 exports.Game$ = Game$;
+//Helper Functions For Logs:
 const gameSocketEventsNames = Object.keys(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS).map(e => GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS[e]);
 function isGAME_SOCKET_EVENT(event_name) {
     return gameSocketEventsNames.some(evName => evName === event_name);

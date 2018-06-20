@@ -2,6 +2,7 @@
 import * as config from 'config';
 import * as request from 'request';
 import { Logger } from '../utils/Logger';
+const fb = require('fbgraph');//facebook graph api sdk
 const TAG = 'FacebookService';
 //========config
 const ENV: string = process.env.ENV || 'local';
@@ -20,7 +21,20 @@ import { iFacebookUserInfo } from './models/iUserinfo.model'
 export class FackbookService {
 
     static getConsentPageUrl() {
-        let permissions = ['user_likes', 'user_posts', 'user_friends','publish_actions','email'];
+        let permissions = [
+            'user_birthday',
+            'user_gender',
+            'user_link',//Provides access to the Facebook profile URL for another user of the app.
+            'user_hometown',//Provides access to a person's hometown location through the hometown field on the User object. This is set by the user on the Profile.
+            'user_location',//Provides access to a person's current city through the location field on the User object. The current city is set by a person on their Profile.
+            'user_photos',
+            'user_videos',
+            'user_likes',
+            'user_posts',
+            'user_friends',
+            'publish_actions',
+            'email' //Provides access to the person's primary email address via the email property on the user object.
+        ];
 
         let url = `https://www.facebook.com/v2.10/dialog/oauth?client_id=${clientId}&redirect_uri=${redirect_uri}`
             + '&scope=' + permissions.join();
@@ -60,33 +74,56 @@ export class FackbookService {
             });
         });
     }
-    static getUserInfo(accessToken) {
+    /**
+     * Returns info about user profile (name,link,profile pic etc..) 
+     * @see https://developers.facebook.com/docs/graph-api/reference/v3.0/user
+     * @param access_token 
+     */
+    static getUserInfo(access_token: string) :Promise<iFacebookUserInfo>{
         //https://graph.facebook.com/me?access_token=...
         return new Promise<iFacebookUserInfo>((resolve, reject) => {
 
-            let url = `https://graph.facebook.com/me?access_token=` + accessToken + '&fields=id,email,name,gender,link,picture&type=large'
-
-
-            Logger.d(TAG, `****getting user info facebook Info (name,gender etc..)**** `, 'gray');
-
-            request.get(url, {
-                // headers: headers,
-                json: true,
-
-            }, (err, response, body) => {
-                if (!response || response.statusCode > 204) {//ERR
-                    Logger.d(TAG, JSON.stringify(response), 'red');
-                    reject(response.statusCode);
+            // let url = `https://graph.facebook.com/me?access_token=` + accessToken + '&fields=id,email,name,gender,link,picture&type=large'
+            // request.get(url, {
+            //     // headers: headers,
+            //     json: true,
+            // }, (err, response, body) => {
+            //     if (!response || response.statusCode > 204) {//ERR
+            //         Logger.d(TAG, JSON.stringify(response), 'red');
+            //         reject(response.statusCode);
+            //     }
+            //     else {
+            //         const userCredentials: iFacebookUserInfo = typeof body == 'string' ? JSON.parse(body) : body;
+            //         if (!userCredentials) {//if array is empty and document info not found
+            //             reject(404);
+            //         }
+            //         resolve(userCredentials);
+            //     }
+            // });
+            const userInfoParams: string = ['id', 
+                'birthday',
+                'cover',
+                'first_name',
+                'last_name',
+                'locale',
+                'hometown',
+                'email',
+                'gender',
+                'link',
+                'picture',
+                'address'].join(',');
+            Logger.d(TAG, `****getting user info facebook Info (name,gender etc..)**** `, 'gray');//TODOTODOTODO do a scalable user info (consider to add instegram in the future)
+            fb.setAccessToken(access_token);
+            fb.get(`/me?access_token=${access_token}`, { fields: userInfoParams }, (err, res) => {
+                if (err || !res) {
+                    reject(err);
+                } else {
+                    resolve(res);
                 }
-                else {
-                    const userCredentials: iFacebookUserInfo = typeof body == 'string' ? JSON.parse(body) : body;
-                    if (!userCredentials) {//if array is empty and document info not found
-                        reject(404);
-                    }
-                    resolve(userCredentials);
-                }
+            })
 
-            });
+
+
         });
     }
     //https://developers.facebook.com/docs/graph-api/reference/user/friends/

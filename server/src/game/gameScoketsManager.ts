@@ -15,7 +15,6 @@ import { UserRepository } from '../db/repository/user-rep';
 import { GameRoomManager } from "./gameRoomManager";
 import { game$, game$Event } from './game$.service';
 //====== models
-import { iUser } from '../models';
 import { iFacebookCredentials } from '../facebook/models/iFacebookCredentials.model'
 import { iFacebookUserInfo } from '../facebook/models/index';
 import { iGameRoom } from './models/iGameRoom';
@@ -119,7 +118,7 @@ export class GameScoketsManager {
                 if (this.playersPlaying[userId]) {
                     delete this.playersPlaying[userId];
                 } else {
-                    Logger.d(TAG, `WARNING - user ${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id} is 'leaving game' even he is not from the [PlayersPlaying] list.. `, 'yellow');
+                    Logger.d(TAG, `WARNING - user ${getUserNameBySocket(gameEvent.socket)} is 'leaving game' even he is not from the [PlayersPlaying] list.. `, 'yellow');
                 }
             })
     }
@@ -153,7 +152,7 @@ export class GameScoketsManager {
         //handle disconnections //TODO - check how dispose correctly
         game$.filter((gameEvent: game$Event) => gameEvent.eventName === GAME_SOCKET_EVENTS.disconnect)
             .subscribe((gameEvent: game$Event) => {
-                Logger.d(TAG, `** Handle Disconnection For ${this.getUserNameBySocket(gameEvent.socket)}`, 'gray');
+                Logger.d(TAG, `** Handle Disconnection For ${getUserNameBySocket(gameEvent.socket)}`, 'gray');
 
                 this.handleDisconnectionEvent(gameEvent);
             })
@@ -172,7 +171,7 @@ export class GameScoketsManager {
         let disconnectingUserID = gameEvent.socket.user._id.toString();
         let disconnectUserSocket:iGameSocket = gameEvent.socket;
         //remove socket from waiting list if its there
-        this.waitingList[disconnectingUserID] ? Logger.d(TAG, `** removing ${this.getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'gray') : '';
+        this.waitingList[disconnectingUserID] ? Logger.d(TAG, `** removing ${getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'gray') : '';
         delete this.waitingList[disconnectingUserID];
 
     }
@@ -207,9 +206,7 @@ export class GameScoketsManager {
     private userIsAlreadyConnected(socket: iGameSocket) {
         //TODO
     }
-    private getUserNameBySocket(socket: iGameSocket) { //return userName or userId
-        return socket.user.facebook ? socket.user.facebook.name : socket.user._id
-    }
+
     private printCurrentState(socket :iGameSocket) {
         Logger.mt(TAG, ' Socket Details ', 'yellow')
         .d(TAG,`socket id [${socket.id}] ,rooms:[${Object.keys(socket.rooms)}]`)
@@ -222,7 +219,7 @@ export class GameScoketsManager {
 
           Logger.st(TAG, `**Generating  New gameroom**`, 'gray')
           .d(TAG, `gameroomId:${gameroom.roomId}`, 'gray')
-          .d(TAG, `players:${gameroom.players.map(p=>this.getUserNameBySocket(p))}`, 'gray');
+          .d(TAG, `players:${gameroom.players.map(p=>getUserNameBySocket(p))}`, 'gray');
 
         
     }

@@ -2,8 +2,10 @@
 @import '~styles/main';/*The tilde (~) will tell Sass to look in the src/ folder and is a quick shortcut to importing Sass files.*/
 
 #player,#partner{
-    min-height: 30%;
+    // min-height: 30%;
+    height: 30%;
     background-color: gray;
+    overflow: scroll;
 }
 #game-wrapper{
     background-color: $white;

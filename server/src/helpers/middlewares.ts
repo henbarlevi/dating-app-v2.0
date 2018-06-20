@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken'; //jwt authentication
 //===== DB
 import { UserRepository } from '../db/repository/user-rep';
 //=====models
-import { iUser } from '../models'
+import { iDBUser } from '../db/schemas/user'
 
 //=====utils
 import { Logger } from '../utils/Logger';
@@ -72,7 +72,7 @@ export function authenticationMiddleware(req, res, next) {
 }
 
 /*return User if token is valid*/
-export function verifyToken(token:string): Promise<iUser> {
+export function verifyToken(token:string): Promise<iDBUser> {
     return new Promise((resolve, reject) => {
         Logger.st(TAG, `Verify JWT Token`, 'yellow');
         Logger.d(TAG, `token = ${token?token.slice(0,5)+'...':'Null!'}`, 'gray');
@@ -87,10 +87,10 @@ export function verifyToken(token:string): Promise<iUser> {
                 try {
 
                     let userRep = new UserRepository();
-                    let user: iUser = await userRep.getUserById(userId);
+                    let user: iDBUser = await userRep.getUserById(userId);
                     Logger.d(TAG, `user is authenticated, userId > ${userId} `, 'green');
                     Logger.d(TAG, `userId = ${userId} `, 'gray');
-                    Logger.d(TAG, `userName = ${user.facebook ? user.facebook.name:'Unknwon'} `, 'gray');
+                    Logger.d(TAG, `userName = ${user ? user.first_name:'Unknwon'} `, 'gray');
                     
                     
                     Logger.st(TAG, '/END Verify JWT Token', 'yellow');

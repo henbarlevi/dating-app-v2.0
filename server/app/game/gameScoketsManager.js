@@ -102,7 +102,7 @@ class GameScoketsManager {
                 delete this.playersPlaying[userId];
             }
             else {
-                Logger_1.Logger.d(TAG, `WARNING - user ${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id} is 'leaving game' even he is not from the [PlayersPlaying] list.. `, 'yellow');
+                Logger_1.Logger.d(TAG, `WARNING - user ${iGameSocket_1.getUserNameBySocket(gameEvent.socket)} is 'leaving game' even he is not from the [PlayersPlaying] list.. `, 'yellow');
             }
         });
     }
@@ -134,7 +134,7 @@ class GameScoketsManager {
         //handle disconnections //TODO - check how dispose correctly
         game__service_1.game$.filter((gameEvent) => gameEvent.eventName === GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.disconnect)
             .subscribe((gameEvent) => {
-            Logger_1.Logger.d(TAG, `** Handle Disconnection For ${this.getUserNameBySocket(gameEvent.socket)}`, 'gray');
+            Logger_1.Logger.d(TAG, `** Handle Disconnection For ${iGameSocket_1.getUserNameBySocket(gameEvent.socket)}`, 'gray');
             this.handleDisconnectionEvent(gameEvent);
         });
     }
@@ -151,7 +151,7 @@ class GameScoketsManager {
         let disconnectingUserID = gameEvent.socket.user._id.toString();
         let disconnectUserSocket = gameEvent.socket;
         //remove socket from waiting list if its there
-        this.waitingList[disconnectingUserID] ? Logger_1.Logger.d(TAG, `** removing ${this.getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'gray') : '';
+        this.waitingList[disconnectingUserID] ? Logger_1.Logger.d(TAG, `** removing ${iGameSocket_1.getUserNameBySocket(disconnectUserSocket)} from [waiting list].. **`, 'gray') : '';
         delete this.waitingList[disconnectingUserID];
     }
     /**
@@ -184,9 +184,6 @@ class GameScoketsManager {
     userIsAlreadyConnected(socket) {
         //TODO
     }
-    getUserNameBySocket(socket) {
-        return socket.user.facebook ? socket.user.facebook.name : socket.user._id;
-    }
     printCurrentState(socket) {
         Logger_1.Logger.mt(TAG, ' Socket Details ', 'yellow')
             .d(TAG, `socket id [${socket.id}] ,rooms:[${Object.keys(socket.rooms)}]`)
@@ -198,7 +195,7 @@ class GameScoketsManager {
     printGameroomDetails(gameroom) {
         Logger_1.Logger.st(TAG, `**Generating  New gameroom**`, 'gray')
             .d(TAG, `gameroomId:${gameroom.roomId}`, 'gray')
-            .d(TAG, `players:${gameroom.players.map(p => this.getUserNameBySocket(p))}`, 'gray');
+            .d(TAG, `players:${gameroom.players.map(p => iGameSocket_1.getUserNameBySocket(p))}`, 'gray');
     }
 }
 exports.GameScoketsManager = GameScoketsManager;

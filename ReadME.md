@@ -52,7 +52,7 @@ var a:string = 'namw'
 - handle configurations for each environment using environment.ts/environment.prod.ts etc... more info [here](https://github.com/angular/angular-cli/wiki/build#ng-build) (you can also use [tokenInjection](https://stackoverflow.com/questions/43193049/app-settings-the-angular-4-way/43316544) instead)
 > ### SCSS
 - how to devide SCSS files (Veriables, Mixing etc...)
-- how to import SCSS files into components scss files <span class="well"> @import '~styles/main';</span> The tilde <b>~</b> will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.  
+- how to import SCSS files into components scss files<b> ``` @import '~styles/main';```</b> The tilde <b>~</b> will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.  
 - to create new angular project with scss:<b> ng new My_New_Project --style=scss</b>
 > ### Server
 - using SOCKET.IO
@@ -103,6 +103,10 @@ var a:string = 'namw'
 |init_mini_game|      |     <-----> |   |
 |ready_for_mini_game|----->||<-----|
 
+# ====================================
+# Notes 
+# ====================================
+a. even when the client just do a refresh - the socket will be disconnected and reconnect as different socket connection <b> (WITH DIFFERENT SOCKETID)!</b>
 # ====================================
 # TODO 
 # ====================================

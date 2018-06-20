@@ -4,7 +4,7 @@
  */
 import { Action } from '@ngrx/store';
 import { iPlayAction } from '../games/logic/iPlayAction.model';
-import { GAME_SOCKET_EVENTS } from '../models/GAME_SOCKET_EVENTS.enum';
+import { GAME_SOCKET_EVENTS, partner_info_exposed_PAYLOAD } from '../models/GAME_SOCKET_EVENTS.enum';
 import { iGameState } from './game.reducers';
 import { MINIGAME_TYPE } from '../games/logic/MINIGAME_TYPE_ENUM';
 /* ==== ACTIONS ====*/
@@ -28,11 +28,11 @@ export class setReconnectedGameData implements Action {
     readonly type = SET_RECONNECTED_GAMEDATA;
     constructor(public payload: iGameState) { }
 }
-// ------ player perss the 'Play Game' Button
+// ------ some info about player has exposed 
 export const UPDATE_PARTNERS_DATA: string = 'UPDATE_PARTNERS_DATA';
 export class updatePartnersData implements Action {
     readonly type = UPDATE_PARTNERS_DATA;
-    constructor(public payload: any) { }
+    constructor(public payload: partner_info_exposed_PAYLOAD) { }
 }
 
 // ------ starting new mini game with initial minigame state
@@ -74,4 +74,4 @@ export class socketDisconnection implements Action {
 }
 
 /// EXPORT
-export type GameActions = StartNewGame | updateNewGameroomData | initalNewMinigame | updateMinigame |endMinigame | endGame | socketDisconnection | setReconnectedGameData
+export type GameActions = StartNewGame | updateNewGameroomData | updatePartnersData|initalNewMinigame | updateMinigame |endMinigame | endGame | socketDisconnection | setReconnectedGameData

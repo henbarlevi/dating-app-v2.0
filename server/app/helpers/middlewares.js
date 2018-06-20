@@ -90,7 +90,7 @@ function verifyToken(token) {
                     let user = yield userRep.getUserById(userId);
                     Logger_1.Logger.d(TAG, `user is authenticated, userId > ${userId} `, 'green');
                     Logger_1.Logger.d(TAG, `userId = ${userId} `, 'gray');
-                    Logger_1.Logger.d(TAG, `userName = ${user.facebook ? user.facebook.name : 'Unknwon'} `, 'gray');
+                    Logger_1.Logger.d(TAG, `userName = ${user ? user.first_name : 'Unknwon'} `, 'gray');
                     Logger_1.Logger.st(TAG, '/END Verify JWT Token', 'yellow');
                     resolve(user);
                 }

@@ -7,11 +7,13 @@ var GAME_SOCKET_EVENTS;
     GAME_SOCKET_EVENTS["disconnect"] = "disconnect";
     GAME_SOCKET_EVENTS["connection"] = "connection";
     GAME_SOCKET_EVENTS["leave_game"] = "leave_game";
-    GAME_SOCKET_EVENTS["game_ended"] = "game_ended";
     GAME_SOCKET_EVENTS["partner_left_game"] = "partner_left_game";
     GAME_SOCKET_EVENTS["partner_disconnected"] = "partner_disconnected";
     GAME_SOCKET_EVENTS["partner_reconnection_time_ended"] = "partner_reconnection_time_ended";
     GAME_SOCKET_EVENTS["partner_reconnected"] = "partner_reconnected";
+    /**general game events */
+    GAME_SOCKET_EVENTS["game_ended"] = "game_ended";
+    GAME_SOCKET_EVENTS["partner_info_exposed"] = "partner_info_exposed";
     /** search for game*/
     GAME_SOCKET_EVENTS["searchForPartner"] = "searching_for_partner";
     GAME_SOCKET_EVENTS["found_partner"] = "found_partner";

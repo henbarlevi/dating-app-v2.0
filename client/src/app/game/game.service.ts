@@ -3,12 +3,12 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 import { Observable } from 'rxjs/Observable';
-import {filter, first} from 'rxjs/operators';
+import { filter, first } from 'rxjs/operators';
 
 import * as io from 'socket.io-client';
 import * as plugin from 'socketio-wildcard'
 import { iSocketData } from './models/iSocketData.model';
-import { GAME_SOCKET_EVENTS } from './models/GAME_SOCKET_EVENTS.enum';
+import { GAME_SOCKET_EVENTS, partner_info_exposed_PAYLOAD } from './models/GAME_SOCKET_EVENTS.enum';
 import { game$Event } from './models/game$Event.model';
 const socketListenToAllEventsPlugin = plugin(io.Manager); //add the '*' option : https://stackoverflow.com/questions/31757188/socket-on-listen-for-any-event
 //ngrx (redux)
@@ -19,10 +19,10 @@ import { Router } from '@angular/router';
 import { MINIGAME_TYPE } from './games/logic/MINIGAME_TYPE_ENUM';
 import { iGenericMiniGameState } from './games/logic/iminiGameState.model';
 import { MINIGAME_STATUS } from './games/logic/MINIGAME_STATUS_ENUM';
-import { GAME_STATUS } from './models/GAME_STATUS_ENUM';
 import { Logger } from '../shared/logger.service';
 import { logger } from '../app.module';
 import { Subscription } from 'rxjs';
+import { GAME_STATUS } from './models/GAME_STATUS.enum';
 //==== utils
 const TAG: string = 'GameService |';
 @Injectable()
@@ -80,7 +80,7 @@ export class GameService {
   }
 
 
-  connect(){
+  connect() {
     console.log('creating game socket..');
     const token: String = localStorage.getItem('token');
     //connecting :
@@ -101,11 +101,16 @@ export class GameService {
 
   getGameEventsByName(eventName: GAME_SOCKET_EVENTS): Observable<game$Event> {
     return this.game$
-    .pipe(filter((gameEvent: game$Event) => gameEvent.eventName === eventName));
-    
+      .pipe(filter((gameEvent: game$Event) => gameEvent.eventName === eventName));
+
   }
+  /**
+   * @description handle game events that should be handled globally
+   * (no matter what specific component diaplayed) 
+   */
   private handleGameSocketEvents(): any {
     this.game$Sub = this.game$.subscribe(async (gameEvent: game$Event) => {
+
       switch (gameEvent.eventName) {
         /**happens if the client temporarly disconnected and reconnected: */
         case GAME_SOCKET_EVENTS.reconnection_data:
@@ -128,7 +133,11 @@ export class GameService {
           this.store.dispatch(new GameActions.endGame(null));
           return this.router.navigate([`/dashboard/game/end`]); // navigate to end game page
         case GAME_SOCKET_EVENTS.disconnect: // if game_status !== game_ended - will be consider an unexpected disconnection
-          this.handleDisconnection();
+          return this.handleDisconnection();
+        /**happens when server decide to expose some info about certian player: */
+        case GAME_SOCKET_EVENTS.partner_info_exposed:
+          const evData: partner_info_exposed_PAYLOAD = gameEvent.eventData;
+          this.store.dispatch(new GameActions.updatePartnersData(evData))
         default:
           break;
       }

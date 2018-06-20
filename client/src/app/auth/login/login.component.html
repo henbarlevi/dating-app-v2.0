@@ -1,6 +1,4 @@
-<p>
-    NEW login works!
-</p>
+
 <section id="login">
     <div class="container">
         <div class="row">
@@ -12,13 +10,16 @@
             </div>
             <div class="col-xs-12">
                 <div class="form-wrap">
-                    <h1>Login With :</h1>
+                        <h1>Login With :</h1>
 
                     <div class="text-center">
+                        <!--GOOGLE-->
                         <!--<button (click)="loginGoogle()" id="btn-login-google" class="btn btn-danger">Google+ <span class="fa fa-google-plus"></span> </button>-->
-                        <a href="/auth/google" id="btn-login-google" class="btn btn-danger btn-custom btn-block">Google+ <span class="fa fa-google-plus"></span> </a>
-                        <a (click)="loginWithFacebook()"> <span class="btn btn-info">Facbook</span></a>
-
+                        <!-- <a href="/auth/google" id="btn-login-google" class="btn btn-danger btn-custom btn-block">Google+ <span class="fa fa-google-plus"></span> </a> -->
+                        <!--FACEBOOK-->
+                        <!-- <a (click)="loginWithFacebook()"> <span class="btn btn-info">Facbook</span></a> -->
+                        <button class="loginBtn loginBtn--facebook" (click)="loginWithFacebook()">Facebook</button>
+                          
                     </div>
                     <!--Login Button-->
                     <!--<button (click)="login()" id="btn-login" class="btn btn-custom btn-lg btn-block">Login</button>-->
@@ -37,7 +38,7 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
-                <p>GVI © - 2017</p>
+                <p>Dating-App © - 2018</p>
                 <p>created by <strong><a href="https://github.com/henbarlevi" target="_blank">Hen Bar Levi</a></strong></p>
             </div>
         </div>

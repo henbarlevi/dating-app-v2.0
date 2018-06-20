@@ -10,7 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Observable_1 = require("rxjs/Observable");
 require("rxjs/add/observable/timer");
+require("rxjs/add/observable/interval");
 require("rxjs/add/observable/merge");
+require("rxjs/add/operator/map");
 require("rxjs/add/operator/first");
 const MINIGAME_TYPE_ENUM_1 = require("./mini_games/logic/MINIGAME_TYPE_ENUM");
 //=======utils
@@ -30,10 +32,13 @@ let miniGames = [
 const config = require("config");
 const iGameState_model_1 = require("./models/iGameState.model");
 const GAMEROOM_EVENTS_1 = require("./models/GAMEROOM_EVENTS");
+const playersExposedInfoManager_service_1 = require("./gameroom/playersExposedInfoManager.service");
+const GAME_STATUS_enum_1 = require("./models/GAME_STATUS.enum");
 const ENV = process.env.ENV || 'local';
 const envConfig = config.get(ENV);
 const reconnection_timeout = envConfig.game.reconnection_timeout; //time to reconnect if a player is inside a game
 const minigames_per_game = envConfig.game.minigames_per_game;
+const partner_info_exposed_time = 1000 * 4; //TODO - move to configuration file
 /**handle an individual game room that contains 2 sockets (or more -in future version) of players
  *
 */
@@ -51,7 +56,7 @@ class GameRoomManager {
         this.gameRoom.players.map(p => p.user._id.toString()).forEach(playerId => {
             initPlayersExposedData[playerId] = { id: playerId };
         });
-        return Object.assign({}, iGameState_model_1.initialState, { miniGamesRemaining: minigames_per_game, GAME_STATUS: iGameState_model_1.GAME_STATUS.playing, 
+        return Object.assign({}, iGameState_model_1.initialState, { miniGamesRemaining: minigames_per_game, GAME_STATUS: GAME_STATUS_enum_1.GAME_STATUS.playing, 
             //players exposed data
             players: initPlayersExposedData });
     }
@@ -60,11 +65,10 @@ class GameRoomManager {
             try {
                 this.gameRoomState = this.InitGameRoomState;
                 this.handeDisconnections();
+                this.handlePlayersDataExposer(); //TODO - commented in order to easly resolve other bugs - uncomment when done
                 const gameRoomId = this.gameRoom.roomId;
                 //insert to each socket the gameroomId:
-                this.gameRoom.players.forEach(socket => {
-                    this.enterPlayerToRoom(socket, gameRoomId);
-                });
+                this.enterPlayersToRoom(this.gameRoom.players, gameRoomId);
                 //tell players that match is found and their partner/s id
                 const playersId = this.gameRoom.players.map(p => p.user._id.toString());
                 this.gameRoom.players.forEach((playersocket) => {
@@ -113,11 +117,12 @@ class GameRoomManager {
     handleDisconnection(gameEvent) {
         const disconnectedSocket = gameEvent.socket;
         Logger_1.Logger.st(TAG, `handling disconnection of player ${iGameSocket_1.getUserNameBySocket(disconnectedSocket)} `, 'gray');
+        Logger_1.Logger.d(TAG, `disconnected socketId #[${disconnectedSocket.id}]`, 'magenta');
         const disconnctedSocketId = disconnectedSocket.id;
         const disconnectedUserId = disconnectedSocket.user._id.toString();
         // // 2.remove player from players list
-        // this.gameRoom.players = this.gameRoom.players.filter(socket => socket !== disconnectedSocket);
-        // Logger.d(TAG, `** removed player from players list , there are now [${this.gameRoom.players.length}] players **`, 'gray');
+        this.gameRoom.players = this.gameRoom.players.filter(socket => socket !== disconnectedSocket);
+        Logger_1.Logger.d(TAG, `** removed player from players list , there are now [${this.gameRoom.players.length}] players **`, 'gray');
         //3.tell other players about disconnected partner
         this.io.to(this.gameRoom.roomId).emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.partner_disconnected, { partner: disconnectedSocket.user });
         //4.give a player a certien time to reconnect:
@@ -129,18 +134,24 @@ class GameRoomManager {
             gameEvent.socket.user._id.toString() === disconnectedUserId);
         const timeOut$ = Observable_1.Observable.timer(time_to_reconnect);
         Observable_1.Observable.merge(reconnected$, timeOut$).first().subscribe((gameEventOrTimeout) => {
-            //reconnected on time:
-            if (gameEventOrTimeout.eventName) {
-                const gameEvent = gameEventOrTimeout;
-                const reconnectedUser = gameEvent.socket;
-                Logger_1.Logger.d(TAG, `User [${iGameSocket_1.getUserNameBySocket(disconnectedSocket)}] reconnected back to gameRoomId: [${this.gameRoom.roomId}]`, 'gray');
-                this.handleReconnection(reconnectedUser);
+            try {
+                //reconnected on time:
+                if (gameEventOrTimeout.eventName) {
+                    const gameEvent = gameEventOrTimeout;
+                    const reconnectedUser = gameEvent.socket;
+                    Logger_1.Logger.d(TAG, `User [${iGameSocket_1.getUserNameBySocket(disconnectedSocket)}] reconnected back to gameRoomId: [${this.gameRoom.roomId}]`, 'gray');
+                    Logger_1.Logger.d(TAG, `reconnected socketId #[${reconnectedUser.id}]`, 'magenta');
+                    this.handleReconnection(reconnectedUser);
+                }
+                else {
+                    //emit game_ended event
+                    Logger_1.Logger.d(TAG, `User [${iGameSocket_1.getUserNameBySocket(disconnectedSocket)}] chance to reconnection passed, goomRoomId: [${this.gameRoom.roomId}]`, 'gray');
+                    const playersId = this.gameRoom.players.map(p => p.user._id.toString()); //players that leaving
+                    this.handleGameEnded(); //tell players game ended + dispose room
+                }
             }
-            else {
-                //emit game_ended event
-                Logger_1.Logger.d(TAG, `User [${iGameSocket_1.getUserNameBySocket(disconnectedSocket)}] chance to reconnection passed, goomRoomId: [${this.gameRoom.roomId}]`, 'gray');
-                const playersId = this.gameRoom.players.map(p => p.user._id.toString()); //players that leaving
-                this.handleGameEnded(); //tell players game ended + dispose room
+            catch (e) {
+                Logger_1.Logger.d(TAG, `Err ====> player reconneciton process failed: ${e}`, 'red');
             }
         });
     }
@@ -164,8 +175,13 @@ class GameRoomManager {
         socket.emit(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.reconnection_data, clientGameState);
         //3.add him to the players list (gameroom.players)
         this.gameRoom.players.push(socket);
+        Logger_1.Logger.d(TAG, `Current players socket in gameroom = ${this.gameRoom.players.length}`, 'gray');
         //4.add him to room
         this.enterPlayerToRoom(socket, this.gameRoom.roomId);
+    }
+    enterPlayersToRoom(sockets, roomId) {
+        Logger_1.Logger.st(TAG, `** GameroomId:[${roomId}] entering Sockets To Gameroom **`, 'gray');
+        sockets.forEach(s => this.enterPlayerToRoom(s, roomId));
     }
     /**
      * @description
@@ -178,7 +194,8 @@ class GameRoomManager {
         socket.gameRoomId = roomId;
     }
     /**
-     * @description the difference is that gameRoomState saving all the players exposed data in the 'players' property
+     * @description
+     * the difference is that gameRoomState saving all the players exposed data in the 'players' property
      * while in client this data is seperated - 'player' contain the player exposed data , 'partners' - his partners exposed data
      * @param gameroomState
      */
@@ -212,13 +229,39 @@ class GameRoomManager {
     onDestory() {
         Logger_1.Logger.d(TAG, `** disposing gameroom ${this.gameRoom.roomId}`, 'gray');
         this.disconnection$Sub ? this.disconnection$Sub.unsubscribe() : '';
+        this.playerInfoExposed$Sub ? this.playerInfoExposed$Sub.unsubscribe() : '';
         if (this.minigame) {
             this.minigame.onDestory();
             this.minigame = null;
         }
     }
-}
+    /**
+ * @description
+ * in the begining of the game
+ * the player will know nothing about his partner/partners he is playing with,
+ * as the game proceed , each certian of time the player receive a new info about his matched partner (name/age etc.)
+ this method will call a service that will be responsible to emit to players the player info.
+@param exposerTrigger - each time the observable emit event - [partner_info_exposed] will be emited.
+*/
+    handlePlayersDataExposer() {
+        const exposerTrigger$ = Observable_1.Observable.interval(partner_info_exposed_time).map(() => this.gameRoomState);
+        playersExposedInfoManager_service_1.PlayersExposedInfoManager.handleExposer(this.gameRoom, this.io, exposerTrigger$);
+        const playerInfoExposed$ = game__service_1.Game$
+            .getByEventName(GAME_SOCKET_EVENTS_enum_1.GAME_SOCKET_EVENTS.partner_info_exposed)
+            .filter(gameEvent => gameEvent.socket.gameRoomId === this.gameRoom.roomId); //check its realted to this gameroomId
+        this.playerInfoExposed$Sub = playerInfoExposed$.subscribe((gameEvent) => {
+            //update gameroomState (update player exposer state)
+            const eventData = gameEvent.eventData;
+            const exposedPlayerId = eventData.playerId;
+            let playerExposerState = Object.assign({}, this.gameRoomState.players[exposedPlayerId]);
+            playerExposerState[eventData.infoPropExposed] = eventData.infoPropValue;
+            this.gameRoomState.players[exposedPlayerId] = playerExposerState;
+            Logger_1.Logger.d(TAG, '** [GameroomState] [UPDATED] **', 'gray');
+        });
+    }
+} //TODO - when gameroom diposed - PlayersExposedInfoManager should unsubscribe
 exports.GameRoomManager = GameRoomManager;
+//
 function randomizeGame() {
     let min = 0;
     let max = Object.keys(MINIGAME_TYPE_ENUM_1.MINIGAME_TYPE).length / 2 - 1;

@@ -13,7 +13,7 @@ import { Store } from '@ngrx/store';
 import * as GameActions from '../_ngrx/game.actions'
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { MINIGAME_TYPE } from '../games/logic/MINIGAME_TYPE_ENUM';
-import { GAME_STATUS } from '../models/GAME_STATUS_ENUM';
+import { GAME_STATUS } from '../models/GAME_STATUS.enum';
 //utils
 const TAG: string = 'LoadingGame |';
 @Component({

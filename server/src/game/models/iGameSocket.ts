@@ -1,4 +1,4 @@
-import { iUser } from "../../models/iUser.model";
+import { iDBUser } from "../../db/schemas/user";
 
 /**
  * after socket authenticated
@@ -7,13 +7,13 @@ import { iUser } from "../../models/iUser.model";
  * and after he join a gameroom it will also contain the
  * @param gameRoomId he is in
  */
-export interface iGameSocket extends SocketIO.Socket{
-    user?:iUser
-    gameRoomId?:string
+export interface iGameSocket extends SocketIO.Socket {
+    user?: iDBUser
+    gameRoomId?: string
 }
 
 
 
-export  function getUserNameBySocket(socket: iGameSocket) :string { //return userName or userId
-    return socket.user.facebook ? socket.user.facebook.name : socket.user._id
+export function getUserNameBySocket(socket: iGameSocket): string { //return userName or userId
+    return socket.user ? socket.user.first_name ? socket.user.first_name : socket.user._id.toString() : 'Unknown';
 }

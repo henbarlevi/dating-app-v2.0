@@ -14,7 +14,7 @@ import { Store } from '@ngrx/store';
 import * as GameActions from '../_ngrx/game.actions'
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { MINIGAME_TYPE } from '../games/logic/MINIGAME_TYPE_ENUM';
-import { GAME_STATUS } from '../models/GAME_STATUS_ENUM';
+import { GAME_STATUS } from '../models/GAME_STATUS.enum';
 //utils
 const TAG: string = 'EndGamePageComponent |';
 @Component({
@@ -39,7 +39,7 @@ export class EndGamePageComponent implements OnInit, OnDestroy {
     this.GameService.startGame();
     const gameState$: Observable<iGameState> = this.store.select(getGameState);
     gameState$
-      .pipe(filter((gameState: iGameState) => gameState.GAME_STATUS === GAME_STATUS.start_new_game)
+      .pipe(filter((gameState: iGameState) => gameState.GAME_STATUS === GAME_STATUS.loading_new_game)
       ,first())
       .subscribe(() => {
         this.Router.navigate(['/dashboard/game']);

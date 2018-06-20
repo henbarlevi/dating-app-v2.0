@@ -1,5 +1,5 @@
 import { Logger } from "../utils/Logger";
-import { iGameSocket } from "./models/iGameSocket";
+import { iGameSocket, getUserNameBySocket } from "./models/iGameSocket";
 import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
@@ -58,6 +58,10 @@ export class Game$ {
     static emit(gameEvent: game$Event) {
         _game$.next(gameEvent);
     }
+
+    static getByEventName(eventName:GAME_SOCKET_EVENTS |GAMEROOM_EVENT):Observable<game$Event>{
+            return game$.filter(gameEvent=>gameEvent.eventName===eventName);
+    }
     private static printAllEvents() {
         this.printAllGameSocketEvents();
         this.printAllGameroomEvents();
@@ -67,7 +71,7 @@ export class Game$ {
             try {
                 const eventName: GAME_SOCKET_EVENTS | GAMEROOM_EVENT = gameEvent.eventName
                 if (isGAME_SOCKET_EVENT(eventName))
-                    Logger.d(TAG, `Client User [${gameEvent.socket.user.facebook ? gameEvent.socket.user.facebook.name : gameEvent.socket.user._id}] - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
+                    Logger.d(TAG, `${gameEvent.socket?`Client User [${getUserNameBySocket(gameEvent.socket)}]`:'Server'}  - Emited Event: [${eventName ? eventName : 'Unknwon'}] With the Data [${gameEvent.eventData ? JSON.stringify(gameEvent.eventData) : 'None'}]`, 'cyan');
             }
             catch (e) {
                 Logger.d(TAG, `Err =====> while printing event ` + e + 'the eventName was ' + gameEvent ? gameEvent.eventName : 'unknown', 'red');
@@ -97,6 +101,9 @@ export interface game$Event {
 }
 export { game$ }
 
+
+
+//Helper Functions For Logs:
 const gameSocketEventsNames: string[] = Object.keys(GAME_SOCKET_EVENTS).map(e => GAME_SOCKET_EVENTS[e]);
 function isGAME_SOCKET_EVENT(event_name: String): boolean {
     return gameSocketEventsNames.some(evName => evName === event_name);
