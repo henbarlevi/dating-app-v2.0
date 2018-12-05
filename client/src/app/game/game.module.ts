@@ -32,7 +32,7 @@ import { gameReducer } from './_ngrx/game.reducers';
     EndGamePageComponent
 
   ],
-  //LazyPrivateService = accessable only inside the module
+  //private services = accessable only inside the module:
   providers: [GameService]
 })
 export class GameModule {
