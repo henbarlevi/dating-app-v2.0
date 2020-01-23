@@ -17,7 +17,7 @@ web application that let people expirience online dating in a different way, by 
 the purpose of this app is to let users expirience date online in a different and special way by let them play with anonymous partner a variety of mini-games
 > ## How to run project <a name="howtorun"></a>
 * ### option 1: 
-for development i created shortcut - write *<span class="well">"npm run dev" </span>* in the <b> root folder</b>
+for development i created shortcut - write `npm run dev` in the **root folder**
  instead of opening 2 command lines sepertly and run the client in one and the server in another.
 i've created package.json in root folder in order to crate npm script commands.
 the "dev" command open 2 cmd windows and run the server in one and the client in another
@@ -26,7 +26,7 @@ the "dev" command open 2 cmd windows and run the server in one and the client in
 #### to run client - *open cmd *enter the 'client' folder *execute **"npm run build"** - if you want to build for production and **"npm start"** for dev 
 
 * ### Don't Forget To Run Mongo!
-<div class="well">NOTE - to see readme styled with mark-down format inside VScode - download the extention "Markdown preview github styling</div>
+NOTE - to see readme styled with mark-down format inside VScode - download the extention "Markdown preview github styling
 <br />
 
 > ## Common Language <a name="commonlanguage"></a>
@@ -36,9 +36,7 @@ the "dev" command open 2 cmd windows and run the server in one and the client in
 - server side tech - nodejs, socket.io
 - db - mongodb + mongoose
 - client side tech - angualr 4.3 
-# ===================================
-# what best practice/good examples can you find here <a name="bestpractice"></a>
-# ===================================
+> # what best practice/good examples can you find here <a name="bestpractice"></a>
 
 ```scss
 example for code block
@@ -52,7 +50,7 @@ var a:string = 'namw'
 - handle configurations for each environment using environment.ts/environment.prod.ts etc... more info [here](https://github.com/angular/angular-cli/wiki/build#ng-build) (you can also use [tokenInjection](https://stackoverflow.com/questions/43193049/app-settings-the-angular-4-way/43316544) instead)
 > ### SCSS
 - how to devide SCSS files (Veriables, Mixing etc...)
-- how to import SCSS files into components scss files <span class="well"> @import '~styles/main';</span> The tilde <b>~</b> will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.  
+- how to import SCSS files into components scss files  `@import '~styles/main';` The tilde **~** will tell Sass to look in the src/ folder and is a quick shortcut to importing         Sass files.  
 - to create new angular project with scss:<b> ng new My_New_Project --style=scss</b>
 > ### Server
 - using SOCKET.IO
@@ -66,7 +64,7 @@ var a:string = 'namw'
 - write chained commands in the npm scripts (CMD) : <b>& </b>- will run the commands at the same time | <b>&& </b>- will run command only after the first command finished
 - [set environment variable in the npm scripts (CMD)](https://stackoverflow.com/questions/9249830/how-can-i-set-node-env-production-on-windows?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa) :<br>
 <b>```set NODE_ENV=production ```</b> - work on windows<br>
-<b>```npm run env NODE_ENV=prod -- <another command> ```</b> - work cross platform (windows/mac etc.) - NOTE that in order to chain another command we use ```-- ``` instead of ```&& ```
+<b>```npm run env NODE_ENV=prod -- <another command> ```</b> - work cross platform (windows/mac etc.)  <br>NOTE that in order to chain another command we use ```-- ``` instead of ```&& ```
 - how to use gulp:
 ```
  * How to use Gulp:
